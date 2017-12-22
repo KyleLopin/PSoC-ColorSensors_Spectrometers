@@ -1,0 +1,15 @@
+AS7262/AS7262.cydsn/Export/*
+AS7262/AS7262.cydsn/CortexM3/*
+AS7262/AS7262.cydsn/Generated_Source/*
+AS7262/AS7262.cydsn/codegentemp/*
+AS7262/AS7262.cydsn/*.cywrk
+AS7262/AS7262.cydsn/*.cycdx
+AS7262/AS7262.cydsn/*.cyfit
+AS7262/AS7262.cydsn/*.cyprj
+AS7262/AS7262.cydsn/*.rpt
+AS7262/AS7262.cydsn/*.svd
+AS7262/AS7262.cydsn/*.html
+*/Export/*
+*/CortexM3/*
+*/Generated_Source/*
+*/codegentemp/*
