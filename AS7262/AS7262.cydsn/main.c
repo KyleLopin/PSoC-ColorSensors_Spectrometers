@@ -58,7 +58,7 @@ int main(void)
             Input_Flag = USB_CheckInput(OUT_Data_Buffer);  // check if there is a response from the computer
         }
 
-        
+        LED_4_Write( AS7262_INT_Read() );
         
         if (Input_Flag == true) {
             switch (OUT_Data_Buffer[0]) {  

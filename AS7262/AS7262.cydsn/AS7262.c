@@ -36,6 +36,9 @@ uint8 write_buffer[2];
 *      Function Prototypes
 ***************************************/
 
+uint8 update_control_reg_value(AS7262_settings* as7262_ptr);
+uint8 update_LED_reg_value(AS7262_settings* as7262_ptr);
+
 uint8 virtual_reg_read(uint8 reg_addr);
 uint8 I2C_AS7262_Read(uint8 reg_addr);
 uint8 I2C_AS7262_ReadRegister(uint8 reg_addr);
@@ -44,6 +47,7 @@ uint8 I2C_AS7262_WriteRegister(uint8 reg_addr, uint8 value);
 void AS7262_ReadAllData(void);
 uint8 convert_hex_string(uint8 array[]);
 uint8 hex_value_from_char(uint8 _char);
+uint16 ConvertDecimal(uint8 array[], uint8 len);
 
 
 /***************************************
@@ -52,11 +56,14 @@ uint8 hex_value_from_char(uint8 _char);
 ***************************************/
 
 AS7262_settings as7262 = {
-    .measurement_mode = BANK_MODE_0,
+    .measurement_mode = BANK_MODE_3,
     .gain = GAIN_SETTING_1X,
-    .integration_time = 1,
+    .interrupt_on = True,
+    .integration_time = 255,
     .LED_power_level = LED_POWER_12_5_mA,
-    .LED_on = False
+    .LED_on = False,
+    .indicator_power_level = INDICATOR_POWER_4_mA,
+    .indicator_on = False
 };
 
 
@@ -73,55 +80,72 @@ extern char LCD_str[40];
 
 
 CY_ISR( isr_handler_basic_read ) {
+    LED_4_Write( 1 );
     LCD_Position(1, 0);
     LCD_PrintString("SingleRead3a ");
     isr_as7262_int_Disable();
     AS7262_INT_ClearInterrupt();
     LCD_Position(1, 0);
     LCD_PrintString("SingleRead3b ");
-    AS7262_ReadAllData();
-    LCD_Position(1, 0);
-    LCD_PrintString("SingleRead4 ");
-    USB_Export_Data(all_calibrated_data.data_bytes, 24);
+//    AS7262_ReadAllData();
+//    LCD_Position(1, 0);
+//    LCD_PrintString("SingleRead4 ");
+//    USB_Export_Data(all_calibrated_data.data_bytes, 24);
 }
 
 
 /******************************************************************************
-* Function Name: as7262_Init
+* Function Name: AS7262_Init
 *******************************************************************************
 *
 * Summary:
 *  Set up the AS7262 with the default configuration.
 *
+* Return:
+*  true (1) if the AS7262 responds with the correct device type
+*
+* Global variables:
+*  as7262:  strucutre that stores a local copy of all the parameters it is set to
+*
 *******************************************************************************/
 
 uint8 AS7262_Init(void) {
-    LCD_Position(1, 0); 
-    LCD_PrintString("check4bpre   ");
+    // get the hardware and firmware data and save it to the struct
     uint8 data = I2C_AS7262_Read(AS726x_REG_DEVICE_TYPE);
     as7262.device_type = data;
-    LCD_Position(1, 0); 
-    LCD_PrintString("check4b   ");
     data = I2C_AS7262_Read(AS726x_REG_HW_VERSION);
     as7262.hw_version = data;
     data = I2C_AS7262_Read(AS726x_REG_FW1_VERSION);
     as7262.fw_version = ( data << 8 );
     data = I2C_AS7262_Read(AS726x_REG_FW2_VERSION);
     as7262.fw_version += data;
-    I2C_AS7262_Write( AS726x_REG_CONTROL, 0x4C );
     
-    AS7262_ReadAllData();
+    // update the control,led, and integration time registers to their default starting values
+    update_control_reg_value( &as7262 );
+    update_LED_reg_value( &as7262 );
+    I2C_AS7262_Write(AS726x_REG_INT, as7262.integration_time);
     
-    data = I2C_AS7262_Read(AS726x_REG_CONTROL);
-    LCD_Position(0, 0); 
-    sprintf(LCD_str, "Cod2: 0x%02x", data);
-    LCD_PrintString(LCD_str);
-    
+    // if the device responeded with the correct device type return true to symbolize the device is connected
     if ( as7262.device_type == AS7262_DEVICE_TYPE ) {
         return true;
     }
     return false;
 }
+
+/******************************************************************************
+* Function Name: AS7262_Commands
+*******************************************************************************
+*
+* Summary:
+*  Take in User inputs that deal with the AS7262 and peform the proper action.
+*
+* Parameters:
+*  uint8 buffer: array of the chars the user inputted
+*
+* Global variables:
+*  as7262:  strucutre that stores a local copy of all the parameters it is set to
+*
+*******************************************************************************/
 
 void AS7262_Commands(uint8 buffer[]) {
     switch ( buffer[7] ) {
@@ -156,7 +180,49 @@ void AS7262_Commands(uint8 buffer[]) {
                 AS7262_SingleRead();
             }
             break;
+        case SET_INTEGRATION_TIME: ; // the command to set the integration time
+            uint8 new_integration_time = ConvertDecimal(&buffer[22],3);
+            as7262.integration_time = new_integration_time;
+            I2C_AS7262_Write( AS726x_REG_INT, as7262.integration_time );
+            break;
+            
+        case SET_GAIN: ; // change the gain setting of the device
+            as7262.gain = ( ConvertDecimal(&buffer[12], 1) & 0x03 );  // only allow values from 0x00-0x03
+            update_control_reg_value( &as7262 );
+            break;
+        case SET_LED_POWER: ; // set the current through the main light source
+            as7262.LED_power_level = ( ConvertDecimal(&buffer[19], 1) & 0x03 );  // only allow values from 0x00-0x03
+            update_LED_reg_value( &as7262 );
+            break;
+        case LED_ON_OFF: ;  //  set if the LED should be on or off
+            if ( (buffer[17] == 'N') || (buffer[17] == 'n') ) {
+                as7262.LED_on = True;
+            }
+            else if ( (buffer[17] == 'F') || (buffer[17] == 'f') ) {
+                as7262.LED_on = False;
+            }
+            update_LED_reg_value( &as7262 );
+            break;
     }
+}
+
+uint8 update_control_reg_value(AS7262_settings* as7262_ptr) {
+    uint8 control_reg = (as7262_ptr->interrupt_on << 6) | 
+                        (as7262_ptr->gain << 4) | 
+                        (as7262_ptr->measurement_mode << 2);
+    I2C_AS7262_Write( AS726x_REG_CONTROL, control_reg );
+    as7262_ptr->control_reg_value = control_reg;
+    return control_reg;
+}
+
+uint8 update_LED_reg_value(AS7262_settings* as7262_ptr) {
+    uint8 led_control_reg = (as7262_ptr->LED_power_level << 4) | 
+                            (as7262_ptr->LED_on << 3) | 
+                            (as7262_ptr->indicator_power_level << 1) |
+                            (as7262_ptr->indicator_on);
+    I2C_AS7262_Write( AS726x_REG_LED, led_control_reg );
+    as7262_ptr->LED_control_reg_value = led_control_reg;
+    return led_control_reg;
 }
 
 
@@ -165,16 +231,16 @@ void AS7262_SingleRead(void) {
     LCD_ClearDisplay();
     LCD_Position(0, 0);
     LCD_PrintString("SingleRead  ");
-    I2C_AS7262_Write( AS726x_REG_CONTROL, 0x4C );
+    I2C_AS7262_Write( AS726x_REG_CONTROL, as7262.control_reg_value );
     LCD_Position(0, 0);
     LCD_PrintString("SingleRead2  ");
     
-    CyDelay(1600);
-    uint8 data = I2C_AS7262_Read(AS726x_REG_CONTROL);
+    CyDelay( (5.8 * as7262.integration_time) + 100);
+    uint8 data = I2C_AS7262_Read( AS726x_REG_CONTROL );
     LCD_Position(1, 0); 
-    sprintf(LCD_str, "Code: 0x%02x  ", data);
+    sprintf(LCD_str, "C2:0x%02x|0x%02x  ", data, as7262.control_reg_value);
     LCD_PrintString(LCD_str);
-    //isr_as7262_int_StartEx( isr_handler_basic_read );
+    isr_as7262_int_StartEx( isr_handler_basic_read );
     //CyDelay(6);
     AS7262_ReadAllData();
     USB_Export_Data(all_calibrated_data.data_bytes, 24);
@@ -184,9 +250,9 @@ void AS7262_ReadAllData(void) {
     for (uint8 i=0; i < 24; i++ ) {
         all_calibrated_data.data_bytes[i] = I2C_AS7262_Read(AS7262_DATA_START_ADDR + i);
     }
-    LCD_Position(0, 0);
-    sprintf(LCD_str, "C:0x%02x|0x%02x  ", all_calibrated_data.data_bytes[0], all_calibrated_data.data_bytes[1]);
-    LCD_PrintString(LCD_str);
+//    LCD_Position(0, 0);
+//    sprintf(LCD_str, "C:0x%02x|0x%02x  ", all_calibrated_data.data_bytes[0], all_calibrated_data.data_bytes[1]);
+//    LCD_PrintString(LCD_str);
     
 }
 
@@ -291,6 +357,14 @@ uint8 hex_value_from_char(uint8 _char) {
         return (10 + _char - 'a');
     }
     return 0;
+}
+
+uint16 ConvertDecimal(uint8 array[], uint8 len) {
+    uint16 num = 0;
+    for (int i = 0; i < len; i++){
+        num = num * 10 + (array[i] - '0');
+    }
+    return num;
 }
 
 

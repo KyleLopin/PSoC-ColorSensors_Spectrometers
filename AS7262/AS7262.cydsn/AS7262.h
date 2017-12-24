@@ -26,6 +26,7 @@
 typedef struct {
     uint8 measurement_mode;
     uint8 gain;
+    uint8 interrupt_on;
     uint8 integration_time;
     uint8 LED_power_level;
     uint8 LED_on;
@@ -35,6 +36,8 @@ typedef struct {
     uint8 hw_version;
     uint16 fw_version;
     uint8* comm_error;
+    uint8 control_reg_value;
+    uint8 LED_control_reg_value;
 } AS7262_settings;
 
 /***************************************
@@ -114,13 +117,21 @@ typedef struct {
 #define LED_POWER_100_mA            0x03
 
 
+#define INDICATOR_POWER_1_mA        0X00
+#define INDICATOR_POWER_2_mA        0X01
+#define INDICATOR_POWER_4_mA        0X02
+#define INDICATOR_POWER_8_mA        0X03
+
 
 /***************************************
 *      AS7262 User Commands Constants
 ***************************************/ 
 
 #define READ_COMMANDS               'R'
-
+#define SET_INTEGRATION_TIME        'I'
+#define SET_GAIN                    'G'
+#define SET_LED_POWER               'P'
+#define LED_ON_OFF                  'L'
 
 extern char USB_str[40];
 

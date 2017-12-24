@@ -284,6 +284,7 @@
       <Data key="32c48b25-95c4-4977-b3fc-25ddcca918a5/8b77a6c4-10a0-4390-971c-672353e2a49c" value="USBFS_Dm" />
       <Data key="32c48b25-95c4-4977-b3fc-25ddcca918a5/618a72fc-5ddd-4df5-958f-a3d55102db42" value="USBFS_Dp" />
       <Data key="22863ebe-a37b-476f-b252-6e49a8c00b12" value="SDA" />
+      <Data key="e851a3b9-efb8-48be-bbb8-b303b216c393" value="LED_4" />
     </Group>
   </Group>
   <Group key="EEPROM">
@@ -3406,6 +3407,11 @@
     <Group key="22863ebe-a37b-476f-b252-6e49a8c00b12">
       <Group key="0">
         <Data key="Port Format" value="12,5" />
+      </Group>
+    </Group>
+    <Group key="e851a3b9-efb8-48be-bbb8-b303b216c393">
+      <Group key="0">
+        <Data key="Port Format" value="6,3" />
       </Group>
     </Group>
   </Group>
