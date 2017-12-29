@@ -1,12 +1,12 @@
---------------- Build Started: 12/24/2017 15:49:22 Project: AS7262, Configuration: ARM GCC 5.4-2016-q2-update Debug ---------------
+--------------- Build Started: 12/26/2017 15:54:22 Project: AS7262, Configuration: ARM GCC 5.4-2016-q2-update Debug ---------------
 The code generation step is up to date.
-arm-none-eabi-gcc.exe -mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=.\CortexM3\ARM_GCC_541\Debug/AS7262.lst -g -D DEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Og -c AS7262.c -o .\CortexM3\ARM_GCC_541\Debug\AS7262.o
+arm-none-eabi-gcc.exe -c AS7262.c -o .\CortexM3\ARM_GCC_541\Debug\AS7262.o -mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=.\CortexM3\ARM_GCC_541\Debug/AS7262.lst -g -D DEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Og
 AS7262.c: In function 'I2C_AS7262_Read':
-AS7262.c:254:15: warning: unused variable 'data' [-Wunused-variable]
+AS7262.c:284:15: warning: unused variable 'data' [-Wunused-variable]
          uint8 data = I2C_AS7262_ReadRegister(reg_addr);
                ^
 AS7262.c: In function 'I2C_AS7262_ReadRegister':
-AS7262.c:292:66: warning: passing argument 4 of 'sensor_read8' from incompatible pointer type [-Wincompatible-pointer-types]
+AS7262.c:322:66: warning: passing argument 4 of 'sensor_read8' from incompatible pointer type [-Wincompatible-pointer-types]
      status = sensor_read8(AS7262_ADDRESS, read_buffer, reg_addr, &as7262.comm_error);
                                                                   ^
 In file included from AS7262.h:17:0,
@@ -14,18 +14,18 @@ In file included from AS7262.h:17:0,
 i2c_functions.h:36:7: note: expected 'uint8 * {aka unsigned char *}' but argument is of type 'uint8 ** {aka unsigned char **}'
  uint8 sensor_read8(uint8 address, uint8* buffer, uint8 _register, uint8* error);  
        ^
-AS7262.c:289:11: warning: variable 'status' set but not used [-Wunused-but-set-variable]
+AS7262.c:319:11: warning: variable 'status' set but not used [-Wunused-but-set-variable]
      uint8 status;
            ^
 AS7262.c: In function 'I2C_AS7262_WriteRegister':
-AS7262.c:322:11: warning: unused variable 'status' [-Wunused-variable]
+AS7262.c:352:11: warning: unused variable 'status' [-Wunused-variable]
      uint8 status;
            ^
-arm-none-eabi-ar.exe -rs .\CortexM3\ARM_GCC_541\Debug\AS7262.a .\CortexM3\ARM_GCC_541\Debug\SDA.o .\CortexM3\ARM_GCC_541\Debug\SCL.o .\CortexM3\ARM_GCC_541\Debug\I2C.o .\CortexM3\ARM_GCC_541\Debug\I2C_BOOT.o .\CortexM3\ARM_GCC_541\Debug\I2C_INT.o .\CortexM3\ARM_GCC_541\Debug\I2C_PM.o .\CortexM3\ARM_GCC_541\Debug\I2C_SLAVE.o .\CortexM3\ARM_GCC_541\Debug\I2C_MASTER.o .\CortexM3\ARM_GCC_541\Debug\LCD.o .\CortexM3\ARM_GCC_541\Debug\LCD_PM.o .\CortexM3\ARM_GCC_541\Debug\USBFS.o .\CortexM3\ARM_GCC_541\Debug\USBFS_audio.o .\CortexM3\ARM_GCC_541\Debug\USBFS_boot.o .\CortexM3\ARM_GCC_541\Debug\USBFS_cdc.o .\CortexM3\ARM_GCC_541\Debug\USBFS_cls.o .\CortexM3\ARM_GCC_541\Debug\USBFS_descr.o .\CortexM3\ARM_GCC_541\Debug\USBFS_drv.o .\CortexM3\ARM_GCC_541\Debug\USBFS_episr.o .\CortexM3\ARM_GCC_541\Debug\USBFS_hid.o .\CortexM3\ARM_GCC_541\Debug\USBFS_pm.o .\CortexM3\ARM_GCC_541\Debug\USBFS_std.o .\CortexM3\ARM_GCC_541\Debug\USBFS_vnd.o .\CortexM3\ARM_GCC_541\Debug\USBFS_midi.o .\CortexM3\ARM_GCC_541\Debug\USBFS_msc.o .\CortexM3\ARM_GCC_541\Debug\AS7262_INT.o .\CortexM3\ARM_GCC_541\Debug\isr_as7262_int.o .\CortexM3\ARM_GCC_541\Debug\LCD_LCDPort.o .\CortexM3\ARM_GCC_541\Debug\USBFS_Dm.o .\CortexM3\ARM_GCC_541\Debug\USBFS_Dp.o .\CortexM3\ARM_GCC_541\Debug\CyDmac.o .\CortexM3\ARM_GCC_541\Debug\CyFlash.o .\CortexM3\ARM_GCC_541\Debug\CyLib.o .\CortexM3\ARM_GCC_541\Debug\cyPm.o .\CortexM3\ARM_GCC_541\Debug\CySpc.o .\CortexM3\ARM_GCC_541\Debug\cyutils.o .\CortexM3\ARM_GCC_541\Debug\LED_4.o .\CortexM3\ARM_GCC_541\Debug\CyBootAsmGnu.o
+arm-none-eabi-ar.exe -rs .\CortexM3\ARM_GCC_541\Debug\AS7262.a .\CortexM3\ARM_GCC_541\Debug\SDA.o .\CortexM3\ARM_GCC_541\Debug\SCL.o .\CortexM3\ARM_GCC_541\Debug\I2C.o .\CortexM3\ARM_GCC_541\Debug\I2C_BOOT.o .\CortexM3\ARM_GCC_541\Debug\I2C_INT.o .\CortexM3\ARM_GCC_541\Debug\I2C_PM.o .\CortexM3\ARM_GCC_541\Debug\I2C_SLAVE.o .\CortexM3\ARM_GCC_541\Debug\I2C_MASTER.o .\CortexM3\ARM_GCC_541\Debug\LCD.o .\CortexM3\ARM_GCC_541\Debug\LCD_PM.o .\CortexM3\ARM_GCC_541\Debug\USBFS.o .\CortexM3\ARM_GCC_541\Debug\USBFS_audio.o .\CortexM3\ARM_GCC_541\Debug\USBFS_boot.o .\CortexM3\ARM_GCC_541\Debug\USBFS_cdc.o .\CortexM3\ARM_GCC_541\Debug\USBFS_cls.o .\CortexM3\ARM_GCC_541\Debug\USBFS_descr.o .\CortexM3\ARM_GCC_541\Debug\USBFS_drv.o .\CortexM3\ARM_GCC_541\Debug\USBFS_episr.o .\CortexM3\ARM_GCC_541\Debug\USBFS_hid.o .\CortexM3\ARM_GCC_541\Debug\USBFS_pm.o .\CortexM3\ARM_GCC_541\Debug\USBFS_std.o .\CortexM3\ARM_GCC_541\Debug\USBFS_vnd.o .\CortexM3\ARM_GCC_541\Debug\USBFS_midi.o .\CortexM3\ARM_GCC_541\Debug\USBFS_msc.o .\CortexM3\ARM_GCC_541\Debug\AS7262_INT.o .\CortexM3\ARM_GCC_541\Debug\isr_as7262_int.o .\CortexM3\ARM_GCC_541\Debug\LCD_LCDPort.o .\CortexM3\ARM_GCC_541\Debug\USBFS_Dm.o .\CortexM3\ARM_GCC_541\Debug\USBFS_Dp.o .\CortexM3\ARM_GCC_541\Debug\CyDmac.o .\CortexM3\ARM_GCC_541\Debug\CyFlash.o .\CortexM3\ARM_GCC_541\Debug\CyLib.o .\CortexM3\ARM_GCC_541\Debug\cyPm.o .\CortexM3\ARM_GCC_541\Debug\CySpc.o .\CortexM3\ARM_GCC_541\Debug\cyutils.o .\CortexM3\ARM_GCC_541\Debug\LED_4.o .\CortexM3\ARM_GCC_541\Debug\timer_clock.o .\CortexM3\ARM_GCC_541\Debug\Timer_1.o .\CortexM3\ARM_GCC_541\Debug\Timer_1_PM.o .\CortexM3\ARM_GCC_541\Debug\isr_as7262_timer.o .\CortexM3\ARM_GCC_541\Debug\LED_3.o .\CortexM3\ARM_GCC_541\Debug\isr_as7262_pin.o .\CortexM3\ARM_GCC_541\Debug\CyBootAsmGnu.o
 arm-none-eabi-ar.exe: creating .\CortexM3\ARM_GCC_541\Debug\AS7262.a
-arm-none-eabi-gcc.exe -Wl,--start-group -o "C:\Users\Zanith\Documents\PSoC Creator\Spectro\PSoC-ColorSensors_Spectrometers\AS7262\AS7262.cydsn\CortexM3\ARM_GCC_541\Debug\AS7262.elf" .\CortexM3\ARM_GCC_541\Debug\main.o .\CortexM3\ARM_GCC_541\Debug\i2c_functions.o .\CortexM3\ARM_GCC_541\Debug\AS7262.o .\CortexM3\ARM_GCC_541\Debug\usb_functions.o .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o .\CortexM3\ARM_GCC_541\Debug\cymetadata.o .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o .\CortexM3\ARM_GCC_541\Debug\AS7262.a "C:\Program Files (x86)\Cypress\PSoC Creator\4.1\PSoC Creator\psoc\content\cycomponentlibrary\CyComponentLibrary.cylib\CortexM3\ARM_GCC_541\Debug\CyComponentLibrary.a" -mcpu=cortex-m3 -mthumb -L Generated_Source\PSoC5 -Wl,-Map,.\CortexM3\ARM_GCC_541\Debug/AS7262.map -T Generated_Source\PSoC5\cm3gcc.ld -specs=nano.specs -Wl,--gc-sections -g -ffunction-sections -Og -ffat-lto-objects -Wl,--end-group
-cyelftool.exe -C "C:\Users\Zanith\Documents\PSoC Creator\Spectro\PSoC-ColorSensors_Spectrometers\AS7262\AS7262.cydsn\CortexM3\ARM_GCC_541\Debug\AS7262.elf" --flash_row_size 256 --flash_size 262144 --flash_offset 0x00000000
-cyelftool.exe -S "C:\Users\Zanith\Documents\PSoC Creator\Spectro\PSoC-ColorSensors_Spectrometers\AS7262\AS7262.cydsn\CortexM3\ARM_GCC_541\Debug\AS7262.elf"
-Flash used: 14520 of 262144 bytes (5.5%).
+arm-none-eabi-gcc.exe -Wl,--start-group -o "C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS7262\AS7262.cydsn\CortexM3\ARM_GCC_541\Debug\AS7262.elf" .\CortexM3\ARM_GCC_541\Debug\main.o .\CortexM3\ARM_GCC_541\Debug\i2c_functions.o .\CortexM3\ARM_GCC_541\Debug\AS7262.o .\CortexM3\ARM_GCC_541\Debug\usb_functions.o .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o .\CortexM3\ARM_GCC_541\Debug\cymetadata.o .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o .\CortexM3\ARM_GCC_541\Debug\AS7262.a "C:\Program Files (x86)\Cypress\PSoC Creator\4.1\PSoC Creator\psoc\content\cycomponentlibrary\CyComponentLibrary.cylib\CortexM3\ARM_GCC_541\Debug\CyComponentLibrary.a" -mcpu=cortex-m3 -mthumb -L Generated_Source\PSoC5 -Wl,-Map,.\CortexM3\ARM_GCC_541\Debug/AS7262.map -T Generated_Source\PSoC5\cm3gcc.ld -specs=nano.specs -Wl,--gc-sections -g -ffunction-sections -Og -ffat-lto-objects -Wl,--end-group
+cyelftool.exe -C "C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS7262\AS7262.cydsn\CortexM3\ARM_GCC_541\Debug\AS7262.elf" --flash_row_size 256 --flash_size 262144 --flash_offset 0x00000000
+cyelftool.exe -S "C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS7262\AS7262.cydsn\CortexM3\ARM_GCC_541\Debug\AS7262.elf"
+Flash used: 14624 of 262144 bytes (5.6%).
 SRAM used: 4849 of 65536 bytes (7.4%). Stack: 2048 bytes. Heap: 2048 bytes.
---------------- Build Succeeded: 12/24/2017 15:49:24 ---------------
+--------------- Build Succeeded: 12/26/2017 15:54:23 ---------------

@@ -28,6 +28,9 @@ bool Input_Flag = false;
 extern AS7262_settings as7262;
 extern uint8 OUT_Data_Buffer[MAX_IN_ENDPOINT_BUFFER_SIZE];
 
+CY_ISR_PROTO( isr_handler_debug1 );
+CY_ISR_PROTO( isr_handler_basic_read );
+
 int main(void)
 {
     CyGlobalIntEnable; /* Enable global interrupts. */
@@ -45,6 +48,12 @@ int main(void)
     LCD_ClearDisplay();
     LCD_Position(1, 0); 
     LCD_PrintString("check3   ");
+    isr_as7262_int_StartEx( isr_handler_basic_read );
+    isr_as7262_pin_StartEx( isr_handler_debug1 );
+    LED_3_Write( 1 );
+    LED_4_Write( 1 );
+    //isr_as7262_int_StartEx( isr_handler_basic_read );
+    //isr_as7262_pin_StartEx( isr_handler_debug1 );
     for(;;)
     {
         
@@ -58,7 +67,7 @@ int main(void)
             Input_Flag = USB_CheckInput(OUT_Data_Buffer);  // check if there is a response from the computer
         }
 
-        LED_4_Write( AS7262_INT_Read() );
+        // LED_4_Write( AS7262_INT_Read() );
         
         if (Input_Flag == true) {
             switch (OUT_Data_Buffer[0]) {  

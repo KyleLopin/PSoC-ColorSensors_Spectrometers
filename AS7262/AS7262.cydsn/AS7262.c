@@ -23,7 +23,6 @@
 // local files
 #include "usb_functions.h"
 
-
 #define AS72XX_SLAVE_STATUS_REG 0x00
 #define AS72XX_SLAVE_WRITE_REG 0x01
 #define AS72XX_SLAVE_READ_REG 0x02
@@ -80,10 +79,10 @@ extern char LCD_str[40];
 
 
 CY_ISR( isr_handler_basic_read ) {
-    LED_4_Write( 1 );
+    LED_4_Write( 0 );
     LCD_Position(1, 0);
     LCD_PrintString("SingleRead3a ");
-    isr_as7262_int_Disable();
+    // isr_as7262_int_Disable();
     AS7262_INT_ClearInterrupt();
     LCD_Position(1, 0);
     LCD_PrintString("SingleRead3b ");
@@ -93,6 +92,12 @@ CY_ISR( isr_handler_basic_read ) {
 //    USB_Export_Data(all_calibrated_data.data_bytes, 24);
 }
 
+CY_ISR( isr_handler_debug1 ) {
+    LED_3_Write( 0 );
+    LCD_Position(1, 0);
+    LCD_PrintString("debug1 ");
+    //AS7262_INT_ClearInterrupt();
+}
 
 /******************************************************************************
 * Function Name: AS7262_Init
@@ -235,13 +240,24 @@ void AS7262_SingleRead(void) {
     LCD_Position(0, 0);
     LCD_PrintString("SingleRead2  ");
     
-    CyDelay( (5.8 * as7262.integration_time) + 100);
-    uint8 data = I2C_AS7262_Read( AS726x_REG_CONTROL );
-    LCD_Position(1, 0); 
-    sprintf(LCD_str, "C2:0x%02x|0x%02x  ", data, as7262.control_reg_value);
-    LCD_PrintString(LCD_str);
-    isr_as7262_int_StartEx( isr_handler_basic_read );
-    //CyDelay(6);
+    CyDelay( (5.8 * as7262.integration_time) );
+    uint8 data;
+    uint8 failed_tries=0;
+    do {
+        CyDelay(1);
+        data = I2C_AS7262_Read( AS726x_REG_CONTROL );
+        failed_tries++;
+        if ( failed_tries > 200 ) {
+            USB_Export_Data((uint8*)"FAILED", 6);
+        }
+    } while ( (data & 0x02) == 0x02 );
+//    LCD_Position(1, 0); 
+//    sprintf(LCD_str, "C2:0x%02x|0x%02x  ", data, as7262.control_reg_value);
+//    LCD_PrintString(LCD_str);
+//    isr_as7262_int_StartEx( isr_handler_basic_read );
+//    isr_as7262_pin_StartEx( isr_handler_debug1 );
+    //LED_3_Write( 1 );
+    //CyDelay(1000);
     AS7262_ReadAllData();
     USB_Export_Data(all_calibrated_data.data_bytes, 24);
 }
