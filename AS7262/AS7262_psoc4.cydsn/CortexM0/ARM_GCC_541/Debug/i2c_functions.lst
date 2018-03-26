@@ -1,0 +1,1961 @@
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"i2c_functions.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.sensor_write,"ax",%progbits
+  20              		.align	2
+  21              		.code	16
+  22              		.thumb_func
+  23              		.type	sensor_write, %function
+  24              	sensor_write:
+  25              	.LFB38:
+  26              		.file 1 "i2c_functions.c"
+   1:i2c_functions.c **** /*******************************************************************************
+   2:i2c_functions.c ****  * File Name: i2c_functions.c
+   3:i2c_functions.c ****  * Version 0.80
+   4:i2c_functions.c ****  *
+   5:i2c_functions.c ****  * Description:
+   6:i2c_functions.c ****  *  This file provides higher level I2C functions.
+   7:i2c_functions.c ****  *  A I2C master component with the name I2C is required
+   8:i2c_functions.c ****  *
+   9:i2c_functions.c **** *******************************************************************************
+  10:i2c_functions.c ****  * Copyright by Kyle Lopin, Naresuan University, 2017
+  11:i2c_functions.c ****  * All Rights Reserved
+  12:i2c_functions.c ****  * UNPUBLISHED, LICENSED SOFTWARE.
+  13:i2c_functions.c ****  *
+  14:i2c_functions.c ****  * CONFIDENTIAL AND PROPRIETARY INFORMATION
+  15:i2c_functions.c ****  * WHICH IS THE PROPERTY OF Naresuan University.
+  16:i2c_functions.c ****  *
+  17:i2c_functions.c ****  * ========================================
+  18:i2c_functions.c **** */
+  19:i2c_functions.c **** 
+  20:i2c_functions.c **** #include "i2c_functions.h"
+  21:i2c_functions.c **** 
+  22:i2c_functions.c **** extern char LCD_str[40];
+  23:i2c_functions.c **** 
+  24:i2c_functions.c **** 
+  25:i2c_functions.c **** /***************************************
+  26:i2c_functions.c **** *      Static Function Prototypes
+  27:i2c_functions.c **** ***************************************/ 
+  28:i2c_functions.c **** 
+  29:i2c_functions.c **** 
+  30:i2c_functions.c **** static uint8 sensor_read(uint8 address, uint8* buffer, uint8 _register, uint8 num_bytes);
+  31:i2c_functions.c **** static uint8 sensor_write(uint8 address, uint8* buffer, uint8 num_bytes);
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 2
+
+
+  32:i2c_functions.c **** 
+  33:i2c_functions.c **** uint8 sensor_write8(uint8 address, uint8* buffer) {   
+  34:i2c_functions.c ****     return sensor_write(address, buffer, 2);
+  35:i2c_functions.c **** }
+  36:i2c_functions.c **** 
+  37:i2c_functions.c **** uint8 sensor_write16(uint8 address, uint8* buffer) {   
+  38:i2c_functions.c ****     return sensor_write(address, buffer, 3);
+  39:i2c_functions.c **** }
+  40:i2c_functions.c **** 
+  41:i2c_functions.c **** uint8 sensor_write_n(uint8 address, uint8* buffer, uint8 num_bytes) {   
+  42:i2c_functions.c ****     return sensor_write(address, buffer, num_bytes);
+  43:i2c_functions.c **** }
+  44:i2c_functions.c **** 
+  45:i2c_functions.c **** uint8 sensor_write(uint8 address, uint8* buffer, uint8 num_bytes) {   
+  27              		.loc 1 45 0
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 0
+  30              		@ frame_needed = 0, uses_anonymous_args = 0
+  31              	.LVL0:
+  32 0000 10B5     		push	{r4, lr}
+  33              		.cfi_def_cfa_offset 8
+  34              		.cfi_offset 4, -8
+  35              		.cfi_offset 14, -4
+  36              	.LVL1:
+  46:i2c_functions.c ****     uint8 status = 0;
+  47:i2c_functions.c ****     status = I2C_I2CMasterWriteBuf(address, buffer, num_bytes, I2C_I2C_MODE_COMPLETE_XFER);
+  37              		.loc 1 47 0
+  38 0002 0023     		movs	r3, #0
+  39 0004 FFF7FEFF 		bl	I2C_I2CMasterWriteBuf
+  40              	.LVL2:
+  41 0008 C4B2     		uxtb	r4, r0
+  42              	.LVL3:
+  43              	.L2:
+  48:i2c_functions.c ****     for(;;) {
+  49:i2c_functions.c ****         if (0x00 != (I2C_I2CMasterStatus() & I2C_I2C_MSTAT_WR_CMPLT)) {
+  44              		.loc 1 49 0
+  45 000a FFF7FEFF 		bl	I2C_I2CMasterStatus
+  46              	.LVL4:
+  47 000e 8307     		lsls	r3, r0, #30
+  48 0010 FBD5     		bpl	.L2
+  50:i2c_functions.c ****             break;
+  51:i2c_functions.c ****         }
+  52:i2c_functions.c ****     }
+  53:i2c_functions.c ****     return status;
+  54:i2c_functions.c **** }
+  49              		.loc 1 54 0
+  50 0012 2000     		movs	r0, r4
+  51              		@ sp needed
+  52              	.LVL5:
+  53 0014 10BD     		pop	{r4, pc}
+  54              		.cfi_endproc
+  55              	.LFE38:
+  56              		.size	sensor_write, .-sensor_write
+  57 0016 C046     		.section	.text.sensor_read,"ax",%progbits
+  58              		.align	2
+  59              		.code	16
+  60              		.thumb_func
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 3
+
+
+  61              		.type	sensor_read, %function
+  62              	sensor_read:
+  63              	.LFB42:
+  55:i2c_functions.c **** 
+  56:i2c_functions.c **** 
+  57:i2c_functions.c **** 
+  58:i2c_functions.c **** uint8 sensor_read8(uint8 address, uint8* buffer, uint8 _register, uint8* error) {
+  59:i2c_functions.c **** //    LCD_Position(0, 0); 
+  60:i2c_functions.c **** //    LCD_PrintString("read0010   ");
+  61:i2c_functions.c ****     *error = sensor_read(address, buffer, _register, 1);
+  62:i2c_functions.c ****     return buffer[0];
+  63:i2c_functions.c **** }
+  64:i2c_functions.c **** 
+  65:i2c_functions.c **** uint16 sensor_read16(uint8 address, uint8* buffer, uint8 _register, uint8* error) {
+  66:i2c_functions.c ****     *error = sensor_read(address, buffer, _register, 2);
+  67:i2c_functions.c ****     return buffer[0] | (buffer[1] << 8);
+  68:i2c_functions.c **** }
+  69:i2c_functions.c **** 
+  70:i2c_functions.c **** uint8 sensor_read_n(uint8 address, uint8* buffer, uint8 _register, uint8 num_bytes) {
+  71:i2c_functions.c ****     return sensor_read(address, buffer, _register, num_bytes);
+  72:i2c_functions.c **** }
+  73:i2c_functions.c **** 
+  74:i2c_functions.c **** static uint8 sensor_read(uint8 address, uint8* buffer, uint8 _register, uint8 num_bytes) {
+  64              		.loc 1 74 0
+  65              		.cfi_startproc
+  66              		@ args = 0, pretend = 0, frame = 8
+  67              		@ frame_needed = 0, uses_anonymous_args = 0
+  68              	.LVL6:
+  69 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+  70              		.cfi_def_cfa_offset 20
+  71              		.cfi_offset 4, -20
+  72              		.cfi_offset 5, -16
+  73              		.cfi_offset 6, -12
+  74              		.cfi_offset 7, -8
+  75              		.cfi_offset 14, -4
+  76 0002 83B0     		sub	sp, sp, #12
+  77              		.cfi_def_cfa_offset 32
+  78 0004 0D00     		movs	r5, r1
+  79 0006 1E00     		movs	r6, r3
+  80 0008 6B46     		mov	r3, sp
+  81              	.LVL7:
+  82 000a D91D     		adds	r1, r3, #7
+  83              	.LVL8:
+  84 000c 0A70     		strb	r2, [r1]
+  75:i2c_functions.c ****     uint8 temp;
+  76:i2c_functions.c **** //    LCD_Position(0, 0); 
+  77:i2c_functions.c **** //    LCD_PrintString("read0020   ");
+  78:i2c_functions.c ****     // I2C_MasterSendStart(address, 0);
+  79:i2c_functions.c ****     temp = I2C_I2CMasterWriteBuf(address, &_register, 1, I2C_I2C_MODE_NO_STOP);
+  85              		.loc 1 79 0
+  86 000e 0400     		movs	r4, r0
+  87 0010 0223     		movs	r3, #2
+  88 0012 0122     		movs	r2, #1
+  89              	.LVL9:
+  90 0014 FFF7FEFF 		bl	I2C_I2CMasterWriteBuf
+  91              	.LVL10:
+  92 0018 C7B2     		uxtb	r7, r0
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 4
+
+
+  93              	.LVL11:
+  94              	.L4:
+  80:i2c_functions.c **** //    LCD_Position(0, 0); 
+  81:i2c_functions.c **** //    sprintf(LCD_str, "temp stat:%d", temp);
+  82:i2c_functions.c **** //    LCD_PrintString(LCD_str);
+  83:i2c_functions.c ****     for(;;) {
+  84:i2c_functions.c ****         if (0x00 != (I2C_I2CMasterStatus() & I2C_I2C_MSTAT_WR_CMPLT)) {
+  95              		.loc 1 84 0
+  96 001a FFF7FEFF 		bl	I2C_I2CMasterStatus
+  97              	.LVL12:
+  98 001e 8307     		lsls	r3, r0, #30
+  99 0020 FBD5     		bpl	.L4
+  85:i2c_functions.c ****             break;
+  86:i2c_functions.c ****         }
+  87:i2c_functions.c **** //        LCD_Position(0, 0); 
+  88:i2c_functions.c **** //        sprintf(LCD_str, "MS status:%d", I2C_MasterStatus());
+  89:i2c_functions.c **** //        LCD_PrintString(LCD_str);
+  90:i2c_functions.c ****     }
+  91:i2c_functions.c ****     if (temp != I2C_I2C_MSTR_NO_ERROR ) {
+ 100              		.loc 1 91 0
+ 101 0022 002F     		cmp	r7, #0
+ 102 0024 01D0     		beq	.L5
+  92:i2c_functions.c ****         return temp;
+ 103              		.loc 1 92 0
+ 104 0026 3800     		movs	r0, r7
+ 105 0028 10E0     		b	.L3
+ 106              	.L5:
+  93:i2c_functions.c ****     }
+  94:i2c_functions.c ****     
+  95:i2c_functions.c ****     I2C_I2CMasterClearWriteBuf();
+ 107              		.loc 1 95 0
+ 108 002a FFF7FEFF 		bl	I2C_I2CMasterClearWriteBuf
+ 109              	.LVL13:
+ 110              	.L7:
+  96:i2c_functions.c **** 
+  97:i2c_functions.c ****     do {
+  98:i2c_functions.c ****         temp = I2C_I2CMasterReadBuf(address, buffer, num_bytes, I2C_I2C_MODE_REPEAT_START);
+ 111              		.loc 1 98 0
+ 112 002e 0123     		movs	r3, #1
+ 113 0030 3200     		movs	r2, r6
+ 114 0032 2900     		movs	r1, r5
+ 115 0034 2000     		movs	r0, r4
+ 116 0036 FFF7FEFF 		bl	I2C_I2CMasterReadBuf
+ 117              	.LVL14:
+ 118 003a C7B2     		uxtb	r7, r0
+ 119              	.LVL15:
+ 120              	.L6:
+  99:i2c_functions.c ****         for(;;) {
+ 100:i2c_functions.c ****             if (0x00 != (I2C_I2CMasterStatus() & I2C_I2C_MSTAT_RD_CMPLT)) {
+ 121              		.loc 1 100 0
+ 122 003c FFF7FEFF 		bl	I2C_I2CMasterStatus
+ 123              	.LVL16:
+ 124 0040 C307     		lsls	r3, r0, #31
+ 125 0042 FBD5     		bpl	.L6
+ 101:i2c_functions.c ****                 break;
+ 102:i2c_functions.c ****             }
+ 103:i2c_functions.c ****         }
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 5
+
+
+ 104:i2c_functions.c ****     }
+ 105:i2c_functions.c ****     while (temp != I2C_I2C_MSTR_NO_ERROR);
+ 126              		.loc 1 105 0
+ 127 0044 002F     		cmp	r7, #0
+ 128 0046 F2D1     		bne	.L7
+ 106:i2c_functions.c ****     I2C_I2CMasterClearReadBuf();
+ 129              		.loc 1 106 0
+ 130 0048 FFF7FEFF 		bl	I2C_I2CMasterClearReadBuf
+ 131              	.LVL17:
+ 132              	.L3:
+ 107:i2c_functions.c **** }
+ 133              		.loc 1 107 0
+ 134 004c 03B0     		add	sp, sp, #12
+ 135              	.LVL18:
+ 136              		@ sp needed
+ 137              	.LVL19:
+ 138              	.LVL20:
+ 139 004e F0BD     		pop	{r4, r5, r6, r7, pc}
+ 140              		.cfi_endproc
+ 141              	.LFE42:
+ 142              		.size	sensor_read, .-sensor_read
+ 143              		.section	.text.sensor_write8,"ax",%progbits
+ 144              		.align	2
+ 145              		.global	sensor_write8
+ 146              		.code	16
+ 147              		.thumb_func
+ 148              		.type	sensor_write8, %function
+ 149              	sensor_write8:
+ 150              	.LFB35:
+  33:i2c_functions.c ****     return sensor_write(address, buffer, 2);
+ 151              		.loc 1 33 0
+ 152              		.cfi_startproc
+ 153              		@ args = 0, pretend = 0, frame = 0
+ 154              		@ frame_needed = 0, uses_anonymous_args = 0
+ 155              	.LVL21:
+ 156 0000 10B5     		push	{r4, lr}
+ 157              		.cfi_def_cfa_offset 8
+ 158              		.cfi_offset 4, -8
+ 159              		.cfi_offset 14, -4
+  34:i2c_functions.c **** }
+ 160              		.loc 1 34 0
+ 161 0002 0222     		movs	r2, #2
+ 162 0004 FFF7FEFF 		bl	sensor_write
+ 163              	.LVL22:
+  35:i2c_functions.c **** 
+ 164              		.loc 1 35 0
+ 165              		@ sp needed
+ 166 0008 10BD     		pop	{r4, pc}
+ 167              		.cfi_endproc
+ 168              	.LFE35:
+ 169              		.size	sensor_write8, .-sensor_write8
+ 170 000a C046     		.section	.text.sensor_write16,"ax",%progbits
+ 171              		.align	2
+ 172              		.global	sensor_write16
+ 173              		.code	16
+ 174              		.thumb_func
+ 175              		.type	sensor_write16, %function
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 6
+
+
+ 176              	sensor_write16:
+ 177              	.LFB36:
+  37:i2c_functions.c ****     return sensor_write(address, buffer, 3);
+ 178              		.loc 1 37 0
+ 179              		.cfi_startproc
+ 180              		@ args = 0, pretend = 0, frame = 0
+ 181              		@ frame_needed = 0, uses_anonymous_args = 0
+ 182              	.LVL23:
+ 183 0000 10B5     		push	{r4, lr}
+ 184              		.cfi_def_cfa_offset 8
+ 185              		.cfi_offset 4, -8
+ 186              		.cfi_offset 14, -4
+  38:i2c_functions.c **** }
+ 187              		.loc 1 38 0
+ 188 0002 0322     		movs	r2, #3
+ 189 0004 FFF7FEFF 		bl	sensor_write
+ 190              	.LVL24:
+  39:i2c_functions.c **** 
+ 191              		.loc 1 39 0
+ 192              		@ sp needed
+ 193 0008 10BD     		pop	{r4, pc}
+ 194              		.cfi_endproc
+ 195              	.LFE36:
+ 196              		.size	sensor_write16, .-sensor_write16
+ 197 000a C046     		.section	.text.sensor_write_n,"ax",%progbits
+ 198              		.align	2
+ 199              		.global	sensor_write_n
+ 200              		.code	16
+ 201              		.thumb_func
+ 202              		.type	sensor_write_n, %function
+ 203              	sensor_write_n:
+ 204              	.LFB37:
+  41:i2c_functions.c ****     return sensor_write(address, buffer, num_bytes);
+ 205              		.loc 1 41 0
+ 206              		.cfi_startproc
+ 207              		@ args = 0, pretend = 0, frame = 0
+ 208              		@ frame_needed = 0, uses_anonymous_args = 0
+ 209              	.LVL25:
+ 210 0000 10B5     		push	{r4, lr}
+ 211              		.cfi_def_cfa_offset 8
+ 212              		.cfi_offset 4, -8
+ 213              		.cfi_offset 14, -4
+  42:i2c_functions.c **** }
+ 214              		.loc 1 42 0
+ 215 0002 FFF7FEFF 		bl	sensor_write
+ 216              	.LVL26:
+  43:i2c_functions.c **** 
+ 217              		.loc 1 43 0
+ 218              		@ sp needed
+ 219 0006 10BD     		pop	{r4, pc}
+ 220              		.cfi_endproc
+ 221              	.LFE37:
+ 222              		.size	sensor_write_n, .-sensor_write_n
+ 223              		.section	.text.sensor_read8,"ax",%progbits
+ 224              		.align	2
+ 225              		.global	sensor_read8
+ 226              		.code	16
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 7
+
+
+ 227              		.thumb_func
+ 228              		.type	sensor_read8, %function
+ 229              	sensor_read8:
+ 230              	.LFB39:
+  58:i2c_functions.c **** //    LCD_Position(0, 0); 
+ 231              		.loc 1 58 0
+ 232              		.cfi_startproc
+ 233              		@ args = 0, pretend = 0, frame = 0
+ 234              		@ frame_needed = 0, uses_anonymous_args = 0
+ 235              	.LVL27:
+ 236 0000 70B5     		push	{r4, r5, r6, lr}
+ 237              		.cfi_def_cfa_offset 16
+ 238              		.cfi_offset 4, -16
+ 239              		.cfi_offset 5, -12
+ 240              		.cfi_offset 6, -8
+ 241              		.cfi_offset 14, -4
+ 242 0002 0C00     		movs	r4, r1
+ 243 0004 1D00     		movs	r5, r3
+  61:i2c_functions.c ****     return buffer[0];
+ 244              		.loc 1 61 0
+ 245 0006 0123     		movs	r3, #1
+ 246              	.LVL28:
+ 247 0008 FFF7FEFF 		bl	sensor_read
+ 248              	.LVL29:
+ 249 000c 2870     		strb	r0, [r5]
+  62:i2c_functions.c **** }
+ 250              		.loc 1 62 0
+ 251 000e 2078     		ldrb	r0, [r4]
+  63:i2c_functions.c **** 
+ 252              		.loc 1 63 0
+ 253              		@ sp needed
+ 254              	.LVL30:
+ 255              	.LVL31:
+ 256 0010 70BD     		pop	{r4, r5, r6, pc}
+ 257              		.cfi_endproc
+ 258              	.LFE39:
+ 259              		.size	sensor_read8, .-sensor_read8
+ 260 0012 C046     		.section	.text.sensor_read16,"ax",%progbits
+ 261              		.align	2
+ 262              		.global	sensor_read16
+ 263              		.code	16
+ 264              		.thumb_func
+ 265              		.type	sensor_read16, %function
+ 266              	sensor_read16:
+ 267              	.LFB40:
+  65:i2c_functions.c ****     *error = sensor_read(address, buffer, _register, 2);
+ 268              		.loc 1 65 0
+ 269              		.cfi_startproc
+ 270              		@ args = 0, pretend = 0, frame = 0
+ 271              		@ frame_needed = 0, uses_anonymous_args = 0
+ 272              	.LVL32:
+ 273 0000 70B5     		push	{r4, r5, r6, lr}
+ 274              		.cfi_def_cfa_offset 16
+ 275              		.cfi_offset 4, -16
+ 276              		.cfi_offset 5, -12
+ 277              		.cfi_offset 6, -8
+ 278              		.cfi_offset 14, -4
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 8
+
+
+ 279 0002 0C00     		movs	r4, r1
+ 280 0004 1D00     		movs	r5, r3
+  66:i2c_functions.c ****     return buffer[0] | (buffer[1] << 8);
+ 281              		.loc 1 66 0
+ 282 0006 0223     		movs	r3, #2
+ 283              	.LVL33:
+ 284 0008 FFF7FEFF 		bl	sensor_read
+ 285              	.LVL34:
+ 286 000c 2870     		strb	r0, [r5]
+  67:i2c_functions.c **** }
+ 287              		.loc 1 67 0
+ 288 000e 2378     		ldrb	r3, [r4]
+ 289 0010 6078     		ldrb	r0, [r4, #1]
+ 290 0012 0002     		lsls	r0, r0, #8
+ 291 0014 1843     		orrs	r0, r3
+  68:i2c_functions.c **** 
+ 292              		.loc 1 68 0
+ 293              		@ sp needed
+ 294              	.LVL35:
+ 295              	.LVL36:
+ 296 0016 70BD     		pop	{r4, r5, r6, pc}
+ 297              		.cfi_endproc
+ 298              	.LFE40:
+ 299              		.size	sensor_read16, .-sensor_read16
+ 300              		.section	.text.sensor_read_n,"ax",%progbits
+ 301              		.align	2
+ 302              		.global	sensor_read_n
+ 303              		.code	16
+ 304              		.thumb_func
+ 305              		.type	sensor_read_n, %function
+ 306              	sensor_read_n:
+ 307              	.LFB41:
+  70:i2c_functions.c ****     return sensor_read(address, buffer, _register, num_bytes);
+ 308              		.loc 1 70 0
+ 309              		.cfi_startproc
+ 310              		@ args = 0, pretend = 0, frame = 0
+ 311              		@ frame_needed = 0, uses_anonymous_args = 0
+ 312              	.LVL37:
+ 313 0000 10B5     		push	{r4, lr}
+ 314              		.cfi_def_cfa_offset 8
+ 315              		.cfi_offset 4, -8
+ 316              		.cfi_offset 14, -4
+  71:i2c_functions.c **** }
+ 317              		.loc 1 71 0
+ 318 0002 FFF7FEFF 		bl	sensor_read
+ 319              	.LVL38:
+  72:i2c_functions.c **** 
+ 320              		.loc 1 72 0
+ 321              		@ sp needed
+ 322 0006 10BD     		pop	{r4, pc}
+ 323              		.cfi_endproc
+ 324              	.LFE41:
+ 325              		.size	sensor_read_n, .-sensor_read_n
+ 326              		.text
+ 327              	.Letext0:
+ 328              		.file 2 "Generated_Source\\PSoC4/cytypes.h"
+ 329              		.file 3 "Generated_Source\\PSoC4/I2C_I2C.h"
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 9
+
+
+ 330              		.section	.debug_info,"",%progbits
+ 331              	.Ldebug_info0:
+ 332 0000 61040000 		.4byte	0x461
+ 333 0004 0400     		.2byte	0x4
+ 334 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 335 000a 04       		.byte	0x4
+ 336 000b 01       		.uleb128 0x1
+ 337 000c 83010000 		.4byte	.LASF36
+ 338 0010 0C       		.byte	0xc
+ 339 0011 4A020000 		.4byte	.LASF37
+ 340 0015 05010000 		.4byte	.LASF38
+ 341 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 342 001d 00000000 		.4byte	0
+ 343 0021 00000000 		.4byte	.Ldebug_line0
+ 344 0025 02       		.uleb128 0x2
+ 345 0026 01       		.byte	0x1
+ 346 0027 06       		.byte	0x6
+ 347 0028 69000000 		.4byte	.LASF0
+ 348 002c 02       		.uleb128 0x2
+ 349 002d 01       		.byte	0x1
+ 350 002e 08       		.byte	0x8
+ 351 002f 75000000 		.4byte	.LASF1
+ 352 0033 02       		.uleb128 0x2
+ 353 0034 02       		.byte	0x2
+ 354 0035 05       		.byte	0x5
+ 355 0036 33020000 		.4byte	.LASF2
+ 356 003a 02       		.uleb128 0x2
+ 357 003b 02       		.byte	0x2
+ 358 003c 07       		.byte	0x7
+ 359 003d AB000000 		.4byte	.LASF3
+ 360 0041 02       		.uleb128 0x2
+ 361 0042 04       		.byte	0x4
+ 362 0043 05       		.byte	0x5
+ 363 0044 5A020000 		.4byte	.LASF4
+ 364 0048 02       		.uleb128 0x2
+ 365 0049 04       		.byte	0x4
+ 366 004a 07       		.byte	0x7
+ 367 004b 83000000 		.4byte	.LASF5
+ 368 004f 02       		.uleb128 0x2
+ 369 0050 08       		.byte	0x8
+ 370 0051 05       		.byte	0x5
+ 371 0052 20020000 		.4byte	.LASF6
+ 372 0056 02       		.uleb128 0x2
+ 373 0057 08       		.byte	0x8
+ 374 0058 07       		.byte	0x7
+ 375 0059 6C010000 		.4byte	.LASF7
+ 376 005d 03       		.uleb128 0x3
+ 377 005e 04       		.byte	0x4
+ 378 005f 05       		.byte	0x5
+ 379 0060 696E7400 		.ascii	"int\000"
+ 380 0064 02       		.uleb128 0x2
+ 381 0065 04       		.byte	0x4
+ 382 0066 07       		.byte	0x7
+ 383 0067 52010000 		.4byte	.LASF8
+ 384 006b 04       		.uleb128 0x4
+ 385 006c 44020000 		.4byte	.LASF9
+ 386 0070 02       		.byte	0x2
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 10
+
+
+ 387 0071 D201     		.2byte	0x1d2
+ 388 0073 2C000000 		.4byte	0x2c
+ 389 0077 04       		.uleb128 0x4
+ 390 0078 FE000000 		.4byte	.LASF10
+ 391 007c 02       		.byte	0x2
+ 392 007d D301     		.2byte	0x1d3
+ 393 007f 3A000000 		.4byte	0x3a
+ 394 0083 02       		.uleb128 0x2
+ 395 0084 04       		.byte	0x4
+ 396 0085 04       		.byte	0x4
+ 397 0086 63000000 		.4byte	.LASF11
+ 398 008a 02       		.uleb128 0x2
+ 399 008b 08       		.byte	0x8
+ 400 008c 04       		.byte	0x4
+ 401 008d 28000000 		.4byte	.LASF12
+ 402 0091 02       		.uleb128 0x2
+ 403 0092 01       		.byte	0x1
+ 404 0093 08       		.byte	0x8
+ 405 0094 2E020000 		.4byte	.LASF13
+ 406 0098 02       		.uleb128 0x2
+ 407 0099 08       		.byte	0x8
+ 408 009a 04       		.byte	0x4
+ 409 009b 63020000 		.4byte	.LASF14
+ 410 009f 02       		.uleb128 0x2
+ 411 00a0 04       		.byte	0x4
+ 412 00a1 07       		.byte	0x7
+ 413 00a2 11020000 		.4byte	.LASF15
+ 414 00a6 05       		.uleb128 0x5
+ 415 00a7 04       		.byte	0x4
+ 416 00a8 6B000000 		.4byte	0x6b
+ 417 00ac 06       		.uleb128 0x6
+ 418 00ad AD020000 		.4byte	.LASF19
+ 419 00b1 01       		.byte	0x1
+ 420 00b2 2D       		.byte	0x2d
+ 421 00b3 6B000000 		.4byte	0x6b
+ 422 00b7 00000000 		.4byte	.LFB38
+ 423 00bb 16000000 		.4byte	.LFE38-.LFB38
+ 424 00bf 01       		.uleb128 0x1
+ 425 00c0 9C       		.byte	0x9c
+ 426 00c1 25010000 		.4byte	0x125
+ 427 00c5 07       		.uleb128 0x7
+ 428 00c6 64010000 		.4byte	.LASF16
+ 429 00ca 01       		.byte	0x1
+ 430 00cb 2D       		.byte	0x2d
+ 431 00cc 6B000000 		.4byte	0x6b
+ 432 00d0 00000000 		.4byte	.LLST0
+ 433 00d4 07       		.uleb128 0x7
+ 434 00d5 3D020000 		.4byte	.LASF17
+ 435 00d9 01       		.byte	0x1
+ 436 00da 2D       		.byte	0x2d
+ 437 00db A6000000 		.4byte	0xa6
+ 438 00df 21000000 		.4byte	.LLST1
+ 439 00e3 07       		.uleb128 0x7
+ 440 00e4 F4000000 		.4byte	.LASF18
+ 441 00e8 01       		.byte	0x1
+ 442 00e9 2D       		.byte	0x2d
+ 443 00ea 6B000000 		.4byte	0x6b
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 11
+
+
+ 444 00ee 42000000 		.4byte	.LLST2
+ 445 00f2 08       		.uleb128 0x8
+ 446 00f3 3E000000 		.4byte	.LASF22
+ 447 00f7 01       		.byte	0x1
+ 448 00f8 2E       		.byte	0x2e
+ 449 00f9 6B000000 		.4byte	0x6b
+ 450 00fd 63000000 		.4byte	.LLST3
+ 451 0101 09       		.uleb128 0x9
+ 452 0102 08000000 		.4byte	.LVL2
+ 453 0106 28040000 		.4byte	0x428
+ 454 010a 1B010000 		.4byte	0x11b
+ 455 010e 0A       		.uleb128 0xa
+ 456 010f 01       		.uleb128 0x1
+ 457 0110 51       		.byte	0x51
+ 458 0111 03       		.uleb128 0x3
+ 459 0112 F3       		.byte	0xf3
+ 460 0113 01       		.uleb128 0x1
+ 461 0114 51       		.byte	0x51
+ 462 0115 0A       		.uleb128 0xa
+ 463 0116 01       		.uleb128 0x1
+ 464 0117 53       		.byte	0x53
+ 465 0118 01       		.uleb128 0x1
+ 466 0119 30       		.byte	0x30
+ 467 011a 00       		.byte	0
+ 468 011b 0B       		.uleb128 0xb
+ 469 011c 0E000000 		.4byte	.LVL4
+ 470 0120 34040000 		.4byte	0x434
+ 471 0124 00       		.byte	0
+ 472 0125 06       		.uleb128 0x6
+ 473 0126 7E020000 		.4byte	.LASF20
+ 474 012a 01       		.byte	0x1
+ 475 012b 4A       		.byte	0x4a
+ 476 012c 6B000000 		.4byte	0x6b
+ 477 0130 00000000 		.4byte	.LFB42
+ 478 0134 50000000 		.4byte	.LFE42-.LFB42
+ 479 0138 01       		.uleb128 0x1
+ 480 0139 9C       		.byte	0x9c
+ 481 013a F7010000 		.4byte	0x1f7
+ 482 013e 07       		.uleb128 0x7
+ 483 013f 64010000 		.4byte	.LASF16
+ 484 0143 01       		.byte	0x1
+ 485 0144 4A       		.byte	0x4a
+ 486 0145 6B000000 		.4byte	0x6b
+ 487 0149 8D000000 		.4byte	.LLST4
+ 488 014d 07       		.uleb128 0x7
+ 489 014e 3D020000 		.4byte	.LASF17
+ 490 0152 01       		.byte	0x1
+ 491 0153 4A       		.byte	0x4a
+ 492 0154 A6000000 		.4byte	0xa6
+ 493 0158 AE000000 		.4byte	.LLST5
+ 494 015c 07       		.uleb128 0x7
+ 495 015d 45000000 		.4byte	.LASF21
+ 496 0161 01       		.byte	0x1
+ 497 0162 4A       		.byte	0x4a
+ 498 0163 6B000000 		.4byte	0x6b
+ 499 0167 DA000000 		.4byte	.LLST6
+ 500 016b 07       		.uleb128 0x7
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 12
+
+
+ 501 016c F4000000 		.4byte	.LASF18
+ 502 0170 01       		.byte	0x1
+ 503 0171 4A       		.byte	0x4a
+ 504 0172 6B000000 		.4byte	0x6b
+ 505 0176 11010000 		.4byte	.LLST7
+ 506 017a 08       		.uleb128 0x8
+ 507 017b 5F010000 		.4byte	.LASF23
+ 508 017f 01       		.byte	0x1
+ 509 0180 4B       		.byte	0x4b
+ 510 0181 6B000000 		.4byte	0x6b
+ 511 0185 32010000 		.4byte	.LLST8
+ 512 0189 09       		.uleb128 0x9
+ 513 018a 18000000 		.4byte	.LVL10
+ 514 018e 28040000 		.4byte	0x428
+ 515 0192 AD010000 		.4byte	0x1ad
+ 516 0196 0A       		.uleb128 0xa
+ 517 0197 01       		.uleb128 0x1
+ 518 0198 50       		.byte	0x50
+ 519 0199 02       		.uleb128 0x2
+ 520 019a 74       		.byte	0x74
+ 521 019b 00       		.sleb128 0
+ 522 019c 0A       		.uleb128 0xa
+ 523 019d 01       		.uleb128 0x1
+ 524 019e 51       		.byte	0x51
+ 525 019f 02       		.uleb128 0x2
+ 526 01a0 7D       		.byte	0x7d
+ 527 01a1 07       		.sleb128 7
+ 528 01a2 0A       		.uleb128 0xa
+ 529 01a3 01       		.uleb128 0x1
+ 530 01a4 52       		.byte	0x52
+ 531 01a5 01       		.uleb128 0x1
+ 532 01a6 31       		.byte	0x31
+ 533 01a7 0A       		.uleb128 0xa
+ 534 01a8 01       		.uleb128 0x1
+ 535 01a9 53       		.byte	0x53
+ 536 01aa 01       		.uleb128 0x1
+ 537 01ab 32       		.byte	0x32
+ 538 01ac 00       		.byte	0
+ 539 01ad 0B       		.uleb128 0xb
+ 540 01ae 1E000000 		.4byte	.LVL12
+ 541 01b2 34040000 		.4byte	0x434
+ 542 01b6 0B       		.uleb128 0xb
+ 543 01b7 2E000000 		.4byte	.LVL13
+ 544 01bb 40040000 		.4byte	0x440
+ 545 01bf 09       		.uleb128 0x9
+ 546 01c0 3A000000 		.4byte	.LVL14
+ 547 01c4 4C040000 		.4byte	0x44c
+ 548 01c8 E4010000 		.4byte	0x1e4
+ 549 01cc 0A       		.uleb128 0xa
+ 550 01cd 01       		.uleb128 0x1
+ 551 01ce 50       		.byte	0x50
+ 552 01cf 02       		.uleb128 0x2
+ 553 01d0 74       		.byte	0x74
+ 554 01d1 00       		.sleb128 0
+ 555 01d2 0A       		.uleb128 0xa
+ 556 01d3 01       		.uleb128 0x1
+ 557 01d4 51       		.byte	0x51
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 13
+
+
+ 558 01d5 02       		.uleb128 0x2
+ 559 01d6 75       		.byte	0x75
+ 560 01d7 00       		.sleb128 0
+ 561 01d8 0A       		.uleb128 0xa
+ 562 01d9 01       		.uleb128 0x1
+ 563 01da 52       		.byte	0x52
+ 564 01db 02       		.uleb128 0x2
+ 565 01dc 76       		.byte	0x76
+ 566 01dd 00       		.sleb128 0
+ 567 01de 0A       		.uleb128 0xa
+ 568 01df 01       		.uleb128 0x1
+ 569 01e0 53       		.byte	0x53
+ 570 01e1 01       		.uleb128 0x1
+ 571 01e2 31       		.byte	0x31
+ 572 01e3 00       		.byte	0
+ 573 01e4 0B       		.uleb128 0xb
+ 574 01e5 40000000 		.4byte	.LVL16
+ 575 01e9 34040000 		.4byte	0x434
+ 576 01ed 0B       		.uleb128 0xb
+ 577 01ee 4C000000 		.4byte	.LVL17
+ 578 01f2 58040000 		.4byte	0x458
+ 579 01f6 00       		.byte	0
+ 580 01f7 0C       		.uleb128 0xc
+ 581 01f8 9F020000 		.4byte	.LASF24
+ 582 01fc 01       		.byte	0x1
+ 583 01fd 21       		.byte	0x21
+ 584 01fe 6B000000 		.4byte	0x6b
+ 585 0202 00000000 		.4byte	.LFB35
+ 586 0206 0A000000 		.4byte	.LFE35-.LFB35
+ 587 020a 01       		.uleb128 0x1
+ 588 020b 9C       		.byte	0x9c
+ 589 020c 45020000 		.4byte	0x245
+ 590 0210 07       		.uleb128 0x7
+ 591 0211 64010000 		.4byte	.LASF16
+ 592 0215 01       		.byte	0x1
+ 593 0216 21       		.byte	0x21
+ 594 0217 6B000000 		.4byte	0x6b
+ 595 021b 45010000 		.4byte	.LLST9
+ 596 021f 07       		.uleb128 0x7
+ 597 0220 3D020000 		.4byte	.LASF17
+ 598 0224 01       		.byte	0x1
+ 599 0225 21       		.byte	0x21
+ 600 0226 A6000000 		.4byte	0xa6
+ 601 022a 66010000 		.4byte	.LLST10
+ 602 022e 0D       		.uleb128 0xd
+ 603 022f 08000000 		.4byte	.LVL22
+ 604 0233 AC000000 		.4byte	0xac
+ 605 0237 0A       		.uleb128 0xa
+ 606 0238 01       		.uleb128 0x1
+ 607 0239 51       		.byte	0x51
+ 608 023a 03       		.uleb128 0x3
+ 609 023b F3       		.byte	0xf3
+ 610 023c 01       		.uleb128 0x1
+ 611 023d 51       		.byte	0x51
+ 612 023e 0A       		.uleb128 0xa
+ 613 023f 01       		.uleb128 0x1
+ 614 0240 52       		.byte	0x52
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 14
+
+
+ 615 0241 01       		.uleb128 0x1
+ 616 0242 32       		.byte	0x32
+ 617 0243 00       		.byte	0
+ 618 0244 00       		.byte	0
+ 619 0245 0C       		.uleb128 0xc
+ 620 0246 2F000000 		.4byte	.LASF25
+ 621 024a 01       		.byte	0x1
+ 622 024b 25       		.byte	0x25
+ 623 024c 6B000000 		.4byte	0x6b
+ 624 0250 00000000 		.4byte	.LFB36
+ 625 0254 0A000000 		.4byte	.LFE36-.LFB36
+ 626 0258 01       		.uleb128 0x1
+ 627 0259 9C       		.byte	0x9c
+ 628 025a 93020000 		.4byte	0x293
+ 629 025e 07       		.uleb128 0x7
+ 630 025f 64010000 		.4byte	.LASF16
+ 631 0263 01       		.byte	0x1
+ 632 0264 25       		.byte	0x25
+ 633 0265 6B000000 		.4byte	0x6b
+ 634 0269 87010000 		.4byte	.LLST11
+ 635 026d 07       		.uleb128 0x7
+ 636 026e 3D020000 		.4byte	.LASF17
+ 637 0272 01       		.byte	0x1
+ 638 0273 25       		.byte	0x25
+ 639 0274 A6000000 		.4byte	0xa6
+ 640 0278 A8010000 		.4byte	.LLST12
+ 641 027c 0D       		.uleb128 0xd
+ 642 027d 08000000 		.4byte	.LVL24
+ 643 0281 AC000000 		.4byte	0xac
+ 644 0285 0A       		.uleb128 0xa
+ 645 0286 01       		.uleb128 0x1
+ 646 0287 51       		.byte	0x51
+ 647 0288 03       		.uleb128 0x3
+ 648 0289 F3       		.byte	0xf3
+ 649 028a 01       		.uleb128 0x1
+ 650 028b 51       		.byte	0x51
+ 651 028c 0A       		.uleb128 0xa
+ 652 028d 01       		.uleb128 0x1
+ 653 028e 52       		.byte	0x52
+ 654 028f 01       		.uleb128 0x1
+ 655 0290 33       		.byte	0x33
+ 656 0291 00       		.byte	0
+ 657 0292 00       		.byte	0
+ 658 0293 0C       		.uleb128 0xc
+ 659 0294 6F020000 		.4byte	.LASF26
+ 660 0298 01       		.byte	0x1
+ 661 0299 29       		.byte	0x29
+ 662 029a 6B000000 		.4byte	0x6b
+ 663 029e 00000000 		.4byte	.LFB37
+ 664 02a2 08000000 		.4byte	.LFE37-.LFB37
+ 665 02a6 01       		.uleb128 0x1
+ 666 02a7 9C       		.byte	0x9c
+ 667 02a8 EB020000 		.4byte	0x2eb
+ 668 02ac 07       		.uleb128 0x7
+ 669 02ad 64010000 		.4byte	.LASF16
+ 670 02b1 01       		.byte	0x1
+ 671 02b2 29       		.byte	0x29
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 15
+
+
+ 672 02b3 6B000000 		.4byte	0x6b
+ 673 02b7 C9010000 		.4byte	.LLST13
+ 674 02bb 07       		.uleb128 0x7
+ 675 02bc 3D020000 		.4byte	.LASF17
+ 676 02c0 01       		.byte	0x1
+ 677 02c1 29       		.byte	0x29
+ 678 02c2 A6000000 		.4byte	0xa6
+ 679 02c6 EA010000 		.4byte	.LLST14
+ 680 02ca 07       		.uleb128 0x7
+ 681 02cb F4000000 		.4byte	.LASF18
+ 682 02cf 01       		.byte	0x1
+ 683 02d0 29       		.byte	0x29
+ 684 02d1 6B000000 		.4byte	0x6b
+ 685 02d5 0B020000 		.4byte	.LLST15
+ 686 02d9 0D       		.uleb128 0xd
+ 687 02da 06000000 		.4byte	.LVL26
+ 688 02de AC000000 		.4byte	0xac
+ 689 02e2 0A       		.uleb128 0xa
+ 690 02e3 01       		.uleb128 0x1
+ 691 02e4 51       		.byte	0x51
+ 692 02e5 03       		.uleb128 0x3
+ 693 02e6 F3       		.byte	0xf3
+ 694 02e7 01       		.uleb128 0x1
+ 695 02e8 51       		.byte	0x51
+ 696 02e9 00       		.byte	0
+ 697 02ea 00       		.byte	0
+ 698 02eb 0C       		.uleb128 0xc
+ 699 02ec BE000000 		.4byte	.LASF27
+ 700 02f0 01       		.byte	0x1
+ 701 02f1 3A       		.byte	0x3a
+ 702 02f2 6B000000 		.4byte	0x6b
+ 703 02f6 00000000 		.4byte	.LFB39
+ 704 02fa 12000000 		.4byte	.LFE39-.LFB39
+ 705 02fe 01       		.uleb128 0x1
+ 706 02ff 9C       		.byte	0x9c
+ 707 0300 56030000 		.4byte	0x356
+ 708 0304 07       		.uleb128 0x7
+ 709 0305 64010000 		.4byte	.LASF16
+ 710 0309 01       		.byte	0x1
+ 711 030a 3A       		.byte	0x3a
+ 712 030b 6B000000 		.4byte	0x6b
+ 713 030f 2C020000 		.4byte	.LLST16
+ 714 0313 07       		.uleb128 0x7
+ 715 0314 3D020000 		.4byte	.LASF17
+ 716 0318 01       		.byte	0x1
+ 717 0319 3A       		.byte	0x3a
+ 718 031a A6000000 		.4byte	0xa6
+ 719 031e 4D020000 		.4byte	.LLST17
+ 720 0322 07       		.uleb128 0x7
+ 721 0323 45000000 		.4byte	.LASF21
+ 722 0327 01       		.byte	0x1
+ 723 0328 3A       		.byte	0x3a
+ 724 0329 6B000000 		.4byte	0x6b
+ 725 032d 79020000 		.4byte	.LLST18
+ 726 0331 07       		.uleb128 0x7
+ 727 0332 1A020000 		.4byte	.LASF28
+ 728 0336 01       		.byte	0x1
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 16
+
+
+ 729 0337 3A       		.byte	0x3a
+ 730 0338 A6000000 		.4byte	0xa6
+ 731 033c 9A020000 		.4byte	.LLST19
+ 732 0340 0D       		.uleb128 0xd
+ 733 0341 0C000000 		.4byte	.LVL29
+ 734 0345 25010000 		.4byte	0x125
+ 735 0349 0A       		.uleb128 0xa
+ 736 034a 01       		.uleb128 0x1
+ 737 034b 51       		.byte	0x51
+ 738 034c 02       		.uleb128 0x2
+ 739 034d 74       		.byte	0x74
+ 740 034e 00       		.sleb128 0
+ 741 034f 0A       		.uleb128 0xa
+ 742 0350 01       		.uleb128 0x1
+ 743 0351 53       		.byte	0x53
+ 744 0352 01       		.uleb128 0x1
+ 745 0353 31       		.byte	0x31
+ 746 0354 00       		.byte	0
+ 747 0355 00       		.byte	0
+ 748 0356 0C       		.uleb128 0xc
+ 749 0357 E6000000 		.4byte	.LASF29
+ 750 035b 01       		.byte	0x1
+ 751 035c 41       		.byte	0x41
+ 752 035d 77000000 		.4byte	0x77
+ 753 0361 00000000 		.4byte	.LFB40
+ 754 0365 18000000 		.4byte	.LFE40-.LFB40
+ 755 0369 01       		.uleb128 0x1
+ 756 036a 9C       		.byte	0x9c
+ 757 036b C1030000 		.4byte	0x3c1
+ 758 036f 07       		.uleb128 0x7
+ 759 0370 64010000 		.4byte	.LASF16
+ 760 0374 01       		.byte	0x1
+ 761 0375 41       		.byte	0x41
+ 762 0376 6B000000 		.4byte	0x6b
+ 763 037a C6020000 		.4byte	.LLST20
+ 764 037e 07       		.uleb128 0x7
+ 765 037f 3D020000 		.4byte	.LASF17
+ 766 0383 01       		.byte	0x1
+ 767 0384 41       		.byte	0x41
+ 768 0385 A6000000 		.4byte	0xa6
+ 769 0389 E7020000 		.4byte	.LLST21
+ 770 038d 07       		.uleb128 0x7
+ 771 038e 45000000 		.4byte	.LASF21
+ 772 0392 01       		.byte	0x1
+ 773 0393 41       		.byte	0x41
+ 774 0394 6B000000 		.4byte	0x6b
+ 775 0398 13030000 		.4byte	.LLST22
+ 776 039c 07       		.uleb128 0x7
+ 777 039d 1A020000 		.4byte	.LASF28
+ 778 03a1 01       		.byte	0x1
+ 779 03a2 41       		.byte	0x41
+ 780 03a3 A6000000 		.4byte	0xa6
+ 781 03a7 34030000 		.4byte	.LLST23
+ 782 03ab 0D       		.uleb128 0xd
+ 783 03ac 0C000000 		.4byte	.LVL34
+ 784 03b0 25010000 		.4byte	0x125
+ 785 03b4 0A       		.uleb128 0xa
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 17
+
+
+ 786 03b5 01       		.uleb128 0x1
+ 787 03b6 51       		.byte	0x51
+ 788 03b7 02       		.uleb128 0x2
+ 789 03b8 74       		.byte	0x74
+ 790 03b9 00       		.sleb128 0
+ 791 03ba 0A       		.uleb128 0xa
+ 792 03bb 01       		.uleb128 0x1
+ 793 03bc 53       		.byte	0x53
+ 794 03bd 01       		.uleb128 0x1
+ 795 03be 32       		.byte	0x32
+ 796 03bf 00       		.byte	0
+ 797 03c0 00       		.byte	0
+ 798 03c1 0C       		.uleb128 0xc
+ 799 03c2 1A000000 		.4byte	.LASF30
+ 800 03c6 01       		.byte	0x1
+ 801 03c7 46       		.byte	0x46
+ 802 03c8 6B000000 		.4byte	0x6b
+ 803 03cc 00000000 		.4byte	.LFB41
+ 804 03d0 08000000 		.4byte	.LFE41-.LFB41
+ 805 03d4 01       		.uleb128 0x1
+ 806 03d5 9C       		.byte	0x9c
+ 807 03d6 28040000 		.4byte	0x428
+ 808 03da 07       		.uleb128 0x7
+ 809 03db 64010000 		.4byte	.LASF16
+ 810 03df 01       		.byte	0x1
+ 811 03e0 46       		.byte	0x46
+ 812 03e1 6B000000 		.4byte	0x6b
+ 813 03e5 60030000 		.4byte	.LLST24
+ 814 03e9 07       		.uleb128 0x7
+ 815 03ea 3D020000 		.4byte	.LASF17
+ 816 03ee 01       		.byte	0x1
+ 817 03ef 46       		.byte	0x46
+ 818 03f0 A6000000 		.4byte	0xa6
+ 819 03f4 81030000 		.4byte	.LLST25
+ 820 03f8 07       		.uleb128 0x7
+ 821 03f9 45000000 		.4byte	.LASF21
+ 822 03fd 01       		.byte	0x1
+ 823 03fe 46       		.byte	0x46
+ 824 03ff 6B000000 		.4byte	0x6b
+ 825 0403 A2030000 		.4byte	.LLST26
+ 826 0407 07       		.uleb128 0x7
+ 827 0408 F4000000 		.4byte	.LASF18
+ 828 040c 01       		.byte	0x1
+ 829 040d 46       		.byte	0x46
+ 830 040e 6B000000 		.4byte	0x6b
+ 831 0412 C3030000 		.4byte	.LLST27
+ 832 0416 0D       		.uleb128 0xd
+ 833 0417 06000000 		.4byte	.LVL38
+ 834 041b 25010000 		.4byte	0x125
+ 835 041f 0A       		.uleb128 0xa
+ 836 0420 01       		.uleb128 0x1
+ 837 0421 51       		.byte	0x51
+ 838 0422 03       		.uleb128 0x3
+ 839 0423 F3       		.byte	0xf3
+ 840 0424 01       		.uleb128 0x1
+ 841 0425 51       		.byte	0x51
+ 842 0426 00       		.byte	0
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 18
+
+
+ 843 0427 00       		.byte	0
+ 844 0428 0E       		.uleb128 0xe
+ 845 0429 95000000 		.4byte	.LASF31
+ 846 042d 95000000 		.4byte	.LASF31
+ 847 0431 03       		.byte	0x3
+ 848 0432 1301     		.2byte	0x113
+ 849 0434 0E       		.uleb128 0xe
+ 850 0435 4F000000 		.4byte	.LASF32
+ 851 0439 4F000000 		.4byte	.LASF32
+ 852 043d 03       		.byte	0x3
+ 853 043e 0F01     		.2byte	0x10f
+ 854 0440 0E       		.uleb128 0xe
+ 855 0441 CB000000 		.4byte	.LASF33
+ 856 0445 CB000000 		.4byte	.LASF33
+ 857 0449 03       		.byte	0x3
+ 858 044a 1801     		.2byte	0x118
+ 859 044c 0E       		.uleb128 0xe
+ 860 044d 8A020000 		.4byte	.LASF34
+ 861 0451 8A020000 		.4byte	.LASF34
+ 862 0455 03       		.byte	0x3
+ 863 0456 1401     		.2byte	0x114
+ 864 0458 0E       		.uleb128 0xe
+ 865 0459 00000000 		.4byte	.LASF35
+ 866 045d 00000000 		.4byte	.LASF35
+ 867 0461 03       		.byte	0x3
+ 868 0462 1701     		.2byte	0x117
+ 869 0464 00       		.byte	0
+ 870              		.section	.debug_abbrev,"",%progbits
+ 871              	.Ldebug_abbrev0:
+ 872 0000 01       		.uleb128 0x1
+ 873 0001 11       		.uleb128 0x11
+ 874 0002 01       		.byte	0x1
+ 875 0003 25       		.uleb128 0x25
+ 876 0004 0E       		.uleb128 0xe
+ 877 0005 13       		.uleb128 0x13
+ 878 0006 0B       		.uleb128 0xb
+ 879 0007 03       		.uleb128 0x3
+ 880 0008 0E       		.uleb128 0xe
+ 881 0009 1B       		.uleb128 0x1b
+ 882 000a 0E       		.uleb128 0xe
+ 883 000b 55       		.uleb128 0x55
+ 884 000c 17       		.uleb128 0x17
+ 885 000d 11       		.uleb128 0x11
+ 886 000e 01       		.uleb128 0x1
+ 887 000f 10       		.uleb128 0x10
+ 888 0010 17       		.uleb128 0x17
+ 889 0011 00       		.byte	0
+ 890 0012 00       		.byte	0
+ 891 0013 02       		.uleb128 0x2
+ 892 0014 24       		.uleb128 0x24
+ 893 0015 00       		.byte	0
+ 894 0016 0B       		.uleb128 0xb
+ 895 0017 0B       		.uleb128 0xb
+ 896 0018 3E       		.uleb128 0x3e
+ 897 0019 0B       		.uleb128 0xb
+ 898 001a 03       		.uleb128 0x3
+ 899 001b 0E       		.uleb128 0xe
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 19
+
+
+ 900 001c 00       		.byte	0
+ 901 001d 00       		.byte	0
+ 902 001e 03       		.uleb128 0x3
+ 903 001f 24       		.uleb128 0x24
+ 904 0020 00       		.byte	0
+ 905 0021 0B       		.uleb128 0xb
+ 906 0022 0B       		.uleb128 0xb
+ 907 0023 3E       		.uleb128 0x3e
+ 908 0024 0B       		.uleb128 0xb
+ 909 0025 03       		.uleb128 0x3
+ 910 0026 08       		.uleb128 0x8
+ 911 0027 00       		.byte	0
+ 912 0028 00       		.byte	0
+ 913 0029 04       		.uleb128 0x4
+ 914 002a 16       		.uleb128 0x16
+ 915 002b 00       		.byte	0
+ 916 002c 03       		.uleb128 0x3
+ 917 002d 0E       		.uleb128 0xe
+ 918 002e 3A       		.uleb128 0x3a
+ 919 002f 0B       		.uleb128 0xb
+ 920 0030 3B       		.uleb128 0x3b
+ 921 0031 05       		.uleb128 0x5
+ 922 0032 49       		.uleb128 0x49
+ 923 0033 13       		.uleb128 0x13
+ 924 0034 00       		.byte	0
+ 925 0035 00       		.byte	0
+ 926 0036 05       		.uleb128 0x5
+ 927 0037 0F       		.uleb128 0xf
+ 928 0038 00       		.byte	0
+ 929 0039 0B       		.uleb128 0xb
+ 930 003a 0B       		.uleb128 0xb
+ 931 003b 49       		.uleb128 0x49
+ 932 003c 13       		.uleb128 0x13
+ 933 003d 00       		.byte	0
+ 934 003e 00       		.byte	0
+ 935 003f 06       		.uleb128 0x6
+ 936 0040 2E       		.uleb128 0x2e
+ 937 0041 01       		.byte	0x1
+ 938 0042 03       		.uleb128 0x3
+ 939 0043 0E       		.uleb128 0xe
+ 940 0044 3A       		.uleb128 0x3a
+ 941 0045 0B       		.uleb128 0xb
+ 942 0046 3B       		.uleb128 0x3b
+ 943 0047 0B       		.uleb128 0xb
+ 944 0048 27       		.uleb128 0x27
+ 945 0049 19       		.uleb128 0x19
+ 946 004a 49       		.uleb128 0x49
+ 947 004b 13       		.uleb128 0x13
+ 948 004c 11       		.uleb128 0x11
+ 949 004d 01       		.uleb128 0x1
+ 950 004e 12       		.uleb128 0x12
+ 951 004f 06       		.uleb128 0x6
+ 952 0050 40       		.uleb128 0x40
+ 953 0051 18       		.uleb128 0x18
+ 954 0052 9742     		.uleb128 0x2117
+ 955 0054 19       		.uleb128 0x19
+ 956 0055 01       		.uleb128 0x1
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 20
+
+
+ 957 0056 13       		.uleb128 0x13
+ 958 0057 00       		.byte	0
+ 959 0058 00       		.byte	0
+ 960 0059 07       		.uleb128 0x7
+ 961 005a 05       		.uleb128 0x5
+ 962 005b 00       		.byte	0
+ 963 005c 03       		.uleb128 0x3
+ 964 005d 0E       		.uleb128 0xe
+ 965 005e 3A       		.uleb128 0x3a
+ 966 005f 0B       		.uleb128 0xb
+ 967 0060 3B       		.uleb128 0x3b
+ 968 0061 0B       		.uleb128 0xb
+ 969 0062 49       		.uleb128 0x49
+ 970 0063 13       		.uleb128 0x13
+ 971 0064 02       		.uleb128 0x2
+ 972 0065 17       		.uleb128 0x17
+ 973 0066 00       		.byte	0
+ 974 0067 00       		.byte	0
+ 975 0068 08       		.uleb128 0x8
+ 976 0069 34       		.uleb128 0x34
+ 977 006a 00       		.byte	0
+ 978 006b 03       		.uleb128 0x3
+ 979 006c 0E       		.uleb128 0xe
+ 980 006d 3A       		.uleb128 0x3a
+ 981 006e 0B       		.uleb128 0xb
+ 982 006f 3B       		.uleb128 0x3b
+ 983 0070 0B       		.uleb128 0xb
+ 984 0071 49       		.uleb128 0x49
+ 985 0072 13       		.uleb128 0x13
+ 986 0073 02       		.uleb128 0x2
+ 987 0074 17       		.uleb128 0x17
+ 988 0075 00       		.byte	0
+ 989 0076 00       		.byte	0
+ 990 0077 09       		.uleb128 0x9
+ 991 0078 898201   		.uleb128 0x4109
+ 992 007b 01       		.byte	0x1
+ 993 007c 11       		.uleb128 0x11
+ 994 007d 01       		.uleb128 0x1
+ 995 007e 31       		.uleb128 0x31
+ 996 007f 13       		.uleb128 0x13
+ 997 0080 01       		.uleb128 0x1
+ 998 0081 13       		.uleb128 0x13
+ 999 0082 00       		.byte	0
+ 1000 0083 00       		.byte	0
+ 1001 0084 0A       		.uleb128 0xa
+ 1002 0085 8A8201   		.uleb128 0x410a
+ 1003 0088 00       		.byte	0
+ 1004 0089 02       		.uleb128 0x2
+ 1005 008a 18       		.uleb128 0x18
+ 1006 008b 9142     		.uleb128 0x2111
+ 1007 008d 18       		.uleb128 0x18
+ 1008 008e 00       		.byte	0
+ 1009 008f 00       		.byte	0
+ 1010 0090 0B       		.uleb128 0xb
+ 1011 0091 898201   		.uleb128 0x4109
+ 1012 0094 00       		.byte	0
+ 1013 0095 11       		.uleb128 0x11
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 21
+
+
+ 1014 0096 01       		.uleb128 0x1
+ 1015 0097 31       		.uleb128 0x31
+ 1016 0098 13       		.uleb128 0x13
+ 1017 0099 00       		.byte	0
+ 1018 009a 00       		.byte	0
+ 1019 009b 0C       		.uleb128 0xc
+ 1020 009c 2E       		.uleb128 0x2e
+ 1021 009d 01       		.byte	0x1
+ 1022 009e 3F       		.uleb128 0x3f
+ 1023 009f 19       		.uleb128 0x19
+ 1024 00a0 03       		.uleb128 0x3
+ 1025 00a1 0E       		.uleb128 0xe
+ 1026 00a2 3A       		.uleb128 0x3a
+ 1027 00a3 0B       		.uleb128 0xb
+ 1028 00a4 3B       		.uleb128 0x3b
+ 1029 00a5 0B       		.uleb128 0xb
+ 1030 00a6 27       		.uleb128 0x27
+ 1031 00a7 19       		.uleb128 0x19
+ 1032 00a8 49       		.uleb128 0x49
+ 1033 00a9 13       		.uleb128 0x13
+ 1034 00aa 11       		.uleb128 0x11
+ 1035 00ab 01       		.uleb128 0x1
+ 1036 00ac 12       		.uleb128 0x12
+ 1037 00ad 06       		.uleb128 0x6
+ 1038 00ae 40       		.uleb128 0x40
+ 1039 00af 18       		.uleb128 0x18
+ 1040 00b0 9742     		.uleb128 0x2117
+ 1041 00b2 19       		.uleb128 0x19
+ 1042 00b3 01       		.uleb128 0x1
+ 1043 00b4 13       		.uleb128 0x13
+ 1044 00b5 00       		.byte	0
+ 1045 00b6 00       		.byte	0
+ 1046 00b7 0D       		.uleb128 0xd
+ 1047 00b8 898201   		.uleb128 0x4109
+ 1048 00bb 01       		.byte	0x1
+ 1049 00bc 11       		.uleb128 0x11
+ 1050 00bd 01       		.uleb128 0x1
+ 1051 00be 31       		.uleb128 0x31
+ 1052 00bf 13       		.uleb128 0x13
+ 1053 00c0 00       		.byte	0
+ 1054 00c1 00       		.byte	0
+ 1055 00c2 0E       		.uleb128 0xe
+ 1056 00c3 2E       		.uleb128 0x2e
+ 1057 00c4 00       		.byte	0
+ 1058 00c5 3F       		.uleb128 0x3f
+ 1059 00c6 19       		.uleb128 0x19
+ 1060 00c7 3C       		.uleb128 0x3c
+ 1061 00c8 19       		.uleb128 0x19
+ 1062 00c9 6E       		.uleb128 0x6e
+ 1063 00ca 0E       		.uleb128 0xe
+ 1064 00cb 03       		.uleb128 0x3
+ 1065 00cc 0E       		.uleb128 0xe
+ 1066 00cd 3A       		.uleb128 0x3a
+ 1067 00ce 0B       		.uleb128 0xb
+ 1068 00cf 3B       		.uleb128 0x3b
+ 1069 00d0 05       		.uleb128 0x5
+ 1070 00d1 00       		.byte	0
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 22
+
+
+ 1071 00d2 00       		.byte	0
+ 1072 00d3 00       		.byte	0
+ 1073              		.section	.debug_loc,"",%progbits
+ 1074              	.Ldebug_loc0:
+ 1075              	.LLST0:
+ 1076 0000 00000000 		.4byte	.LVL0
+ 1077 0004 07000000 		.4byte	.LVL2-1
+ 1078 0008 0100     		.2byte	0x1
+ 1079 000a 50       		.byte	0x50
+ 1080 000b 07000000 		.4byte	.LVL2-1
+ 1081 000f 16000000 		.4byte	.LFE38
+ 1082 0013 0400     		.2byte	0x4
+ 1083 0015 F3       		.byte	0xf3
+ 1084 0016 01       		.uleb128 0x1
+ 1085 0017 50       		.byte	0x50
+ 1086 0018 9F       		.byte	0x9f
+ 1087 0019 00000000 		.4byte	0
+ 1088 001d 00000000 		.4byte	0
+ 1089              	.LLST1:
+ 1090 0021 00000000 		.4byte	.LVL0
+ 1091 0025 07000000 		.4byte	.LVL2-1
+ 1092 0029 0100     		.2byte	0x1
+ 1093 002b 51       		.byte	0x51
+ 1094 002c 07000000 		.4byte	.LVL2-1
+ 1095 0030 16000000 		.4byte	.LFE38
+ 1096 0034 0400     		.2byte	0x4
+ 1097 0036 F3       		.byte	0xf3
+ 1098 0037 01       		.uleb128 0x1
+ 1099 0038 51       		.byte	0x51
+ 1100 0039 9F       		.byte	0x9f
+ 1101 003a 00000000 		.4byte	0
+ 1102 003e 00000000 		.4byte	0
+ 1103              	.LLST2:
+ 1104 0042 00000000 		.4byte	.LVL0
+ 1105 0046 07000000 		.4byte	.LVL2-1
+ 1106 004a 0100     		.2byte	0x1
+ 1107 004c 52       		.byte	0x52
+ 1108 004d 07000000 		.4byte	.LVL2-1
+ 1109 0051 16000000 		.4byte	.LFE38
+ 1110 0055 0400     		.2byte	0x4
+ 1111 0057 F3       		.byte	0xf3
+ 1112 0058 01       		.uleb128 0x1
+ 1113 0059 52       		.byte	0x52
+ 1114 005a 9F       		.byte	0x9f
+ 1115 005b 00000000 		.4byte	0
+ 1116 005f 00000000 		.4byte	0
+ 1117              	.LLST3:
+ 1118 0063 02000000 		.4byte	.LVL1
+ 1119 0067 0A000000 		.4byte	.LVL3
+ 1120 006b 0200     		.2byte	0x2
+ 1121 006d 30       		.byte	0x30
+ 1122 006e 9F       		.byte	0x9f
+ 1123 006f 0A000000 		.4byte	.LVL3
+ 1124 0073 14000000 		.4byte	.LVL5
+ 1125 0077 0100     		.2byte	0x1
+ 1126 0079 54       		.byte	0x54
+ 1127 007a 14000000 		.4byte	.LVL5
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 23
+
+
+ 1128 007e 16000000 		.4byte	.LFE38
+ 1129 0082 0100     		.2byte	0x1
+ 1130 0084 50       		.byte	0x50
+ 1131 0085 00000000 		.4byte	0
+ 1132 0089 00000000 		.4byte	0
+ 1133              	.LLST4:
+ 1134 008d 00000000 		.4byte	.LVL6
+ 1135 0091 17000000 		.4byte	.LVL10-1
+ 1136 0095 0100     		.2byte	0x1
+ 1137 0097 50       		.byte	0x50
+ 1138 0098 17000000 		.4byte	.LVL10-1
+ 1139 009c 50000000 		.4byte	.LFE42
+ 1140 00a0 0400     		.2byte	0x4
+ 1141 00a2 F3       		.byte	0xf3
+ 1142 00a3 01       		.uleb128 0x1
+ 1143 00a4 50       		.byte	0x50
+ 1144 00a5 9F       		.byte	0x9f
+ 1145 00a6 00000000 		.4byte	0
+ 1146 00aa 00000000 		.4byte	0
+ 1147              	.LLST5:
+ 1148 00ae 00000000 		.4byte	.LVL6
+ 1149 00b2 0C000000 		.4byte	.LVL8
+ 1150 00b6 0100     		.2byte	0x1
+ 1151 00b8 51       		.byte	0x51
+ 1152 00b9 0C000000 		.4byte	.LVL8
+ 1153 00bd 4E000000 		.4byte	.LVL19
+ 1154 00c1 0100     		.2byte	0x1
+ 1155 00c3 55       		.byte	0x55
+ 1156 00c4 4E000000 		.4byte	.LVL19
+ 1157 00c8 50000000 		.4byte	.LFE42
+ 1158 00cc 0400     		.2byte	0x4
+ 1159 00ce F3       		.byte	0xf3
+ 1160 00cf 01       		.uleb128 0x1
+ 1161 00d0 51       		.byte	0x51
+ 1162 00d1 9F       		.byte	0x9f
+ 1163 00d2 00000000 		.4byte	0
+ 1164 00d6 00000000 		.4byte	0
+ 1165              	.LLST6:
+ 1166 00da 00000000 		.4byte	.LVL6
+ 1167 00de 14000000 		.4byte	.LVL9
+ 1168 00e2 0100     		.2byte	0x1
+ 1169 00e4 52       		.byte	0x52
+ 1170 00e5 14000000 		.4byte	.LVL9
+ 1171 00e9 17000000 		.4byte	.LVL10-1
+ 1172 00ed 0200     		.2byte	0x2
+ 1173 00ef 71       		.byte	0x71
+ 1174 00f0 00       		.sleb128 0
+ 1175 00f1 17000000 		.4byte	.LVL10-1
+ 1176 00f5 4E000000 		.4byte	.LVL18
+ 1177 00f9 0200     		.2byte	0x2
+ 1178 00fb 7D       		.byte	0x7d
+ 1179 00fc 07       		.sleb128 7
+ 1180 00fd 4E000000 		.4byte	.LVL18
+ 1181 0101 50000000 		.4byte	.LFE42
+ 1182 0105 0200     		.2byte	0x2
+ 1183 0107 91       		.byte	0x91
+ 1184 0108 67       		.sleb128 -25
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 24
+
+
+ 1185 0109 00000000 		.4byte	0
+ 1186 010d 00000000 		.4byte	0
+ 1187              	.LLST7:
+ 1188 0111 00000000 		.4byte	.LVL6
+ 1189 0115 0A000000 		.4byte	.LVL7
+ 1190 0119 0100     		.2byte	0x1
+ 1191 011b 53       		.byte	0x53
+ 1192 011c 0A000000 		.4byte	.LVL7
+ 1193 0120 50000000 		.4byte	.LFE42
+ 1194 0124 0400     		.2byte	0x4
+ 1195 0126 F3       		.byte	0xf3
+ 1196 0127 01       		.uleb128 0x1
+ 1197 0128 53       		.byte	0x53
+ 1198 0129 9F       		.byte	0x9f
+ 1199 012a 00000000 		.4byte	0
+ 1200 012e 00000000 		.4byte	0
+ 1201              	.LLST8:
+ 1202 0132 1A000000 		.4byte	.LVL11
+ 1203 0136 4E000000 		.4byte	.LVL20
+ 1204 013a 0100     		.2byte	0x1
+ 1205 013c 57       		.byte	0x57
+ 1206 013d 00000000 		.4byte	0
+ 1207 0141 00000000 		.4byte	0
+ 1208              	.LLST9:
+ 1209 0145 00000000 		.4byte	.LVL21
+ 1210 0149 07000000 		.4byte	.LVL22-1
+ 1211 014d 0100     		.2byte	0x1
+ 1212 014f 50       		.byte	0x50
+ 1213 0150 07000000 		.4byte	.LVL22-1
+ 1214 0154 0A000000 		.4byte	.LFE35
+ 1215 0158 0400     		.2byte	0x4
+ 1216 015a F3       		.byte	0xf3
+ 1217 015b 01       		.uleb128 0x1
+ 1218 015c 50       		.byte	0x50
+ 1219 015d 9F       		.byte	0x9f
+ 1220 015e 00000000 		.4byte	0
+ 1221 0162 00000000 		.4byte	0
+ 1222              	.LLST10:
+ 1223 0166 00000000 		.4byte	.LVL21
+ 1224 016a 07000000 		.4byte	.LVL22-1
+ 1225 016e 0100     		.2byte	0x1
+ 1226 0170 51       		.byte	0x51
+ 1227 0171 07000000 		.4byte	.LVL22-1
+ 1228 0175 0A000000 		.4byte	.LFE35
+ 1229 0179 0400     		.2byte	0x4
+ 1230 017b F3       		.byte	0xf3
+ 1231 017c 01       		.uleb128 0x1
+ 1232 017d 51       		.byte	0x51
+ 1233 017e 9F       		.byte	0x9f
+ 1234 017f 00000000 		.4byte	0
+ 1235 0183 00000000 		.4byte	0
+ 1236              	.LLST11:
+ 1237 0187 00000000 		.4byte	.LVL23
+ 1238 018b 07000000 		.4byte	.LVL24-1
+ 1239 018f 0100     		.2byte	0x1
+ 1240 0191 50       		.byte	0x50
+ 1241 0192 07000000 		.4byte	.LVL24-1
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 25
+
+
+ 1242 0196 0A000000 		.4byte	.LFE36
+ 1243 019a 0400     		.2byte	0x4
+ 1244 019c F3       		.byte	0xf3
+ 1245 019d 01       		.uleb128 0x1
+ 1246 019e 50       		.byte	0x50
+ 1247 019f 9F       		.byte	0x9f
+ 1248 01a0 00000000 		.4byte	0
+ 1249 01a4 00000000 		.4byte	0
+ 1250              	.LLST12:
+ 1251 01a8 00000000 		.4byte	.LVL23
+ 1252 01ac 07000000 		.4byte	.LVL24-1
+ 1253 01b0 0100     		.2byte	0x1
+ 1254 01b2 51       		.byte	0x51
+ 1255 01b3 07000000 		.4byte	.LVL24-1
+ 1256 01b7 0A000000 		.4byte	.LFE36
+ 1257 01bb 0400     		.2byte	0x4
+ 1258 01bd F3       		.byte	0xf3
+ 1259 01be 01       		.uleb128 0x1
+ 1260 01bf 51       		.byte	0x51
+ 1261 01c0 9F       		.byte	0x9f
+ 1262 01c1 00000000 		.4byte	0
+ 1263 01c5 00000000 		.4byte	0
+ 1264              	.LLST13:
+ 1265 01c9 00000000 		.4byte	.LVL25
+ 1266 01cd 05000000 		.4byte	.LVL26-1
+ 1267 01d1 0100     		.2byte	0x1
+ 1268 01d3 50       		.byte	0x50
+ 1269 01d4 05000000 		.4byte	.LVL26-1
+ 1270 01d8 08000000 		.4byte	.LFE37
+ 1271 01dc 0400     		.2byte	0x4
+ 1272 01de F3       		.byte	0xf3
+ 1273 01df 01       		.uleb128 0x1
+ 1274 01e0 50       		.byte	0x50
+ 1275 01e1 9F       		.byte	0x9f
+ 1276 01e2 00000000 		.4byte	0
+ 1277 01e6 00000000 		.4byte	0
+ 1278              	.LLST14:
+ 1279 01ea 00000000 		.4byte	.LVL25
+ 1280 01ee 05000000 		.4byte	.LVL26-1
+ 1281 01f2 0100     		.2byte	0x1
+ 1282 01f4 51       		.byte	0x51
+ 1283 01f5 05000000 		.4byte	.LVL26-1
+ 1284 01f9 08000000 		.4byte	.LFE37
+ 1285 01fd 0400     		.2byte	0x4
+ 1286 01ff F3       		.byte	0xf3
+ 1287 0200 01       		.uleb128 0x1
+ 1288 0201 51       		.byte	0x51
+ 1289 0202 9F       		.byte	0x9f
+ 1290 0203 00000000 		.4byte	0
+ 1291 0207 00000000 		.4byte	0
+ 1292              	.LLST15:
+ 1293 020b 00000000 		.4byte	.LVL25
+ 1294 020f 05000000 		.4byte	.LVL26-1
+ 1295 0213 0100     		.2byte	0x1
+ 1296 0215 52       		.byte	0x52
+ 1297 0216 05000000 		.4byte	.LVL26-1
+ 1298 021a 08000000 		.4byte	.LFE37
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 26
+
+
+ 1299 021e 0400     		.2byte	0x4
+ 1300 0220 F3       		.byte	0xf3
+ 1301 0221 01       		.uleb128 0x1
+ 1302 0222 52       		.byte	0x52
+ 1303 0223 9F       		.byte	0x9f
+ 1304 0224 00000000 		.4byte	0
+ 1305 0228 00000000 		.4byte	0
+ 1306              	.LLST16:
+ 1307 022c 00000000 		.4byte	.LVL27
+ 1308 0230 0B000000 		.4byte	.LVL29-1
+ 1309 0234 0100     		.2byte	0x1
+ 1310 0236 50       		.byte	0x50
+ 1311 0237 0B000000 		.4byte	.LVL29-1
+ 1312 023b 12000000 		.4byte	.LFE39
+ 1313 023f 0400     		.2byte	0x4
+ 1314 0241 F3       		.byte	0xf3
+ 1315 0242 01       		.uleb128 0x1
+ 1316 0243 50       		.byte	0x50
+ 1317 0244 9F       		.byte	0x9f
+ 1318 0245 00000000 		.4byte	0
+ 1319 0249 00000000 		.4byte	0
+ 1320              	.LLST17:
+ 1321 024d 00000000 		.4byte	.LVL27
+ 1322 0251 0B000000 		.4byte	.LVL29-1
+ 1323 0255 0100     		.2byte	0x1
+ 1324 0257 51       		.byte	0x51
+ 1325 0258 0B000000 		.4byte	.LVL29-1
+ 1326 025c 10000000 		.4byte	.LVL30
+ 1327 0260 0100     		.2byte	0x1
+ 1328 0262 54       		.byte	0x54
+ 1329 0263 10000000 		.4byte	.LVL30
+ 1330 0267 12000000 		.4byte	.LFE39
+ 1331 026b 0400     		.2byte	0x4
+ 1332 026d F3       		.byte	0xf3
+ 1333 026e 01       		.uleb128 0x1
+ 1334 026f 51       		.byte	0x51
+ 1335 0270 9F       		.byte	0x9f
+ 1336 0271 00000000 		.4byte	0
+ 1337 0275 00000000 		.4byte	0
+ 1338              	.LLST18:
+ 1339 0279 00000000 		.4byte	.LVL27
+ 1340 027d 0B000000 		.4byte	.LVL29-1
+ 1341 0281 0100     		.2byte	0x1
+ 1342 0283 52       		.byte	0x52
+ 1343 0284 0B000000 		.4byte	.LVL29-1
+ 1344 0288 12000000 		.4byte	.LFE39
+ 1345 028c 0400     		.2byte	0x4
+ 1346 028e F3       		.byte	0xf3
+ 1347 028f 01       		.uleb128 0x1
+ 1348 0290 52       		.byte	0x52
+ 1349 0291 9F       		.byte	0x9f
+ 1350 0292 00000000 		.4byte	0
+ 1351 0296 00000000 		.4byte	0
+ 1352              	.LLST19:
+ 1353 029a 00000000 		.4byte	.LVL27
+ 1354 029e 08000000 		.4byte	.LVL28
+ 1355 02a2 0100     		.2byte	0x1
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 27
+
+
+ 1356 02a4 53       		.byte	0x53
+ 1357 02a5 08000000 		.4byte	.LVL28
+ 1358 02a9 10000000 		.4byte	.LVL31
+ 1359 02ad 0100     		.2byte	0x1
+ 1360 02af 55       		.byte	0x55
+ 1361 02b0 10000000 		.4byte	.LVL31
+ 1362 02b4 12000000 		.4byte	.LFE39
+ 1363 02b8 0400     		.2byte	0x4
+ 1364 02ba F3       		.byte	0xf3
+ 1365 02bb 01       		.uleb128 0x1
+ 1366 02bc 53       		.byte	0x53
+ 1367 02bd 9F       		.byte	0x9f
+ 1368 02be 00000000 		.4byte	0
+ 1369 02c2 00000000 		.4byte	0
+ 1370              	.LLST20:
+ 1371 02c6 00000000 		.4byte	.LVL32
+ 1372 02ca 0B000000 		.4byte	.LVL34-1
+ 1373 02ce 0100     		.2byte	0x1
+ 1374 02d0 50       		.byte	0x50
+ 1375 02d1 0B000000 		.4byte	.LVL34-1
+ 1376 02d5 18000000 		.4byte	.LFE40
+ 1377 02d9 0400     		.2byte	0x4
+ 1378 02db F3       		.byte	0xf3
+ 1379 02dc 01       		.uleb128 0x1
+ 1380 02dd 50       		.byte	0x50
+ 1381 02de 9F       		.byte	0x9f
+ 1382 02df 00000000 		.4byte	0
+ 1383 02e3 00000000 		.4byte	0
+ 1384              	.LLST21:
+ 1385 02e7 00000000 		.4byte	.LVL32
+ 1386 02eb 0B000000 		.4byte	.LVL34-1
+ 1387 02ef 0100     		.2byte	0x1
+ 1388 02f1 51       		.byte	0x51
+ 1389 02f2 0B000000 		.4byte	.LVL34-1
+ 1390 02f6 16000000 		.4byte	.LVL35
+ 1391 02fa 0100     		.2byte	0x1
+ 1392 02fc 54       		.byte	0x54
+ 1393 02fd 16000000 		.4byte	.LVL35
+ 1394 0301 18000000 		.4byte	.LFE40
+ 1395 0305 0400     		.2byte	0x4
+ 1396 0307 F3       		.byte	0xf3
+ 1397 0308 01       		.uleb128 0x1
+ 1398 0309 51       		.byte	0x51
+ 1399 030a 9F       		.byte	0x9f
+ 1400 030b 00000000 		.4byte	0
+ 1401 030f 00000000 		.4byte	0
+ 1402              	.LLST22:
+ 1403 0313 00000000 		.4byte	.LVL32
+ 1404 0317 0B000000 		.4byte	.LVL34-1
+ 1405 031b 0100     		.2byte	0x1
+ 1406 031d 52       		.byte	0x52
+ 1407 031e 0B000000 		.4byte	.LVL34-1
+ 1408 0322 18000000 		.4byte	.LFE40
+ 1409 0326 0400     		.2byte	0x4
+ 1410 0328 F3       		.byte	0xf3
+ 1411 0329 01       		.uleb128 0x1
+ 1412 032a 52       		.byte	0x52
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 28
+
+
+ 1413 032b 9F       		.byte	0x9f
+ 1414 032c 00000000 		.4byte	0
+ 1415 0330 00000000 		.4byte	0
+ 1416              	.LLST23:
+ 1417 0334 00000000 		.4byte	.LVL32
+ 1418 0338 08000000 		.4byte	.LVL33
+ 1419 033c 0100     		.2byte	0x1
+ 1420 033e 53       		.byte	0x53
+ 1421 033f 08000000 		.4byte	.LVL33
+ 1422 0343 16000000 		.4byte	.LVL36
+ 1423 0347 0100     		.2byte	0x1
+ 1424 0349 55       		.byte	0x55
+ 1425 034a 16000000 		.4byte	.LVL36
+ 1426 034e 18000000 		.4byte	.LFE40
+ 1427 0352 0400     		.2byte	0x4
+ 1428 0354 F3       		.byte	0xf3
+ 1429 0355 01       		.uleb128 0x1
+ 1430 0356 53       		.byte	0x53
+ 1431 0357 9F       		.byte	0x9f
+ 1432 0358 00000000 		.4byte	0
+ 1433 035c 00000000 		.4byte	0
+ 1434              	.LLST24:
+ 1435 0360 00000000 		.4byte	.LVL37
+ 1436 0364 05000000 		.4byte	.LVL38-1
+ 1437 0368 0100     		.2byte	0x1
+ 1438 036a 50       		.byte	0x50
+ 1439 036b 05000000 		.4byte	.LVL38-1
+ 1440 036f 08000000 		.4byte	.LFE41
+ 1441 0373 0400     		.2byte	0x4
+ 1442 0375 F3       		.byte	0xf3
+ 1443 0376 01       		.uleb128 0x1
+ 1444 0377 50       		.byte	0x50
+ 1445 0378 9F       		.byte	0x9f
+ 1446 0379 00000000 		.4byte	0
+ 1447 037d 00000000 		.4byte	0
+ 1448              	.LLST25:
+ 1449 0381 00000000 		.4byte	.LVL37
+ 1450 0385 05000000 		.4byte	.LVL38-1
+ 1451 0389 0100     		.2byte	0x1
+ 1452 038b 51       		.byte	0x51
+ 1453 038c 05000000 		.4byte	.LVL38-1
+ 1454 0390 08000000 		.4byte	.LFE41
+ 1455 0394 0400     		.2byte	0x4
+ 1456 0396 F3       		.byte	0xf3
+ 1457 0397 01       		.uleb128 0x1
+ 1458 0398 51       		.byte	0x51
+ 1459 0399 9F       		.byte	0x9f
+ 1460 039a 00000000 		.4byte	0
+ 1461 039e 00000000 		.4byte	0
+ 1462              	.LLST26:
+ 1463 03a2 00000000 		.4byte	.LVL37
+ 1464 03a6 05000000 		.4byte	.LVL38-1
+ 1465 03aa 0100     		.2byte	0x1
+ 1466 03ac 52       		.byte	0x52
+ 1467 03ad 05000000 		.4byte	.LVL38-1
+ 1468 03b1 08000000 		.4byte	.LFE41
+ 1469 03b5 0400     		.2byte	0x4
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 29
+
+
+ 1470 03b7 F3       		.byte	0xf3
+ 1471 03b8 01       		.uleb128 0x1
+ 1472 03b9 52       		.byte	0x52
+ 1473 03ba 9F       		.byte	0x9f
+ 1474 03bb 00000000 		.4byte	0
+ 1475 03bf 00000000 		.4byte	0
+ 1476              	.LLST27:
+ 1477 03c3 00000000 		.4byte	.LVL37
+ 1478 03c7 05000000 		.4byte	.LVL38-1
+ 1479 03cb 0100     		.2byte	0x1
+ 1480 03cd 53       		.byte	0x53
+ 1481 03ce 05000000 		.4byte	.LVL38-1
+ 1482 03d2 08000000 		.4byte	.LFE41
+ 1483 03d6 0400     		.2byte	0x4
+ 1484 03d8 F3       		.byte	0xf3
+ 1485 03d9 01       		.uleb128 0x1
+ 1486 03da 53       		.byte	0x53
+ 1487 03db 9F       		.byte	0x9f
+ 1488 03dc 00000000 		.4byte	0
+ 1489 03e0 00000000 		.4byte	0
+ 1490              		.section	.debug_aranges,"",%progbits
+ 1491 0000 54000000 		.4byte	0x54
+ 1492 0004 0200     		.2byte	0x2
+ 1493 0006 00000000 		.4byte	.Ldebug_info0
+ 1494 000a 04       		.byte	0x4
+ 1495 000b 00       		.byte	0
+ 1496 000c 0000     		.2byte	0
+ 1497 000e 0000     		.2byte	0
+ 1498 0010 00000000 		.4byte	.LFB38
+ 1499 0014 16000000 		.4byte	.LFE38-.LFB38
+ 1500 0018 00000000 		.4byte	.LFB42
+ 1501 001c 50000000 		.4byte	.LFE42-.LFB42
+ 1502 0020 00000000 		.4byte	.LFB35
+ 1503 0024 0A000000 		.4byte	.LFE35-.LFB35
+ 1504 0028 00000000 		.4byte	.LFB36
+ 1505 002c 0A000000 		.4byte	.LFE36-.LFB36
+ 1506 0030 00000000 		.4byte	.LFB37
+ 1507 0034 08000000 		.4byte	.LFE37-.LFB37
+ 1508 0038 00000000 		.4byte	.LFB39
+ 1509 003c 12000000 		.4byte	.LFE39-.LFB39
+ 1510 0040 00000000 		.4byte	.LFB40
+ 1511 0044 18000000 		.4byte	.LFE40-.LFB40
+ 1512 0048 00000000 		.4byte	.LFB41
+ 1513 004c 08000000 		.4byte	.LFE41-.LFB41
+ 1514 0050 00000000 		.4byte	0
+ 1515 0054 00000000 		.4byte	0
+ 1516              		.section	.debug_ranges,"",%progbits
+ 1517              	.Ldebug_ranges0:
+ 1518 0000 00000000 		.4byte	.LFB38
+ 1519 0004 16000000 		.4byte	.LFE38
+ 1520 0008 00000000 		.4byte	.LFB42
+ 1521 000c 50000000 		.4byte	.LFE42
+ 1522 0010 00000000 		.4byte	.LFB35
+ 1523 0014 0A000000 		.4byte	.LFE35
+ 1524 0018 00000000 		.4byte	.LFB36
+ 1525 001c 0A000000 		.4byte	.LFE36
+ 1526 0020 00000000 		.4byte	.LFB37
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 30
+
+
+ 1527 0024 08000000 		.4byte	.LFE37
+ 1528 0028 00000000 		.4byte	.LFB39
+ 1529 002c 12000000 		.4byte	.LFE39
+ 1530 0030 00000000 		.4byte	.LFB40
+ 1531 0034 18000000 		.4byte	.LFE40
+ 1532 0038 00000000 		.4byte	.LFB41
+ 1533 003c 08000000 		.4byte	.LFE41
+ 1534 0040 00000000 		.4byte	0
+ 1535 0044 00000000 		.4byte	0
+ 1536              		.section	.debug_line,"",%progbits
+ 1537              	.Ldebug_line0:
+ 1538 0000 F3000000 		.section	.debug_str,"MS",%progbits,1
+ 1538      02005700 
+ 1538      00000201 
+ 1538      FB0E0D00 
+ 1538      01010101 
+ 1539              	.LASF35:
+ 1540 0000 4932435F 		.ascii	"I2C_I2CMasterClearReadBuf\000"
+ 1540      4932434D 
+ 1540      61737465 
+ 1540      72436C65 
+ 1540      61725265 
+ 1541              	.LASF30:
+ 1542 001a 73656E73 		.ascii	"sensor_read_n\000"
+ 1542      6F725F72 
+ 1542      6561645F 
+ 1542      6E00
+ 1543              	.LASF12:
+ 1544 0028 646F7562 		.ascii	"double\000"
+ 1544      6C6500
+ 1545              	.LASF25:
+ 1546 002f 73656E73 		.ascii	"sensor_write16\000"
+ 1546      6F725F77 
+ 1546      72697465 
+ 1546      313600
+ 1547              	.LASF22:
+ 1548 003e 73746174 		.ascii	"status\000"
+ 1548      757300
+ 1549              	.LASF21:
+ 1550 0045 5F726567 		.ascii	"_register\000"
+ 1550      69737465 
+ 1550      7200
+ 1551              	.LASF32:
+ 1552 004f 4932435F 		.ascii	"I2C_I2CMasterStatus\000"
+ 1552      4932434D 
+ 1552      61737465 
+ 1552      72537461 
+ 1552      74757300 
+ 1553              	.LASF11:
+ 1554 0063 666C6F61 		.ascii	"float\000"
+ 1554      7400
+ 1555              	.LASF0:
+ 1556 0069 7369676E 		.ascii	"signed char\000"
+ 1556      65642063 
+ 1556      68617200 
+ 1557              	.LASF1:
+ 1558 0075 756E7369 		.ascii	"unsigned char\000"
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 31
+
+
+ 1558      676E6564 
+ 1558      20636861 
+ 1558      7200
+ 1559              	.LASF5:
+ 1560 0083 6C6F6E67 		.ascii	"long unsigned int\000"
+ 1560      20756E73 
+ 1560      69676E65 
+ 1560      6420696E 
+ 1560      7400
+ 1561              	.LASF31:
+ 1562 0095 4932435F 		.ascii	"I2C_I2CMasterWriteBuf\000"
+ 1562      4932434D 
+ 1562      61737465 
+ 1562      72577269 
+ 1562      74654275 
+ 1563              	.LASF3:
+ 1564 00ab 73686F72 		.ascii	"short unsigned int\000"
+ 1564      7420756E 
+ 1564      7369676E 
+ 1564      65642069 
+ 1564      6E7400
+ 1565              	.LASF27:
+ 1566 00be 73656E73 		.ascii	"sensor_read8\000"
+ 1566      6F725F72 
+ 1566      65616438 
+ 1566      00
+ 1567              	.LASF33:
+ 1568 00cb 4932435F 		.ascii	"I2C_I2CMasterClearWriteBuf\000"
+ 1568      4932434D 
+ 1568      61737465 
+ 1568      72436C65 
+ 1568      61725772 
+ 1569              	.LASF29:
+ 1570 00e6 73656E73 		.ascii	"sensor_read16\000"
+ 1570      6F725F72 
+ 1570      65616431 
+ 1570      3600
+ 1571              	.LASF18:
+ 1572 00f4 6E756D5F 		.ascii	"num_bytes\000"
+ 1572      62797465 
+ 1572      7300
+ 1573              	.LASF10:
+ 1574 00fe 75696E74 		.ascii	"uint16\000"
+ 1574      313600
+ 1575              	.LASF38:
+ 1576 0105 433A5C55 		.ascii	"C:\\Users\\Kyle\\Documents\\PSoC Creator\\Spectrome"
+ 1576      73657273 
+ 1576      5C4B796C 
+ 1576      655C446F 
+ 1576      63756D65 
+ 1577 0133 74657273 		.ascii	"ters\\AS7262\\AS7262_psoc4.cydsn\000"
+ 1577      5C415337 
+ 1577      3236325C 
+ 1577      41533732 
+ 1577      36325F70 
+ 1578              	.LASF8:
+ 1579 0152 756E7369 		.ascii	"unsigned int\000"
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 32
+
+
+ 1579      676E6564 
+ 1579      20696E74 
+ 1579      00
+ 1580              	.LASF23:
+ 1581 015f 74656D70 		.ascii	"temp\000"
+ 1581      00
+ 1582              	.LASF16:
+ 1583 0164 61646472 		.ascii	"address\000"
+ 1583      65737300 
+ 1584              	.LASF7:
+ 1585 016c 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 1585      206C6F6E 
+ 1585      6720756E 
+ 1585      7369676E 
+ 1585      65642069 
+ 1586              	.LASF36:
+ 1587 0183 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 1587      43313120 
+ 1587      352E342E 
+ 1587      31203230 
+ 1587      31363036 
+ 1588 01b6 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m0 -mthumb -g -O"
+ 1588      20726576 
+ 1588      6973696F 
+ 1588      6E203233 
+ 1588      37373135 
+ 1589 01e9 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 1589      66756E63 
+ 1589      74696F6E 
+ 1589      2D736563 
+ 1589      74696F6E 
+ 1590              	.LASF15:
+ 1591 0211 73697A65 		.ascii	"sizetype\000"
+ 1591      74797065 
+ 1591      00
+ 1592              	.LASF28:
+ 1593 021a 6572726F 		.ascii	"error\000"
+ 1593      7200
+ 1594              	.LASF6:
+ 1595 0220 6C6F6E67 		.ascii	"long long int\000"
+ 1595      206C6F6E 
+ 1595      6720696E 
+ 1595      7400
+ 1596              	.LASF13:
+ 1597 022e 63686172 		.ascii	"char\000"
+ 1597      00
+ 1598              	.LASF2:
+ 1599 0233 73686F72 		.ascii	"short int\000"
+ 1599      7420696E 
+ 1599      7400
+ 1600              	.LASF17:
+ 1601 023d 62756666 		.ascii	"buffer\000"
+ 1601      657200
+ 1602              	.LASF9:
+ 1603 0244 75696E74 		.ascii	"uint8\000"
+ 1603      3800
+ 1604              	.LASF37:
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\cc4jscxi.s 			page 33
+
+
+ 1605 024a 6932635F 		.ascii	"i2c_functions.c\000"
+ 1605      66756E63 
+ 1605      74696F6E 
+ 1605      732E6300 
+ 1606              	.LASF4:
+ 1607 025a 6C6F6E67 		.ascii	"long int\000"
+ 1607      20696E74 
+ 1607      00
+ 1608              	.LASF14:
+ 1609 0263 6C6F6E67 		.ascii	"long double\000"
+ 1609      20646F75 
+ 1609      626C6500 
+ 1610              	.LASF26:
+ 1611 026f 73656E73 		.ascii	"sensor_write_n\000"
+ 1611      6F725F77 
+ 1611      72697465 
+ 1611      5F6E00
+ 1612              	.LASF20:
+ 1613 027e 73656E73 		.ascii	"sensor_read\000"
+ 1613      6F725F72 
+ 1613      65616400 
+ 1614              	.LASF34:
+ 1615 028a 4932435F 		.ascii	"I2C_I2CMasterReadBuf\000"
+ 1615      4932434D 
+ 1615      61737465 
+ 1615      72526561 
+ 1615      64427566 
+ 1616              	.LASF24:
+ 1617 029f 73656E73 		.ascii	"sensor_write8\000"
+ 1617      6F725F77 
+ 1617      72697465 
+ 1617      3800
+ 1618              	.LASF19:
+ 1619 02ad 73656E73 		.ascii	"sensor_write\000"
+ 1619      6F725F77 
+ 1619      72697465 
+ 1619      00
+ 1620              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

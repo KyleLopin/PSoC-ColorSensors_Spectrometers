@@ -3,11 +3,13 @@
 <!--This file is machine generated and read. It is not intended to be edited by hand.-->
 <!--Due to this, there is no schema for this file.-->
 <CyGuid_2867d519-54d2-4c01-9830-c51cb08bc3dd type_name="CyDesigner.Common.ProjMgmt.Model.CyPrjMgmtWorkspaceSerialize" version="5" xml_contents_version="3" name="AS7262" persistent="AS7262.cywrk" platform="NOT_USED">
-<current_project name=".\AS7262.cydsn\AS7262.cyprj" />
+<current_project name="..\C12880MA.cydsn\C12880MA.cyprj" />
 <wrkspc_folders />
 <files />
 <projects>
 <v>.\AS7262.cydsn\AS7262.cyprj</v>
+<v>.\AS7262_psoc4.cydsn\AS7262_psoc4.cyprj</v>
+<v>..\C12880MA.cydsn\C12880MA.cyprj</v>
 </projects>
 <workspace_id v="a899e26d-1525-4f9e-a494-14151cc0ae67" />
 <WriteAppVersionLastSavedWith v="4.1.0.3210" />

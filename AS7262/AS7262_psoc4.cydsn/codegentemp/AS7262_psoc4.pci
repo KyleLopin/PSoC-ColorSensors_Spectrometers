@@ -1,0 +1,14 @@
+# AS7262_psoc4
+# 2018-01-22 06:38:30Z
+
+# IO_2@[IOP=(3)][IoId=(2)] is reserved: SWDDebugEnabled
+dont_use_io iocell 3 2
+# IO_3@[IOP=(3)][IoId=(3)] is reserved: SWDDebugEnabled
+dont_use_io iocell 3 3
+set_location "ClockGenBlock" m0s8clockgenblockcell -1 -1 0
+set_io "\I2C:sda(0)\" iocell 4 1
+set_io "\I2C:scl(0)\" iocell 4 0
+set_io "\UART:tx(0)\" iocell 7 1
+set_io "\UART:rx(0)\" iocell 7 0
+set_io "Red_LED(0)" iocell 0 6
+set_io "Green_LED(0)" iocell 2 6

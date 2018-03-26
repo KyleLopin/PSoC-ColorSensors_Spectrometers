@@ -13,10 +13,9 @@
 <v>Output</v>
 </TreeKeys>
 <TreeStates>
-<CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="">
+<CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="AS7262\AS7262_psoc4">
 <ExpandedNodeIds>
 <v>AS7262</v>
-<v>AS7262\AS7262</v>
 <v>AS7262\AS7262\TopDesign</v>
 <v>AS7262\AS7262\AS7262.cydwr</v>
 <v>AS7262\AS7262\AS7262.cydwr\Pins</v>
@@ -36,56 +35,68 @@
 <v>AS7262\AS7262\Source Files</v>
 <v>AS7262\AS7262\Source Files\AS7262.c</v>
 <v>AS7262\AS7262\Source Files\i2c_functions.c</v>
+<v>AS7262\AS7262\Source Files\Keil8051Assembly01.a51</v>
 <v>AS7262\AS7262\Source Files\main.c</v>
 <v>AS7262\AS7262\Source Files\usb_functions.c</v>
 <v>AS7262\AS7262\Generated_Source</v>
 <v>AS7262\AS7262\Generated_Source\PSoC5</v>
 <v>AS7262\AS7262\Generated_Source\PSoC5\I2C</v>
+<v>AS7262\AS7262_psoc4\TopDesign</v>
+<v>AS7262\AS7262_psoc4\AS7262_psoc4.cydwr</v>
+<v>AS7262\AS7262_psoc4\AS7262_psoc4.cydwr\Pins</v>
+<v>AS7262\AS7262_psoc4\AS7262_psoc4.cydwr\Analog</v>
+<v>AS7262\AS7262_psoc4\AS7262_psoc4.cydwr\DMA</v>
+<v>AS7262\AS7262_psoc4\AS7262_psoc4.cydwr\Clocks</v>
+<v>AS7262\AS7262_psoc4\AS7262_psoc4.cydwr\Interrupts</v>
+<v>AS7262\AS7262_psoc4\AS7262_psoc4.cydwr\System</v>
+<v>AS7262\AS7262_psoc4\AS7262_psoc4.cydwr\Directives</v>
+<v>AS7262\AS7262_psoc4\AS7262_psoc4.cydwr\Flash Security</v>
+<v>AS7262\AS7262_psoc4\Header Files</v>
+<v>AS7262\AS7262_psoc4\Header Files\AS7262.h</v>
+<v>AS7262\AS7262_psoc4\Header Files\AS7262_psoc4.h</v>
+<v>AS7262\AS7262_psoc4\Header Files\cyapicallbacks.h</v>
+<v>AS7262\AS7262_psoc4\Header Files\i2c_functions.h</v>
+<v>AS7262\AS7262_psoc4\Header Files\usb_functions.h</v>
+<v>AS7262\AS7262_psoc4\Header Files\usb_psoc4.h</v>
+<v>AS7262\AS7262_psoc4\Source Files</v>
+<v>AS7262\AS7262_psoc4\Source Files\AS7262.c</v>
+<v>AS7262\AS7262_psoc4\Source Files\AS7262_psoc4.c</v>
+<v>AS7262\AS7262_psoc4\Source Files\i2c_functions.c</v>
+<v>AS7262\AS7262_psoc4\Source Files\main.c</v>
+<v>AS7262\AS7262_psoc4\Source Files\usb_functions.c</v>
+<v>AS7262\AS7262_psoc4\Source Files\usb_psoc4.c</v>
+<v>AS7262\AS7262_psoc4\Generated_Source</v>
+<v>AS7262\AS7262_psoc4\Generated_Source\PSoC4</v>
+<v>AS7262\AS7262_psoc4\Generated_Source\PSoC4\I2C</v>
+<v>AS7262\C12880MA\TopDesign</v>
+<v>AS7262\C12880MA\C12880MA.cydwr</v>
+<v>AS7262\C12880MA\C12880MA.cydwr\Pins</v>
+<v>AS7262\C12880MA\C12880MA.cydwr\Analog</v>
+<v>AS7262\C12880MA\C12880MA.cydwr\Clocks</v>
+<v>AS7262\C12880MA\C12880MA.cydwr\Interrupts</v>
+<v>AS7262\C12880MA\C12880MA.cydwr\DMA</v>
+<v>AS7262\C12880MA\C12880MA.cydwr\System</v>
+<v>AS7262\C12880MA\C12880MA.cydwr\Directives</v>
+<v>AS7262\C12880MA\C12880MA.cydwr\Flash Security</v>
+<v>AS7262\C12880MA\C12880MA.cydwr\EEPROM</v>
+<v>AS7262\C12880MA\Header Files</v>
+<v>AS7262\C12880MA\Header Files\C12880.h</v>
+<v>AS7262\C12880MA\Header Files\cyapicallbacks.h</v>
+<v>AS7262\C12880MA\Header Files\lighting.h</v>
+<v>AS7262\C12880MA\Header Files\usb_protocols.h</v>
+<v>AS7262\C12880MA\Source Files</v>
+<v>AS7262\C12880MA\Source Files\C12880.c</v>
+<v>AS7262\C12880MA\Source Files\lighting.c</v>
+<v>AS7262\C12880MA\Source Files\main.c</v>
+<v>AS7262\C12880MA\Source Files\usb_protocols.c</v>
+<v>AS7262\C12880MA\Generated_Source</v>
+<v>AS7262\C12880MA\Generated_Source\PSoC5</v>
 </ExpandedNodeIds>
 <VisibleNodeIds>
 <v>AS7262</v>
 <v>AS7262\AS7262</v>
-<v>AS7262\AS7262\TopDesign</v>
-<v>AS7262\AS7262\AS7262.cydwr</v>
-<v>AS7262\AS7262\AS7262.cydwr\Pins</v>
-<v>AS7262\AS7262\AS7262.cydwr\Analog</v>
-<v>AS7262\AS7262\AS7262.cydwr\Clocks</v>
-<v>AS7262\AS7262\AS7262.cydwr\Interrupts</v>
-<v>AS7262\AS7262\AS7262.cydwr\DMA</v>
-<v>AS7262\AS7262\AS7262.cydwr\System</v>
-<v>AS7262\AS7262\AS7262.cydwr\Directives</v>
-<v>AS7262\AS7262\AS7262.cydwr\Flash Security</v>
-<v>AS7262\AS7262\AS7262.cydwr\EEPROM</v>
-<v>AS7262\AS7262\Header Files</v>
-<v>AS7262\AS7262\Header Files\AS7262.h</v>
-<v>AS7262\AS7262\Header Files\cyapicallbacks.h</v>
-<v>AS7262\AS7262\Header Files\i2c_functions.h</v>
-<v>AS7262\AS7262\Header Files\usb_functions.h</v>
-<v>AS7262\AS7262\Source Files</v>
-<v>AS7262\AS7262\Source Files\AS7262.c</v>
-<v>AS7262\AS7262\Source Files\i2c_functions.c</v>
-<v>AS7262\AS7262\Source Files\main.c</v>
-<v>AS7262\AS7262\Source Files\usb_functions.c</v>
-<v>AS7262\AS7262\Generated_Source</v>
-<v>AS7262\AS7262\Generated_Source\PSoC5</v>
-<v>AS7262\AS7262\Generated_Source\PSoC5\AS7262_INT</v>
-<v>AS7262\AS7262\Generated_Source\PSoC5\cy_boot</v>
-<v>AS7262\AS7262\Generated_Source\PSoC5\I2C</v>
-<v>AS7262\AS7262\Generated_Source\PSoC5\I2C\I2C.c</v>
-<v>AS7262\AS7262\Generated_Source\PSoC5\I2C\I2C.h</v>
-<v>AS7262\AS7262\Generated_Source\PSoC5\I2C\I2C_BOOT.c</v>
-<v>AS7262\AS7262\Generated_Source\PSoC5\I2C\I2C_INT.c</v>
-<v>AS7262\AS7262\Generated_Source\PSoC5\I2C\I2C_MASTER.c</v>
-<v>AS7262\AS7262\Generated_Source\PSoC5\I2C\I2C_PM.c</v>
-<v>AS7262\AS7262\Generated_Source\PSoC5\I2C\I2C_PVT.h</v>
-<v>AS7262\AS7262\Generated_Source\PSoC5\I2C\I2C_SLAVE.c</v>
-<v>AS7262\AS7262\Generated_Source\PSoC5\isr_as7262_int</v>
-<v>AS7262\AS7262\Generated_Source\PSoC5\isr_as7262_pin</v>
-<v>AS7262\AS7262\Generated_Source\PSoC5\isr_as7262_timer</v>
-<v>AS7262\AS7262\Generated_Source\PSoC5\LCD</v>
-<v>AS7262\AS7262\Generated_Source\PSoC5\LCD_LCDPort</v>
-<v>AS7262\AS7262\Generated_Source\PSoC5\LED_3</v>
-<v>AS7262\AS7262\Generated_Source\PSoC5\LED_4</v>
+<v>AS7262\AS7262_psoc4</v>
+<v>AS7262\C12880MA</v>
 </VisibleNodeIds>
 </CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
 <CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="">
@@ -94,12 +105,24 @@
 <v>AS7262\AS7262</v>
 <v>AS7262\AS7262\TopDesign</v>
 <v>AS7262\AS7262\TopDesign\TopDesign.cysch</v>
+<v>AS7262\AS7262_psoc4</v>
+<v>AS7262\AS7262_psoc4\TopDesign</v>
+<v>AS7262\AS7262_psoc4\TopDesign\TopDesign.cysch</v>
+<v>AS7262\C12880MA</v>
+<v>AS7262\C12880MA\TopDesign</v>
+<v>AS7262\C12880MA\TopDesign\TopDesign.cysch</v>
 </ExpandedNodeIds>
 <VisibleNodeIds>
 <v>AS7262</v>
 <v>AS7262\AS7262</v>
 <v>AS7262\AS7262\TopDesign</v>
 <v>AS7262\AS7262\TopDesign\TopDesign.cysch</v>
+<v>AS7262\AS7262_psoc4</v>
+<v>AS7262\AS7262_psoc4\TopDesign</v>
+<v>AS7262\AS7262_psoc4\TopDesign\TopDesign.cysch</v>
+<v>AS7262\C12880MA</v>
+<v>AS7262\C12880MA\TopDesign</v>
+<v>AS7262\C12880MA\TopDesign\TopDesign.cysch</v>
 </VisibleNodeIds>
 </CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
 <CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="">
@@ -166,6 +189,144 @@
 <v>AS7262\AS7262\AS7262.gpdsc</v>
 <v>AS7262\AS7262\AS7262.rpt</v>
 <v>AS7262\AS7262\AS7262_timing.html</v>
+<v>AS7262\AS7262_psoc4</v>
+<v>AS7262\AS7262_psoc4\CortexM0</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\AS7262.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\AS7262_psoc4.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\Cm0Start.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\CyBootAsmGnu.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\CyDMA.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\cyfitter_cfg.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\CyFlash.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\CyLFClk.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\CyLib.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\cymetadata.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\cyPm.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\cyutils.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\Green_LED.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\Green_LED_PM.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\I2C.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\I2C_BOOT.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\i2c_functions.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\I2C_I2C.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\I2C_I2C_BOOT.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\I2C_I2C_INT.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\I2C_I2C_MASTER.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\I2C_PM.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\I2C_SCB_IRQ.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\I2C_SCBCLK.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\I2C_scl.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\I2C_scl_PM.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\I2C_sda.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\I2C_sda_PM.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\LCD.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\main.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\Red_LED.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\Red_LED_PM.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\UART.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\UART_BOOT.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\UART_PM.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\UART_rx.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\UART_rx_PM.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\UART_SCB_IRQ.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\UART_SCBCLK.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\UART_SPI_UART.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\UART_SPI_UART_INT.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\UART_tx.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\UART_tx_PM.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\UART_UART.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\UART_UART_BOOT.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\usb_functions.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\Listing Files\usb_psoc4.lst</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\AS7262_psoc4.elf</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\AS7262_psoc4.hex</v>
+<v>AS7262\AS7262_psoc4\CortexM0\ARM_GCC_541\Debug\AS7262_psoc4.map</v>
+<v>AS7262\AS7262_psoc4\AS7262_psoc4.gpdsc</v>
+<v>AS7262\AS7262_psoc4\AS7262_psoc4.rpt</v>
+<v>AS7262\AS7262_psoc4\AS7262_psoc4_timing.html</v>
+<v>AS7262\C12880MA</v>
+<v>AS7262\C12880MA\CortexM3</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\ADC.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\ADC_Bypass.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\ADC_INT.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\ADC_IRQ.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\ADC_PM.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\ADC_theACLK.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\C12880.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\C12880_CLK.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\C12880_CLK_PM.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\C12880_ctrl_reg.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\C12880_ctrl_reg_PM.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\C12880_ST.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\C12880_ST_PM.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\C12880_TRG.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\C12880_TRG_PM.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\Cm3Start.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\Comp_1.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\Comp_1_PM.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\CyBootAsmGnu.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\CyDmac.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\cyfitter_cfg.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\CyFlash.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\CyLib.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\cymetadata.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\cyPm.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\CySpc.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\cyutils.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\DMA_Video_dma.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\isr_read_complete.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\isr_sw.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\Laser.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\LCD.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\LCD_LCDPort.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\LCD_PM.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\LED.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\lighting.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\main.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\Master.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\Opamp_video.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\Opamp_video_PM.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\Pin_1.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\Pin_CLK.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\Pin_complete.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\Pin_ctrl_reg.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\Pin_debug_EOC.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\Pin_debug_EOS.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\Pin_Debug_SoC.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\Pin_ST.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\Pin_TRG.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\Pin_Video.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\Pin_video_comp.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\SW1.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\usb_protocols.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_audio.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_boot.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_cdc.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_cls.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_descr.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_Dm.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_Dp.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_drv.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_episr.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_hid.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_midi.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_msc.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_pm.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_std.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_vnd.lst</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\C12880MA.elf</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\C12880MA.hex</v>
+<v>AS7262\C12880MA\CortexM3\ARM_GCC_541\Debug\C12880MA.map</v>
+<v>AS7262\C12880MA\C12880MA.gpdsc</v>
+<v>AS7262\C12880MA\C12880MA.rpt</v>
+<v>AS7262\C12880MA\C12880MA_timing.html</v>
 </ExpandedNodeIds>
 <VisibleNodeIds>
 <v>AS7262</v>
@@ -211,6 +372,7 @@
 <v>AS7262\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS.lst</v>
 <v>AS7262\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_audio.lst</v>
 <v>AS7262\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_boot.lst</v>
+<v>AS7262\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_cdc.lst</v>
 </VisibleNodeIds>
 </CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
 </TreeStates>
@@ -236,6 +398,41 @@
 <v>AS7262\AS7262\Timer_v2_70.pdf</v>
 <v>AS7262\AS7262\USBFS_v3_10.pdf</v>
 <v>AS7262\AS7262\ZeroTerminal.pdf</v>
+<v>AS7262\AS7262_psoc4</v>
+<v>AS7262\AS7262_psoc4\PSoC 4 Architecture TRM</v>
+<v>AS7262\AS7262_psoc4\PSoC 4200M Family Datasheet</v>
+<v>AS7262\AS7262_psoc4\System Reference Guides</v>
+<v>AS7262\AS7262_psoc4\System Reference Guides\cy_boot_v5_60</v>
+<v>AS7262\AS7262_psoc4\System Reference Guides\cy_dmac_v1_10</v>
+<v>AS7262\AS7262_psoc4\System Reference Guides\cy_lfclk_v1_20</v>
+<v>AS7262\AS7262_psoc4\cy_pins_v2_20</v>
+<v>AS7262\AS7262_psoc4\cy_pins_v2_20\cy_pins_v2_20.pdf</v>
+<v>AS7262\AS7262_psoc4\I2C_LCD_v1_20.pdf</v>
+<v>AS7262\AS7262_psoc4\SCB_P4_v3_20</v>
+<v>AS7262\AS7262_psoc4\SCB_P4_v3_20\SCB_P4_v3_20.pdf</v>
+<v>AS7262\C12880MA</v>
+<v>AS7262\C12880MA\PSoC 5LP Architecture TRM</v>
+<v>AS7262\C12880MA\CY8C58LP Family Datasheet</v>
+<v>AS7262\C12880MA\System Reference Guides</v>
+<v>AS7262\C12880MA\System Reference Guides\cy_boot_v5_60</v>
+<v>AS7262\C12880MA\ADC_SAR_v3_0.pdf</v>
+<v>AS7262\C12880MA\and_v1_0.pdf</v>
+<v>AS7262\C12880MA\CharLCD_v2_20.pdf</v>
+<v>AS7262\C12880MA\Comp_v2_0.pdf</v>
+<v>AS7262\C12880MA\cy_clock_v2_20.pdf</v>
+<v>AS7262\C12880MA\cy_dma_v1_70.pdf</v>
+<v>AS7262\C12880MA\cy_isr_v1_70</v>
+<v>AS7262\C12880MA\cy_isr_v1_70\cy_isr_v1_70.pdf</v>
+<v>AS7262\C12880MA\cy_pins_v2_20</v>
+<v>AS7262\C12880MA\cy_pins_v2_20\cy_pins_v2_20.pdf</v>
+<v>AS7262\C12880MA\cy_vref_v1_70.pdf</v>
+<v>AS7262\C12880MA\CyControlReg_v1_80.pdf</v>
+<v>AS7262\C12880MA\OpAmp_v1_90.pdf</v>
+<v>AS7262\C12880MA\PWM_v3_30</v>
+<v>AS7262\C12880MA\PWM_v3_30\PWM_v3_30.pdf</v>
+<v>AS7262\C12880MA\USBFS_v3_10.pdf</v>
+<v>AS7262\C12880MA\ZeroTerminal</v>
+<v>AS7262\C12880MA\ZeroTerminal\ZeroTerminal.pdf</v>
 </ExpandedNodeIds>
 <VisibleNodeIds>
 <v>AS7262</v>
@@ -254,10 +451,43 @@
 <v>AS7262\AS7262\Timer_v2_70.pdf</v>
 <v>AS7262\AS7262\USBFS_v3_10.pdf</v>
 <v>AS7262\AS7262\ZeroTerminal.pdf</v>
+<v>AS7262\AS7262_psoc4</v>
+<v>AS7262\AS7262_psoc4\PSoC 4 Architecture TRM</v>
+<v>AS7262\AS7262_psoc4\PSoC 4200M Family Datasheet</v>
+<v>AS7262\AS7262_psoc4\System Reference Guides</v>
+<v>AS7262\AS7262_psoc4\System Reference Guides\cy_boot_v5_60</v>
+<v>AS7262\AS7262_psoc4\System Reference Guides\cy_dmac_v1_10</v>
+<v>AS7262\AS7262_psoc4\System Reference Guides\cy_lfclk_v1_20</v>
+<v>AS7262\AS7262_psoc4\cy_pins_v2_20</v>
+<v>AS7262\AS7262_psoc4\cy_pins_v2_20\cy_pins_v2_20.pdf</v>
+<v>AS7262\AS7262_psoc4\I2C_LCD_v1_20.pdf</v>
+<v>AS7262\AS7262_psoc4\SCB_P4_v3_20</v>
+<v>AS7262\AS7262_psoc4\SCB_P4_v3_20\SCB_P4_v3_20.pdf</v>
+<v>AS7262\C12880MA</v>
+<v>AS7262\C12880MA\PSoC 5LP Architecture TRM</v>
+<v>AS7262\C12880MA\CY8C58LP Family Datasheet</v>
+<v>AS7262\C12880MA\System Reference Guides</v>
+<v>AS7262\C12880MA\System Reference Guides\cy_boot_v5_60</v>
+<v>AS7262\C12880MA\ADC_SAR_v3_0.pdf</v>
+<v>AS7262\C12880MA\and_v1_0.pdf</v>
+<v>AS7262\C12880MA\CharLCD_v2_20.pdf</v>
+<v>AS7262\C12880MA\Comp_v2_0.pdf</v>
+<v>AS7262\C12880MA\cy_clock_v2_20.pdf</v>
+<v>AS7262\C12880MA\cy_dma_v1_70.pdf</v>
+<v>AS7262\C12880MA\cy_isr_v1_70</v>
+<v>AS7262\C12880MA\cy_isr_v1_70\cy_isr_v1_70.pdf</v>
+<v>AS7262\C12880MA\cy_pins_v2_20</v>
+<v>AS7262\C12880MA\cy_pins_v2_20\cy_pins_v2_20.pdf</v>
+<v>AS7262\C12880MA\cy_vref_v1_70.pdf</v>
 </VisibleNodeIds>
 </CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
 </TreeStatesV2>
 </CyGuid_1b906a0f-a7b6-4e4d-a428-82f98b53cb35>
+</dataGuid>
+<dataGuid v="5f2be1a5-0687-4501-bb8c-cf21cb8211bf">
+<CyGuid_5f2be1a5-0687-4501-bb8c-cf21cb8211bf type_name="CyDesigner.Common.ProjMgmt.GUI.CyBookmarkData" version="1">
+<indicators />
+</CyGuid_5f2be1a5-0687-4501-bb8c-cf21cb8211bf>
 </dataGuid>
 </userData>
 </CyGuid_fdba8dfd-b15b-4469-9bbb-9e40c3e70997>
@@ -266,12 +496,19 @@
 <name v=".\AS7262.cydsn\TopDesign\TopDesign.cysch" />
 <name v=".\AS7262.cydsn\main.c" />
 <name v=".\AS7262.cydsn\AS7262.cydwr" />
-<name v=".\AS7262.cydsn\i2c_functions.h" />
-<name v=".\AS7262.cydsn\i2c_functions.c" />
-<name v=".\AS7262.cydsn\AS7262.h" />
 <name v=".\AS7262.cydsn\AS7262.c" />
+<name v="..\C12880MA.cydsn\TopDesign\TopDesign.cysch" />
+<name v="..\C12880MA.cydsn\main.c" />
+<name v="..\C12880MA.cydsn\C12880MA.cydwr" />
+<name v=".\AS7262.cydsn\AS7262.h" />
+<name v="..\C12880MA.cydsn\C12880.h" />
+<name v="..\C12880MA.cydsn\C12880.c" />
+<name v="..\C12880MA.cydsn\usb_protocols.h" />
+<name v="..\C12880MA.cydsn\usb_protocols.c" />
 <name v=".\AS7262.cydsn\usb_functions.c" />
-<name v=".\AS7262.cydsn\usb_functions.h" />
+<name v="..\C12880MA.cydsn\lighting.c" />
+<name v="..\C12880MA.cydsn\lighting.h" />
+<name v=".\AS7262_psoc4.cydsn\AS7262_psoc4.cydwr" />
 </OpenDocs>
 <OpenDocsLayout><![CDATA[<?xml version="1.0"?><!--
 
@@ -279,7 +516,7 @@
   Copyright (c) 2001-2016 Actipro Software LLC.  All rights reserved.
   http://www.actiprosoftware.com
 
---><DocumentLayout Version="1.0"><LayoutData><TabbedMdiRootContainer Orientation="Vertical"><TabbedMdiContainer Size="1213, 481" SelectedTabbedMdiWindow="54acd2b6-20ea-4e57-b850-ce0deb968d7f"><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS7262\AS7262.cydsn\TopDesign\TopDesign.cysch" Guid="c6ce54f1-1ee9-48ab-a9a9-0ba7aa2e049d" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS7262\AS7262.cydsn\main.c" Guid="1c22ba8a-e500-4125-b0f3-e2fbecf455b4" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS7262\AS7262.cydsn\AS7262.cydwr" Guid="fb3b545c-75b8-43f6-aeae-7b0fd6464bb1" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS7262\AS7262.cydsn\i2c_functions.h" Guid="89794dd0-3679-4c23-b61c-ea6a48880cbc" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS7262\AS7262.cydsn\i2c_functions.c" Guid="e75eb682-faba-4227-8388-295b95cc163f" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS7262\AS7262.cydsn\AS7262.h" Guid="0c0b8656-b3ec-4271-ac7e-c52cc41c69d5" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS7262\AS7262.cydsn\AS7262.c" Guid="54acd2b6-20ea-4e57-b850-ce0deb968d7f" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS7262\AS7262.cydsn\usb_functions.c" Guid="1d3526ce-5000-4910-b4c4-221c2e67c8d1" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS7262\AS7262.cydsn\usb_functions.h" Guid="88fb1319-9421-423a-be0a-486c132195cc" /><ToolWindow Key="Start Page:bd4649ab-da6b-4d04-a663-c722b8bf99db:Start Page" Guid="f3a4f118-5c92-4dba-9165-9276749dbab5" /></TabbedMdiContainer></TabbedMdiRootContainer><FloatingContainers /></LayoutData></DocumentLayout>]]></OpenDocsLayout>
+--><DocumentLayout Version="1.0"><LayoutData><TabbedMdiRootContainer Orientation="Vertical"><TabbedMdiContainer Size="1269, 521" SelectedTabbedMdiWindow="ee5daa54-0a4f-42c3-8ddd-791b18b151ad"><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS7262\AS7262.cydsn\TopDesign\TopDesign.cysch" Guid="f88900c3-a80f-4d4b-ab68-07bd8f69e7f5" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS7262\AS7262.cydsn\main.c" Guid="9c1d939d-6e5a-4293-82ae-7d050d114cf4" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS7262\AS7262.cydsn\AS7262.cydwr" Guid="2c09d2f0-c0b8-44c6-bfe9-5fd731be7067" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS7262\AS7262.cydsn\AS7262.c" Guid="f37a3255-093f-4c9a-b57c-c1fe5cfe44ed" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA.cydsn\TopDesign\TopDesign.cysch" Guid="7756a224-398d-4d09-91a5-3cf94c4137ca" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA.cydsn\main.c" Guid="7e2f9208-813a-4cb5-992a-a165acb4c63e" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA.cydsn\C12880MA.cydwr" Guid="59aa5dfd-1776-47da-b234-ef55a5b98b7d" /><ToolWindow Key="Start Page:bd4649ab-da6b-4d04-a663-c722b8bf99db:Start Page" Guid="f3a4f118-5c92-4dba-9165-9276749dbab5" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS7262\AS7262.cydsn\AS7262.h" Guid="79f2cbc4-ca9d-4295-b9dc-e745b50ad49a" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA.cydsn\C12880.h" Guid="d9e65b74-f245-4262-916b-43c764a0a7ee" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA.cydsn\C12880.c" Guid="1ff985b9-86d7-4988-9622-3bce4ff2681e" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA.cydsn\usb_protocols.h" Guid="5509cb9f-c02f-4805-a4d2-cab2ddb81675" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA.cydsn\usb_protocols.c" Guid="ed5982e3-fde1-4c7c-99ff-0cfe5fcffe8a" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS7262\AS7262.cydsn\usb_functions.c" Guid="497264ae-fa01-46d4-b0f3-3b246599c502" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA.cydsn\lighting.c" Guid="49c8107a-142c-4b4d-9d6b-5db70356d2d6" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA.cydsn\lighting.h" Guid="1aae8aec-04ba-4cf5-a0bf-a1ef48106fed" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS7262\AS7262_psoc4.cydsn\AS7262_psoc4.cydwr" Guid="ee5daa54-0a4f-42c3-8ddd-791b18b151ad" /></TabbedMdiContainer></TabbedMdiRootContainer><FloatingContainers /></LayoutData></DocumentLayout>]]></OpenDocsLayout>
 <config v="" />
 <AutoUpdate v="true" />
 </CyGuid_843a90a4-0c4b-4e44-991d-05e7fb117a21>

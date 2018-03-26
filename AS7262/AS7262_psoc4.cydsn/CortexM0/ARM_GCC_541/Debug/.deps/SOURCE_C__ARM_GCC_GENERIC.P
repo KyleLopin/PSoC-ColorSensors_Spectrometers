@@ -1,0 +1,98 @@
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/CortexM0/ARM_GCC_541/Debug/usb_psoc4.o : C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/CyDMA.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/CyFlash.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/CyLFClk.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/CyLib.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/Green_LED.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/Green_LED_aliases.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/I2C.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/I2C_BOOT.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/I2C_I2C.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/I2C_I2C_PVT.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/I2C_PINS.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/I2C_PVT.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/I2C_SCBCLK.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/I2C_SCB_IRQ.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/I2C_scl.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/I2C_scl_aliases.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/I2C_sda.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/I2C_sda_aliases.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/LCD.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/Red_LED.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/Red_LED_aliases.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/UART.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/UART_BOOT.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/UART_PINS.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/UART_PVT.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/UART_SCBCLK.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/UART_SCB_IRQ.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/UART_SPI_UART.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/UART_SPI_UART_PVT.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/UART_rx.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/UART_rx_aliases.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/UART_tx.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/UART_tx_aliases.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/cmsis_armcc.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/cmsis_compiler.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/cmsis_gcc.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/core_cm0.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/core_cm0_psoc4.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/cyPm.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/cydevice_trm.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/cydisabledsheets.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/cyfitter.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/cyfitter_cfg.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/cypins.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/cytypes.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/project.h C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/usb_psoc4.c C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/usb_psoc4.h 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/CyDMA.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/CyFlash.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/CyLFClk.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/CyLib.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/Green_LED.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/Green_LED_aliases.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/I2C.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/I2C_BOOT.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/I2C_I2C.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/I2C_I2C_PVT.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/I2C_PINS.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/I2C_PVT.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/I2C_SCBCLK.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/I2C_SCB_IRQ.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/I2C_scl.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/I2C_scl_aliases.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/I2C_sda.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/I2C_sda_aliases.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/LCD.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/Red_LED.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/Red_LED_aliases.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/UART.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/UART_BOOT.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/UART_PINS.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/UART_PVT.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/UART_SCBCLK.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/UART_SCB_IRQ.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/UART_SPI_UART.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/UART_SPI_UART_PVT.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/UART_rx.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/UART_rx_aliases.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/UART_tx.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/UART_tx_aliases.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/cmsis_armcc.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/cmsis_compiler.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/cmsis_gcc.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/core_cm0.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/core_cm0_psoc4.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/cyPm.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/cydevice_trm.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/cydisabledsheets.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/cyfitter.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/cyfitter_cfg.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/cypins.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/cytypes.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/Generated_Source/PSoC4/project.h : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/usb_psoc4.c : 
+
+C:/Users/Kyle/Documents/PSoC\ Creator/Spectrometers/AS7262/AS7262_psoc4.cydsn/usb_psoc4.h : 
+

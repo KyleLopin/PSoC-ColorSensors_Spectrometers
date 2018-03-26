@@ -182,7 +182,44 @@ void AS7262_Commands(uint8 buffer[]) {
             if ( buffer[12] == 'S' ) {  // get a single data point
                 LCD_Position(0, 0);
                 LCD_PrintString("Single Read");
-                AS7262_SingleRead();
+                // AS7262_SingleRead();
+                if (  buffer[19] == 'F' ) { 
+                    LCD_Position(0, 0);
+                    LCD_PrintString("Sgl Read Fls");
+//                    as7262.LED_on = True;
+//                    update_LED_reg_value( &as7262 );
+//                    AS7262_SingleRead();
+//                    CyDelay(100);
+//                    as7262.LED_on = False;
+//                    update_LED_reg_value( &as7262 );
+                    // turn on LED
+                    uint8 led_reg_hold = as7262.LED_control_reg_value;
+                    uint led_reg_on = led_reg_hold;
+                    led_reg_on |= 0x08;
+                    I2C_AS7262_Write( AS726x_REG_LED, led_reg_on );
+                    
+                    uint8 led_reg = I2C_AS7262_Read( AS726x_REG_LED );
+                    
+                    // run the read
+                    AS7262_SingleRead();
+                    
+                    I2C_AS7262_Write( AS726x_REG_LED, led_reg_hold );
+                    LCD_Position(0, 0);
+                    LCD_PrintString("end read ");
+//                    LCD_Position(0, 0);
+//                    sprintf(LCD_str, "L2:0x%02x|0x%02x ", led_reg, led_reg_on);
+//                    LCD_PrintString(LCD_str);
+                    
+                }
+                else if ( buffer[19] == 'N' ) { 
+                    LCD_Position(0, 0);
+                    LCD_PrintString("Sgl Read No Fls");
+                    AS7262_SingleRead();
+                    LCD_Position(0, 0);
+                    LCD_PrintString("SingleRead5  ");
+                }
+                
+                
             }
             break;
         case SET_INTEGRATION_TIME: ; // the command to set the integration time
@@ -194,6 +231,7 @@ void AS7262_Commands(uint8 buffer[]) {
         case SET_GAIN: ; // change the gain setting of the device
             as7262.gain = ( ConvertDecimal(&buffer[12], 1) & 0x03 );  // only allow values from 0x00-0x03
             update_control_reg_value( &as7262 );
+            
             break;
         case SET_LED_POWER: ; // set the current through the main light source
             as7262.LED_power_level = ( ConvertDecimal(&buffer[19], 1) & 0x03 );  // only allow values from 0x00-0x03
@@ -239,7 +277,10 @@ void AS7262_SingleRead(void) {
     I2C_AS7262_Write( AS726x_REG_CONTROL, as7262.control_reg_value );
     LCD_Position(0, 0);
     LCD_PrintString("SingleRead2  ");
-    
+    uint pre_data = I2C_AS7262_Read( AS726x_REG_CONTROL );
+    LCD_Position(0, 0);
+    sprintf(LCD_str, "pre data: 0x%02x ", pre_data);
+    LCD_PrintString(LCD_str);
     CyDelay( (5.8 * as7262.integration_time) );
     uint8 data;
     uint8 failed_tries=0;
@@ -250,16 +291,20 @@ void AS7262_SingleRead(void) {
         if ( failed_tries > 200 ) {
             USB_Export_Data((uint8*)"FAILED", 6);
         }
-    } while ( (data & 0x02) == 0x02 );
-//    LCD_Position(1, 0); 
-//    sprintf(LCD_str, "C2:0x%02x|0x%02x  ", data, as7262.control_reg_value);
-//    LCD_PrintString(LCD_str);
+    } while ( (data & 0x02) == 0x00 );
+    LCD_Position(1, 0); 
+    sprintf(LCD_str, "C2:0x%02x|0x%02x  ", data, as7262.control_reg_value);
+    LCD_PrintString(LCD_str);
 //    isr_as7262_int_StartEx( isr_handler_basic_read );
 //    isr_as7262_pin_StartEx( isr_handler_debug1 );
     //LED_3_Write( 1 );
     //CyDelay(1000);
     AS7262_ReadAllData();
+    LCD_Position(0, 0);
+    LCD_PrintString("SingleRead3  ");
     USB_Export_Data(all_calibrated_data.data_bytes, 24);
+    LCD_Position(0, 0);
+    LCD_PrintString("SingleRead4  ");
 }
 
 void AS7262_ReadAllData(void) {

@@ -56,6 +56,8 @@ int main(void)
     //isr_as7262_pin_StartEx( isr_handler_debug1 );
     for(;;)
     {
+        LCD_Position(0, 0);
+        LCD_PrintString("main loop ");
         
         if(USBFS_IsConfigurationChanged()) {  // if the configuration is changed reenable the OUT ENDPOINT
             while(!USBFS_GetConfiguration()) {  // wait for the configuration with windows / controller is updated
@@ -88,6 +90,7 @@ int main(void)
                 if ( OUT_Data_Buffer[5] == '2' ) {
                     AS7262_Commands( OUT_Data_Buffer );
                 }
+                break;
             }
             
             for (uint8 i=0; i<20; i++) {

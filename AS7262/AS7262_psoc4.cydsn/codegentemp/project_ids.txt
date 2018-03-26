@@ -1,0 +1,7 @@
+C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS7262\AS7262.cydsn\AS7262.cyprj|a5f0d35b-6e0d-44ad-909d-c116039bc48e
+C:\Program Files (x86)\Cypress\PSoC Creator\4.1\PSoC Creator\psoc\content\default\CyAnnotationLibrary\CyAnnotationLibrary.cylib\CyAnnotationLibrary.cyprj|4170fe8f-1fde-4f80-bc26-328e036f738d
+C:\Users\Kyle\Documents\PSoC Creator\4.1\Downloads ( 4.1).cylib\Downloads ( 4.1).cyprj|a5457cd4-749a-41cd-9ac9-f8c11316353d
+C:\Program Files (x86)\Cypress\PSoC Creator\4.1\PSoC Creator\psoc\content\cycomponentlibraryupdates\CyComponentLibraryUpdates.cylib\CyComponentLibraryUpdates.cyprj|d7e2205c-25d8-4e9f-9b15-6e8ab0904c54
+C:\Program Files (x86)\Cypress\PSoC Creator\4.1\PSoC Creator\psoc\content\cycomponentlibrary\CyComponentLibrary.cylib\CyComponentLibrary.cyprj|e86ee966-17f8-4dc3-9443-7a19b44ab11f
+C:\Program Files (x86)\Cypress\PSoC Creator\4.1\PSoC Creator\psoc\content\cyprimitives\CyPrimitives.cylib\CyPrimitives.cyprj|be1069f0-da9d-4db3-8452-d119ea5a91f0
+C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS7262\AS7262_psoc4.cydsn\AS7262_psoc4.cyprj|15c043f5-1c8d-4701-8857-dc6bf916c3d7

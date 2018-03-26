@@ -1,0 +1,4570 @@
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"AS7262_psoc4.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.I2C_AS7262_ReadRegister,"ax",%progbits
+  20              		.align	2
+  21              		.global	I2C_AS7262_ReadRegister
+  22              		.code	16
+  23              		.thumb_func
+  24              		.type	I2C_AS7262_ReadRegister, %function
+  25              	I2C_AS7262_ReadRegister:
+  26              	.LFB42:
+  27              		.file 1 "AS7262_psoc4.c"
+   1:AS7262_psoc4.c **** /*******************************************************************************
+   2:AS7262_psoc4.c ****  * File Name: AS7262.c
+   3:AS7262_psoc4.c ****  * Version 0.20
+   4:AS7262_psoc4.c ****  *
+   5:AS7262_psoc4.c ****  * Description:
+   6:AS7262_psoc4.c ****  *  This file provides functions to control an AS7262 color sensor through the I2C.
+   7:AS7262_psoc4.c ****  *  This file depends on i2c_functions to worik
+   8:AS7262_psoc4.c ****  *
+   9:AS7262_psoc4.c **** *******************************************************************************
+  10:AS7262_psoc4.c ****  * Copyright by Kyle Lopin, Naresuan University, 2017
+  11:AS7262_psoc4.c ****  * All Rights Reserved
+  12:AS7262_psoc4.c ****  * UNPUBLISHED, LICENSED SOFTWARE.
+  13:AS7262_psoc4.c ****  *
+  14:AS7262_psoc4.c ****  * CONFIDENTIAL AND PROPRIETARY INFORMATION
+  15:AS7262_psoc4.c ****  * WHICH IS THE PROPERTY OF Naresuan University.
+  16:AS7262_psoc4.c ****  *
+  17:AS7262_psoc4.c ****  * ========================================
+  18:AS7262_psoc4.c **** */
+  19:AS7262_psoc4.c **** 
+  20:AS7262_psoc4.c **** #include "AS7262_psoc4.h"
+  21:AS7262_psoc4.c **** // standard libraries
+  22:AS7262_psoc4.c **** #include "stdio.h"
+  23:AS7262_psoc4.c **** // local files
+  24:AS7262_psoc4.c **** #include "usb_psoc4.h"
+  25:AS7262_psoc4.c **** 
+  26:AS7262_psoc4.c **** #define AS72XX_SLAVE_STATUS_REG 0x00
+  27:AS7262_psoc4.c **** #define AS72XX_SLAVE_WRITE_REG 0x01
+  28:AS7262_psoc4.c **** #define AS72XX_SLAVE_READ_REG 0x02
+  29:AS7262_psoc4.c **** #define AS72XX_SLAVE_TX_VALID   0x02
+  30:AS7262_psoc4.c **** #define AS72XX_SLAVE_RX_VALID   0x01
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 2
+
+
+  31:AS7262_psoc4.c **** uint8 read_buffer[24];
+  32:AS7262_psoc4.c **** uint8 write_buffer[2];
+  33:AS7262_psoc4.c **** 
+  34:AS7262_psoc4.c **** /***************************************
+  35:AS7262_psoc4.c **** *      Function Prototypes
+  36:AS7262_psoc4.c **** ***************************************/
+  37:AS7262_psoc4.c **** 
+  38:AS7262_psoc4.c **** uint8 update_control_reg_value(AS7262_settings* as7262_ptr);
+  39:AS7262_psoc4.c **** uint8 update_LED_reg_value(AS7262_settings* as7262_ptr);
+  40:AS7262_psoc4.c **** 
+  41:AS7262_psoc4.c **** uint8 virtual_reg_read(uint8 reg_addr);
+  42:AS7262_psoc4.c **** uint8 I2C_AS7262_Read(uint8 reg_addr);
+  43:AS7262_psoc4.c **** uint8 I2C_AS7262_ReadRegister(uint8 reg_addr);
+  44:AS7262_psoc4.c **** uint8 I2C_AS7262_Write(uint8 reg_addr, uint8 value);
+  45:AS7262_psoc4.c **** uint8 I2C_AS7262_WriteRegister(uint8 reg_addr, uint8 value);
+  46:AS7262_psoc4.c **** void AS7262_ReadAllData(void);
+  47:AS7262_psoc4.c **** uint8 convert_hex_string(uint8 array[]);
+  48:AS7262_psoc4.c **** uint8 hex_value_from_char(uint8 _char);
+  49:AS7262_psoc4.c **** uint16 ConvertDecimal(uint8 array[], uint8 len);
+  50:AS7262_psoc4.c **** 
+  51:AS7262_psoc4.c **** 
+  52:AS7262_psoc4.c **** /***************************************
+  53:AS7262_psoc4.c **** *      Initialize Structure to save 
+  54:AS7262_psoc4.c **** *      settings of AS7262
+  55:AS7262_psoc4.c **** ***************************************/
+  56:AS7262_psoc4.c **** 
+  57:AS7262_psoc4.c **** AS7262_settings as7262 = {
+  58:AS7262_psoc4.c ****     .measurement_mode = BANK_MODE_3,
+  59:AS7262_psoc4.c ****     .gain = GAIN_SETTING_1X,
+  60:AS7262_psoc4.c ****     .interrupt_on = True,
+  61:AS7262_psoc4.c ****     .integration_time = 255,
+  62:AS7262_psoc4.c ****     .LED_power_level = LED_POWER_12_5_mA,
+  63:AS7262_psoc4.c ****     .LED_on = False,
+  64:AS7262_psoc4.c ****     .indicator_power_level = INDICATOR_POWER_4_mA,
+  65:AS7262_psoc4.c ****     .indicator_on = False
+  66:AS7262_psoc4.c **** };
+  67:AS7262_psoc4.c **** 
+  68:AS7262_psoc4.c **** 
+  69:AS7262_psoc4.c **** 
+  70:AS7262_psoc4.c **** union CalibratedData {
+  71:AS7262_psoc4.c ****     uint8 data_bytes[25];
+  72:AS7262_psoc4.c ****     float32 calibrated_data[6];
+  73:AS7262_psoc4.c **** };
+  74:AS7262_psoc4.c **** 
+  75:AS7262_psoc4.c **** union CalibratedData all_calibrated_data;
+  76:AS7262_psoc4.c **** 
+  77:AS7262_psoc4.c **** float32 color_data[6];
+  78:AS7262_psoc4.c **** 
+  79:AS7262_psoc4.c **** /******************************************************************************
+  80:AS7262_psoc4.c **** * Function Name: AS7262_Init
+  81:AS7262_psoc4.c **** *******************************************************************************
+  82:AS7262_psoc4.c **** *
+  83:AS7262_psoc4.c **** * Summary:
+  84:AS7262_psoc4.c **** *  Set up the AS7262 with the default configuration.
+  85:AS7262_psoc4.c **** *
+  86:AS7262_psoc4.c **** * Return:
+  87:AS7262_psoc4.c **** *  true (1) if the AS7262 responds with the correct device type
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 3
+
+
+  88:AS7262_psoc4.c **** *
+  89:AS7262_psoc4.c **** * Global variables:
+  90:AS7262_psoc4.c **** *  as7262:  strucutre that stores a local copy of all the parameters it is set to
+  91:AS7262_psoc4.c **** *
+  92:AS7262_psoc4.c **** *******************************************************************************/
+  93:AS7262_psoc4.c **** 
+  94:AS7262_psoc4.c **** uint8 AS7262_Init(void) {
+  95:AS7262_psoc4.c ****     // get the hardware and firmware data and save it to the struct
+  96:AS7262_psoc4.c ****     uint8 data = I2C_AS7262_Read(AS726x_REG_DEVICE_TYPE);
+  97:AS7262_psoc4.c ****     as7262.device_type = data;
+  98:AS7262_psoc4.c ****     data = I2C_AS7262_Read(AS726x_REG_HW_VERSION);
+  99:AS7262_psoc4.c ****     as7262.hw_version = data;
+ 100:AS7262_psoc4.c ****     data = I2C_AS7262_Read(AS726x_REG_FW1_VERSION);
+ 101:AS7262_psoc4.c ****     as7262.fw_version = ( data << 8 );
+ 102:AS7262_psoc4.c ****     data = I2C_AS7262_Read(AS726x_REG_FW2_VERSION);
+ 103:AS7262_psoc4.c ****     as7262.fw_version += data;
+ 104:AS7262_psoc4.c ****     
+ 105:AS7262_psoc4.c ****     // update the control,led, and integration time registers to their default starting values
+ 106:AS7262_psoc4.c ****     update_control_reg_value( &as7262 );
+ 107:AS7262_psoc4.c ****     update_LED_reg_value( &as7262 );
+ 108:AS7262_psoc4.c ****     I2C_AS7262_Write(AS726x_REG_INT, as7262.integration_time);
+ 109:AS7262_psoc4.c ****     
+ 110:AS7262_psoc4.c ****     // if the device responeded with the correct device type return true to symbolize the device is
+ 111:AS7262_psoc4.c ****     if ( as7262.device_type == AS7262_DEVICE_TYPE ) {
+ 112:AS7262_psoc4.c ****         return true;
+ 113:AS7262_psoc4.c ****     }
+ 114:AS7262_psoc4.c ****     return false;
+ 115:AS7262_psoc4.c **** }
+ 116:AS7262_psoc4.c **** 
+ 117:AS7262_psoc4.c **** /******************************************************************************
+ 118:AS7262_psoc4.c **** * Function Name: AS7262_Commands
+ 119:AS7262_psoc4.c **** *******************************************************************************
+ 120:AS7262_psoc4.c **** *
+ 121:AS7262_psoc4.c **** * Summary:
+ 122:AS7262_psoc4.c **** *  Take in User inputs that deal with the AS7262 and peform the proper action.
+ 123:AS7262_psoc4.c **** *
+ 124:AS7262_psoc4.c **** * Parameters:
+ 125:AS7262_psoc4.c **** *  uint8 buffer: array of the chars the user inputted
+ 126:AS7262_psoc4.c **** *
+ 127:AS7262_psoc4.c **** * Global variables:
+ 128:AS7262_psoc4.c **** *  as7262:  strucutre that stores a local copy of all the parameters it is set to
+ 129:AS7262_psoc4.c **** *
+ 130:AS7262_psoc4.c **** *******************************************************************************/
+ 131:AS7262_psoc4.c **** 
+ 132:AS7262_psoc4.c **** void AS7262_Commands(uint8 buffer[]) {
+ 133:AS7262_psoc4.c ****     switch ( buffer[7] ) {
+ 134:AS7262_psoc4.c ****         case READ_COMMANDS: ;  // a command to read 'READ' data is given, or register commands 'REG
+ 135:AS7262_psoc4.c ****             if ( buffer[9] == 'G' ) {  // Register read or write
+ 136:AS7262_psoc4.c ****                 if ( buffer[11] == 'W' ) {  // Write a register value
+ 137:AS7262_psoc4.c ****                     uint8 reg_to_write = convert_hex_string(&buffer[19]);
+ 138:AS7262_psoc4.c ****                     uint8 value_to_write = convert_hex_string(&buffer[24]);
+ 139:AS7262_psoc4.c ****                     I2C_AS7262_Write(reg_to_write, value_to_write);
+ 140:AS7262_psoc4.c **** //                    LCD_Position(0, 0); 
+ 141:AS7262_psoc4.c **** //                    sprintf(LCD_str, "R:0x%02x|v:0x%02x  ", reg_to_write, value_to_write);
+ 142:AS7262_psoc4.c **** //                    LCD_PrintString(LCD_str);
+ 143:AS7262_psoc4.c **** //                    LCD_Position(1, 0); 
+ 144:AS7262_psoc4.c **** //                    sprintf(LCD_str, "B:%c|v:%c  ", buffer[24], buffer[25]);
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 4
+
+
+ 145:AS7262_psoc4.c **** //                    LCD_PrintString(LCD_str);
+ 146:AS7262_psoc4.c ****                     
+ 147:AS7262_psoc4.c ****                 }
+ 148:AS7262_psoc4.c ****                 else if ( buffer[11] == 'R' ) {  // Read a value from a register
+ 149:AS7262_psoc4.c ****                     uint8 reg_to_read = convert_hex_string(&buffer[18]);
+ 150:AS7262_psoc4.c ****                     uint8 reg_value = I2C_AS7262_Read(reg_to_read);
+ 151:AS7262_psoc4.c ****                     sprintf(USB_str, "REG_VALUE|0x%02X", reg_value);
+ 152:AS7262_psoc4.c **** //                    LCD_Position(0, 0); 
+ 153:AS7262_psoc4.c **** //                    sprintf(LCD_str, "RegR:0x%02x|v:0x%02x  ", reg_to_read, reg_value);
+ 154:AS7262_psoc4.c **** //                    // sprintf(LCD_str, "RegR:0x%d|v:0x%d  ", buffer[18], buffer[19]);
+ 155:AS7262_psoc4.c **** //                    LCD_PrintString(LCD_str);
+ 156:AS7262_psoc4.c ****                     USB_Export_Data((uint8*)USB_str, 14);
+ 157:AS7262_psoc4.c ****                 }
+ 158:AS7262_psoc4.c ****             }
+ 159:AS7262_psoc4.c ****             if ( buffer[12] == 'S' ) {  // get a single data point
+ 160:AS7262_psoc4.c **** //                LCD_Position(0, 0);
+ 161:AS7262_psoc4.c **** //                LCD_PrintString("Single Read");
+ 162:AS7262_psoc4.c ****                 // AS7262_SingleRead();
+ 163:AS7262_psoc4.c ****                 if (  buffer[19] == 'F' ) { 
+ 164:AS7262_psoc4.c **** //                    LCD_Position(0, 0);
+ 165:AS7262_psoc4.c **** //                    LCD_PrintString("Sgl Read Fls");
+ 166:AS7262_psoc4.c **** //                    as7262.LED_on = True;
+ 167:AS7262_psoc4.c **** //                    update_LED_reg_value( &as7262 );
+ 168:AS7262_psoc4.c **** //                    AS7262_SingleRead();
+ 169:AS7262_psoc4.c **** //                    CyDelay(100);
+ 170:AS7262_psoc4.c **** //                    as7262.LED_on = False;
+ 171:AS7262_psoc4.c **** //                    update_LED_reg_value( &as7262 );
+ 172:AS7262_psoc4.c ****                     // turn on LED
+ 173:AS7262_psoc4.c ****                     uint8 led_reg_hold = as7262.LED_control_reg_value;
+ 174:AS7262_psoc4.c ****                     uint led_reg_on = led_reg_hold;
+ 175:AS7262_psoc4.c ****                     led_reg_on |= 0x08;
+ 176:AS7262_psoc4.c ****                     I2C_AS7262_Write( AS726x_REG_LED, led_reg_on );
+ 177:AS7262_psoc4.c ****                     
+ 178:AS7262_psoc4.c ****                     uint8 led_reg = I2C_AS7262_Read( AS726x_REG_LED );
+ 179:AS7262_psoc4.c ****                     
+ 180:AS7262_psoc4.c ****                     // run the read
+ 181:AS7262_psoc4.c ****                     AS7262_SingleRead();
+ 182:AS7262_psoc4.c ****                     
+ 183:AS7262_psoc4.c ****                     I2C_AS7262_Write( AS726x_REG_LED, led_reg_hold );
+ 184:AS7262_psoc4.c **** //                    LCD_Position(0, 0);
+ 185:AS7262_psoc4.c **** //                    LCD_PrintString("end read ");
+ 186:AS7262_psoc4.c **** //                    LCD_Position(0, 0);
+ 187:AS7262_psoc4.c **** //                    sprintf(LCD_str, "L2:0x%02x|0x%02x ", led_reg, led_reg_on);
+ 188:AS7262_psoc4.c **** //                    LCD_PrintString(LCD_str);
+ 189:AS7262_psoc4.c ****                     
+ 190:AS7262_psoc4.c ****                 }
+ 191:AS7262_psoc4.c ****                 else if ( buffer[19] == 'N' ) { 
+ 192:AS7262_psoc4.c **** //                    LCD_Position(0, 0);
+ 193:AS7262_psoc4.c **** //                    LCD_PrintString("Sgl Read No Fls");
+ 194:AS7262_psoc4.c ****                     AS7262_SingleRead();
+ 195:AS7262_psoc4.c **** //                    LCD_Position(0, 0);
+ 196:AS7262_psoc4.c **** //                    LCD_PrintString("SingleRead5  ");
+ 197:AS7262_psoc4.c ****                 }
+ 198:AS7262_psoc4.c ****                 
+ 199:AS7262_psoc4.c ****                 
+ 200:AS7262_psoc4.c ****             }
+ 201:AS7262_psoc4.c ****             break;
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 5
+
+
+ 202:AS7262_psoc4.c ****         case SET_INTEGRATION_TIME: ; // the command to set the integration time
+ 203:AS7262_psoc4.c ****             uint8 new_integration_time = ConvertDecimal(&buffer[22],3);
+ 204:AS7262_psoc4.c ****             as7262.integration_time = new_integration_time;
+ 205:AS7262_psoc4.c ****             I2C_AS7262_Write( AS726x_REG_INT, as7262.integration_time );
+ 206:AS7262_psoc4.c ****             break;
+ 207:AS7262_psoc4.c ****             
+ 208:AS7262_psoc4.c ****         case SET_GAIN: ; // change the gain setting of the device
+ 209:AS7262_psoc4.c ****             as7262.gain = ( ConvertDecimal(&buffer[12], 1) & 0x03 );  // only allow values from 0x0
+ 210:AS7262_psoc4.c ****             update_control_reg_value( &as7262 );
+ 211:AS7262_psoc4.c ****             
+ 212:AS7262_psoc4.c ****             break;
+ 213:AS7262_psoc4.c ****         case SET_LED_POWER: ; // set the current through the main light source
+ 214:AS7262_psoc4.c ****             as7262.LED_power_level = ( ConvertDecimal(&buffer[19], 1) & 0x03 );  // only allow valu
+ 215:AS7262_psoc4.c ****             update_LED_reg_value( &as7262 );
+ 216:AS7262_psoc4.c ****             break;
+ 217:AS7262_psoc4.c ****         case LED_ON_OFF: ;  //  set if the LED should be on or off
+ 218:AS7262_psoc4.c ****             if ( (buffer[17] == 'N') || (buffer[17] == 'n') ) {
+ 219:AS7262_psoc4.c ****                 as7262.LED_on = True;
+ 220:AS7262_psoc4.c ****             }
+ 221:AS7262_psoc4.c ****             else if ( (buffer[17] == 'F') || (buffer[17] == 'f') ) {
+ 222:AS7262_psoc4.c ****                 as7262.LED_on = False;
+ 223:AS7262_psoc4.c ****             }
+ 224:AS7262_psoc4.c ****             update_LED_reg_value( &as7262 );
+ 225:AS7262_psoc4.c ****             break;
+ 226:AS7262_psoc4.c ****     }
+ 227:AS7262_psoc4.c **** }
+ 228:AS7262_psoc4.c **** 
+ 229:AS7262_psoc4.c **** uint8 update_control_reg_value(AS7262_settings* as7262_ptr) {
+ 230:AS7262_psoc4.c ****     uint8 control_reg = (as7262_ptr->interrupt_on << 6) | 
+ 231:AS7262_psoc4.c ****                         (as7262_ptr->gain << 4) | 
+ 232:AS7262_psoc4.c ****                         (as7262_ptr->measurement_mode << 2);
+ 233:AS7262_psoc4.c ****     I2C_AS7262_Write( AS726x_REG_CONTROL, control_reg );
+ 234:AS7262_psoc4.c ****     as7262_ptr->control_reg_value = control_reg;
+ 235:AS7262_psoc4.c ****     return control_reg;
+ 236:AS7262_psoc4.c **** }
+ 237:AS7262_psoc4.c **** 
+ 238:AS7262_psoc4.c **** uint8 update_LED_reg_value(AS7262_settings* as7262_ptr) {
+ 239:AS7262_psoc4.c ****     uint8 led_control_reg = (as7262_ptr->LED_power_level << 4) | 
+ 240:AS7262_psoc4.c ****                             (as7262_ptr->LED_on << 3) | 
+ 241:AS7262_psoc4.c ****                             (as7262_ptr->indicator_power_level << 1) |
+ 242:AS7262_psoc4.c ****                             (as7262_ptr->indicator_on);
+ 243:AS7262_psoc4.c ****     I2C_AS7262_Write( AS726x_REG_LED, led_control_reg );
+ 244:AS7262_psoc4.c ****     as7262_ptr->LED_control_reg_value = led_control_reg;
+ 245:AS7262_psoc4.c ****     return led_control_reg;
+ 246:AS7262_psoc4.c **** }
+ 247:AS7262_psoc4.c **** 
+ 248:AS7262_psoc4.c **** 
+ 249:AS7262_psoc4.c **** void AS7262_SingleRead(void) {
+ 250:AS7262_psoc4.c ****     // send command to run a single shot read
+ 251:AS7262_psoc4.c **** //    LCD_ClearDisplay();
+ 252:AS7262_psoc4.c **** //    LCD_Position(0, 0);
+ 253:AS7262_psoc4.c **** //    LCD_PrintString("SingleRead  ");
+ 254:AS7262_psoc4.c ****     I2C_AS7262_Write( AS726x_REG_CONTROL, as7262.control_reg_value );
+ 255:AS7262_psoc4.c **** //    LCD_Position(0, 0);
+ 256:AS7262_psoc4.c **** //    LCD_PrintString("SingleRead2  ");
+ 257:AS7262_psoc4.c ****     uint pre_data = I2C_AS7262_Read( AS726x_REG_CONTROL );
+ 258:AS7262_psoc4.c **** //    LCD_Position(0, 0);
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 6
+
+
+ 259:AS7262_psoc4.c **** //    sprintf(LCD_str, "pre data: 0x%02x ", pre_data);
+ 260:AS7262_psoc4.c **** //    LCD_PrintString(LCD_str);
+ 261:AS7262_psoc4.c ****     CyDelay( (5.8 * as7262.integration_time) );
+ 262:AS7262_psoc4.c ****     uint8 data;
+ 263:AS7262_psoc4.c ****     uint8 failed_tries=0;
+ 264:AS7262_psoc4.c ****     do {
+ 265:AS7262_psoc4.c ****         CyDelay(1);
+ 266:AS7262_psoc4.c ****         data = I2C_AS7262_Read( AS726x_REG_CONTROL );
+ 267:AS7262_psoc4.c ****         failed_tries++;
+ 268:AS7262_psoc4.c ****         if ( failed_tries > 200 ) {
+ 269:AS7262_psoc4.c ****             USB_Export_Data((uint8*)"FAILED", 6);
+ 270:AS7262_psoc4.c ****         }
+ 271:AS7262_psoc4.c ****     } while ( (data & 0x02) == 0x00 );
+ 272:AS7262_psoc4.c **** //    LCD_Position(1, 0); 
+ 273:AS7262_psoc4.c **** //    sprintf(LCD_str, "C2:0x%02x|0x%02x  ", data, as7262.control_reg_value);
+ 274:AS7262_psoc4.c **** //    LCD_PrintString(LCD_str);
+ 275:AS7262_psoc4.c **** //    isr_as7262_int_StartEx( isr_handler_basic_read );
+ 276:AS7262_psoc4.c **** //    isr_as7262_pin_StartEx( isr_handler_debug1 );
+ 277:AS7262_psoc4.c ****     //LED_3_Write( 1 );
+ 278:AS7262_psoc4.c ****     //CyDelay(1000);
+ 279:AS7262_psoc4.c ****     AS7262_ReadAllData();
+ 280:AS7262_psoc4.c **** //    LCD_Position(0, 0);
+ 281:AS7262_psoc4.c **** //    LCD_PrintString("SingleRead3  ");
+ 282:AS7262_psoc4.c ****     USB_Export_Data(all_calibrated_data.data_bytes, 25);
+ 283:AS7262_psoc4.c **** //    LCD_Position(0, 0);
+ 284:AS7262_psoc4.c **** //    LCD_PrintString("SingleRead4  ");
+ 285:AS7262_psoc4.c **** }
+ 286:AS7262_psoc4.c **** 
+ 287:AS7262_psoc4.c **** void AS7262_ReadAllData(void) {
+ 288:AS7262_psoc4.c ****     for (uint8 i=0; i < 24; i++ ) {
+ 289:AS7262_psoc4.c ****         all_calibrated_data.data_bytes[i] = I2C_AS7262_Read(AS7262_DATA_START_ADDR + i);
+ 290:AS7262_psoc4.c ****     }
+ 291:AS7262_psoc4.c ****     all_calibrated_data.data_bytes[24] = 0x00;
+ 292:AS7262_psoc4.c **** //    LCD_Position(0, 0);
+ 293:AS7262_psoc4.c **** //    sprintf(LCD_str, "C:0x%02x|0x%02x  ", all_calibrated_data.data_bytes[0], all_calibrated_data.
+ 294:AS7262_psoc4.c **** //    LCD_PrintString(LCD_str);
+ 295:AS7262_psoc4.c ****     
+ 296:AS7262_psoc4.c **** }
+ 297:AS7262_psoc4.c **** 
+ 298:AS7262_psoc4.c **** 
+ 299:AS7262_psoc4.c **** uint8 I2C_AS7262_Read(uint8 reg_addr) {
+ 300:AS7262_psoc4.c ****     uint8 status;
+ 301:AS7262_psoc4.c **** //    LCD_Position(1, 0); 
+ 302:AS7262_psoc4.c **** //    LCD_PrintString("read0   ");
+ 303:AS7262_psoc4.c ****     status = I2C_AS7262_ReadRegister(AS72XX_SLAVE_STATUS_REG);
+ 304:AS7262_psoc4.c **** //    LCD_Position(1, 0); 
+ 305:AS7262_psoc4.c **** //    LCD_PrintString("read0b   ");
+ 306:AS7262_psoc4.c ****     if ( ( status & AS72XX_SLAVE_RX_VALID ) != 0 ) {  // data is trying ready to read, but it was n
+ 307:AS7262_psoc4.c ****         uint8 data = I2C_AS7262_ReadRegister(reg_addr);
+ 308:AS7262_psoc4.c ****     }
+ 309:AS7262_psoc4.c **** //    LCD_Position(1, 0); 
+ 310:AS7262_psoc4.c **** //    LCD_PrintString("read1   ");
+ 311:AS7262_psoc4.c **** //    
+ 312:AS7262_psoc4.c **** //    I2C_AS7262_WriteRegister(AS72XX_SLAVE_WRITE_REG, ( reg_addr | 0x80 ) );
+ 313:AS7262_psoc4.c ****     
+ 314:AS7262_psoc4.c ****     // Wait for the write flag to clear
+ 315:AS7262_psoc4.c ****     while(1) {
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 7
+
+
+ 316:AS7262_psoc4.c ****         status = I2C_AS7262_ReadRegister( AS72XX_SLAVE_STATUS_REG );
+ 317:AS7262_psoc4.c ****         if( ( status & AS72XX_SLAVE_TX_VALID ) == 0 ) {
+ 318:AS7262_psoc4.c ****             break;
+ 319:AS7262_psoc4.c ****         }
+ 320:AS7262_psoc4.c ****         CyDelay(1);
+ 321:AS7262_psoc4.c ****     }
+ 322:AS7262_psoc4.c ****     I2C_AS7262_WriteRegister( AS72XX_SLAVE_WRITE_REG, reg_addr );
+ 323:AS7262_psoc4.c **** //    LCD_Position(1, 0); 
+ 324:AS7262_psoc4.c **** //    LCD_PrintString("read2   ");
+ 325:AS7262_psoc4.c ****     // Wait for read flag to be set
+ 326:AS7262_psoc4.c ****     while(1) {
+ 327:AS7262_psoc4.c ****         status = I2C_AS7262_ReadRegister(AS72XX_SLAVE_STATUS_REG);
+ 328:AS7262_psoc4.c ****         // Check if the status register has the data read bit set
+ 329:AS7262_psoc4.c ****         if ( ( status & AS72XX_SLAVE_RX_VALID ) != 0 ) {  
+ 330:AS7262_psoc4.c ****             break;
+ 331:AS7262_psoc4.c ****         }
+ 332:AS7262_psoc4.c ****         CyDelay(1);
+ 333:AS7262_psoc4.c **** //        LCD_Position(0, 0); 
+ 334:AS7262_psoc4.c **** //        sprintf(LCD_str, "Code9: %d", status);
+ 335:AS7262_psoc4.c **** //        LCD_PrintString(LCD_str);
+ 336:AS7262_psoc4.c ****     }
+ 337:AS7262_psoc4.c **** 
+ 338:AS7262_psoc4.c ****     return I2C_AS7262_ReadRegister(AS72XX_SLAVE_READ_REG);
+ 339:AS7262_psoc4.c **** }
+ 340:AS7262_psoc4.c **** 
+ 341:AS7262_psoc4.c **** uint8 I2C_AS7262_ReadRegister(uint8 reg_addr) {
+  28              		.loc 1 341 0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32              	.LVL0:
+  33 0000 10B5     		push	{r4, lr}
+  34              		.cfi_def_cfa_offset 8
+  35              		.cfi_offset 4, -8
+  36              		.cfi_offset 14, -4
+  37 0002 0200     		movs	r2, r0
+ 342:AS7262_psoc4.c ****     uint8 status;
+ 343:AS7262_psoc4.c **** //    LCD_Position(0, 0); 
+ 344:AS7262_psoc4.c **** //    LCD_PrintString("read00   ");
+ 345:AS7262_psoc4.c ****     status = sensor_read8(AS7262_ADDRESS, read_buffer, reg_addr, &as7262.comm_error);
+  38              		.loc 1 345 0
+  39 0004 044C     		ldr	r4, .L2
+  40 0006 054B     		ldr	r3, .L2+4
+  41 0008 0C33     		adds	r3, r3, #12
+  42 000a 2100     		movs	r1, r4
+  43 000c 4920     		movs	r0, #73
+  44              	.LVL1:
+  45 000e FFF7FEFF 		bl	sensor_read8
+  46              	.LVL2:
+ 346:AS7262_psoc4.c **** //    LCD_Position(0, 0); 
+ 347:AS7262_psoc4.c **** //    LCD_PrintString("read01   ");
+ 348:AS7262_psoc4.c ****     return read_buffer[0];
+  47              		.loc 1 348 0
+  48 0012 2078     		ldrb	r0, [r4]
+ 349:AS7262_psoc4.c **** }
+  49              		.loc 1 349 0
+  50              		@ sp needed
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 8
+
+
+  51 0014 10BD     		pop	{r4, pc}
+  52              	.L3:
+  53 0016 C046     		.align	2
+  54              	.L2:
+  55 0018 00000000 		.word	read_buffer
+  56 001c 00000000 		.word	.LANCHOR0
+  57              		.cfi_endproc
+  58              	.LFE42:
+  59              		.size	I2C_AS7262_ReadRegister, .-I2C_AS7262_ReadRegister
+  60              		.section	.text.I2C_AS7262_WriteRegister,"ax",%progbits
+  61              		.align	2
+  62              		.global	I2C_AS7262_WriteRegister
+  63              		.code	16
+  64              		.thumb_func
+  65              		.type	I2C_AS7262_WriteRegister, %function
+  66              	I2C_AS7262_WriteRegister:
+  67              	.LFB44:
+ 350:AS7262_psoc4.c **** 
+ 351:AS7262_psoc4.c **** uint8 I2C_AS7262_Write(uint8 reg_addr, uint8 value) {
+ 352:AS7262_psoc4.c ****     uint8 status;
+ 353:AS7262_psoc4.c ****     // Check to see if write buffer is ready
+ 354:AS7262_psoc4.c ****     while(1) {
+ 355:AS7262_psoc4.c ****         status = I2C_AS7262_ReadRegister( AS72XX_SLAVE_STATUS_REG );
+ 356:AS7262_psoc4.c ****         if( ( status & AS72XX_SLAVE_TX_VALID ) == 0 ) {
+ 357:AS7262_psoc4.c ****             break;  // no data inbound so it can be written to
+ 358:AS7262_psoc4.c ****         }
+ 359:AS7262_psoc4.c ****     }
+ 360:AS7262_psoc4.c ****     // Send the virtual register address and set bit 7 to indicate a pending write
+ 361:AS7262_psoc4.c ****     I2C_AS7262_WriteRegister( AS72XX_SLAVE_WRITE_REG, ( reg_addr | AS726x_WRITE_REG_MASK ) );
+ 362:AS7262_psoc4.c ****     // Wait for the write flag to clear
+ 363:AS7262_psoc4.c ****     while(1) {
+ 364:AS7262_psoc4.c ****         status = I2C_AS7262_ReadRegister( AS72XX_SLAVE_STATUS_REG );
+ 365:AS7262_psoc4.c ****         if( ( status & AS72XX_SLAVE_TX_VALID ) == 0 ) {
+ 366:AS7262_psoc4.c ****             break;  // no data inbound so it can be written to
+ 367:AS7262_psoc4.c ****         }
+ 368:AS7262_psoc4.c ****     }
+ 369:AS7262_psoc4.c ****     
+ 370:AS7262_psoc4.c ****     return I2C_AS7262_WriteRegister(AS72XX_SLAVE_WRITE_REG, value);
+ 371:AS7262_psoc4.c **** }
+ 372:AS7262_psoc4.c **** 
+ 373:AS7262_psoc4.c **** 
+ 374:AS7262_psoc4.c **** uint8 I2C_AS7262_WriteRegister(uint8 reg_addr, uint8 value) {
+  68              		.loc 1 374 0
+  69              		.cfi_startproc
+  70              		@ args = 0, pretend = 0, frame = 0
+  71              		@ frame_needed = 0, uses_anonymous_args = 0
+  72              	.LVL3:
+  73 0000 10B5     		push	{r4, lr}
+  74              		.cfi_def_cfa_offset 8
+  75              		.cfi_offset 4, -8
+  76              		.cfi_offset 14, -4
+ 375:AS7262_psoc4.c ****     uint8 status;
+ 376:AS7262_psoc4.c ****     write_buffer[0] = reg_addr;
+  77              		.loc 1 376 0
+  78 0002 044B     		ldr	r3, .L5
+  79 0004 1870     		strb	r0, [r3]
+ 377:AS7262_psoc4.c ****     write_buffer[1] = value;
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 9
+
+
+  80              		.loc 1 377 0
+  81 0006 5970     		strb	r1, [r3, #1]
+ 378:AS7262_psoc4.c ****     return sensor_write8(AS7262_ADDRESS, write_buffer);
+  82              		.loc 1 378 0
+  83 0008 1900     		movs	r1, r3
+  84              	.LVL4:
+  85 000a 4920     		movs	r0, #73
+  86              	.LVL5:
+  87 000c FFF7FEFF 		bl	sensor_write8
+  88              	.LVL6:
+ 379:AS7262_psoc4.c **** }
+  89              		.loc 1 379 0
+  90              		@ sp needed
+  91 0010 10BD     		pop	{r4, pc}
+  92              	.L6:
+  93 0012 C046     		.align	2
+  94              	.L5:
+  95 0014 00000000 		.word	write_buffer
+  96              		.cfi_endproc
+  97              	.LFE44:
+  98              		.size	I2C_AS7262_WriteRegister, .-I2C_AS7262_WriteRegister
+  99              		.section	.text.I2C_AS7262_Read,"ax",%progbits
+ 100              		.align	2
+ 101              		.global	I2C_AS7262_Read
+ 102              		.code	16
+ 103              		.thumb_func
+ 104              		.type	I2C_AS7262_Read, %function
+ 105              	I2C_AS7262_Read:
+ 106              	.LFB41:
+ 299:AS7262_psoc4.c ****     uint8 status;
+ 107              		.loc 1 299 0
+ 108              		.cfi_startproc
+ 109              		@ args = 0, pretend = 0, frame = 0
+ 110              		@ frame_needed = 0, uses_anonymous_args = 0
+ 111              	.LVL7:
+ 112 0000 10B5     		push	{r4, lr}
+ 113              		.cfi_def_cfa_offset 8
+ 114              		.cfi_offset 4, -8
+ 115              		.cfi_offset 14, -4
+ 116 0002 0400     		movs	r4, r0
+ 303:AS7262_psoc4.c **** //    LCD_Position(1, 0); 
+ 117              		.loc 1 303 0
+ 118 0004 0020     		movs	r0, #0
+ 119              	.LVL8:
+ 120 0006 FFF7FEFF 		bl	I2C_AS7262_ReadRegister
+ 121              	.LVL9:
+ 306:AS7262_psoc4.c ****         uint8 data = I2C_AS7262_ReadRegister(reg_addr);
+ 122              		.loc 1 306 0
+ 123 000a C307     		lsls	r3, r0, #31
+ 124 000c 02D5     		bpl	.L10
+ 125              	.LBB2:
+ 307:AS7262_psoc4.c ****     }
+ 126              		.loc 1 307 0
+ 127 000e 2000     		movs	r0, r4
+ 128              	.LVL10:
+ 129 0010 FFF7FEFF 		bl	I2C_AS7262_ReadRegister
+ 130              	.LVL11:
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 10
+
+
+ 131              	.L10:
+ 132              	.LBE2:
+ 316:AS7262_psoc4.c ****         if( ( status & AS72XX_SLAVE_TX_VALID ) == 0 ) {
+ 133              		.loc 1 316 0
+ 134 0014 0020     		movs	r0, #0
+ 135 0016 FFF7FEFF 		bl	I2C_AS7262_ReadRegister
+ 136              	.LVL12:
+ 317:AS7262_psoc4.c ****             break;
+ 137              		.loc 1 317 0
+ 138 001a 8307     		lsls	r3, r0, #30
+ 139 001c 03D5     		bpl	.L9
+ 320:AS7262_psoc4.c ****     }
+ 140              		.loc 1 320 0
+ 141 001e 0120     		movs	r0, #1
+ 142              	.LVL13:
+ 143 0020 FFF7FEFF 		bl	CyDelay
+ 144              	.LVL14:
+ 321:AS7262_psoc4.c ****     I2C_AS7262_WriteRegister( AS72XX_SLAVE_WRITE_REG, reg_addr );
+ 145              		.loc 1 321 0
+ 146 0024 F6E7     		b	.L10
+ 147              	.LVL15:
+ 148              	.L9:
+ 322:AS7262_psoc4.c **** //    LCD_Position(1, 0); 
+ 149              		.loc 1 322 0
+ 150 0026 2100     		movs	r1, r4
+ 151 0028 0120     		movs	r0, #1
+ 152              	.LVL16:
+ 153 002a FFF7FEFF 		bl	I2C_AS7262_WriteRegister
+ 154              	.LVL17:
+ 155              	.L12:
+ 327:AS7262_psoc4.c ****         // Check if the status register has the data read bit set
+ 156              		.loc 1 327 0
+ 157 002e 0020     		movs	r0, #0
+ 158 0030 FFF7FEFF 		bl	I2C_AS7262_ReadRegister
+ 159              	.LVL18:
+ 329:AS7262_psoc4.c ****             break;
+ 160              		.loc 1 329 0
+ 161 0034 C307     		lsls	r3, r0, #31
+ 162 0036 03D4     		bmi	.L11
+ 332:AS7262_psoc4.c **** //        LCD_Position(0, 0); 
+ 163              		.loc 1 332 0
+ 164 0038 0120     		movs	r0, #1
+ 165              	.LVL19:
+ 166 003a FFF7FEFF 		bl	CyDelay
+ 167              	.LVL20:
+ 336:AS7262_psoc4.c **** 
+ 168              		.loc 1 336 0
+ 169 003e F6E7     		b	.L12
+ 170              	.LVL21:
+ 171              	.L11:
+ 338:AS7262_psoc4.c **** }
+ 172              		.loc 1 338 0
+ 173 0040 0220     		movs	r0, #2
+ 174              	.LVL22:
+ 175 0042 FFF7FEFF 		bl	I2C_AS7262_ReadRegister
+ 176              	.LVL23:
+ 339:AS7262_psoc4.c **** 
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 11
+
+
+ 177              		.loc 1 339 0
+ 178              		@ sp needed
+ 179 0046 10BD     		pop	{r4, pc}
+ 180              		.cfi_endproc
+ 181              	.LFE41:
+ 182              		.size	I2C_AS7262_Read, .-I2C_AS7262_Read
+ 183              		.section	.text.AS7262_ReadAllData,"ax",%progbits
+ 184              		.align	2
+ 185              		.global	AS7262_ReadAllData
+ 186              		.code	16
+ 187              		.thumb_func
+ 188              		.type	AS7262_ReadAllData, %function
+ 189              	AS7262_ReadAllData:
+ 190              	.LFB40:
+ 287:AS7262_psoc4.c ****     for (uint8 i=0; i < 24; i++ ) {
+ 191              		.loc 1 287 0
+ 192              		.cfi_startproc
+ 193              		@ args = 0, pretend = 0, frame = 0
+ 194              		@ frame_needed = 0, uses_anonymous_args = 0
+ 195 0000 10B5     		push	{r4, lr}
+ 196              		.cfi_def_cfa_offset 8
+ 197              		.cfi_offset 4, -8
+ 198              		.cfi_offset 14, -4
+ 199              	.LVL24:
+ 200              	.LBB3:
+ 288:AS7262_psoc4.c ****         all_calibrated_data.data_bytes[i] = I2C_AS7262_Read(AS7262_DATA_START_ADDR + i);
+ 201              		.loc 1 288 0
+ 202 0002 0024     		movs	r4, #0
+ 203 0004 08E0     		b	.L14
+ 204              	.LVL25:
+ 205              	.L15:
+ 289:AS7262_psoc4.c ****     }
+ 206              		.loc 1 289 0 discriminator 3
+ 207 0006 2000     		movs	r0, r4
+ 208 0008 1430     		adds	r0, r0, #20
+ 209 000a C0B2     		uxtb	r0, r0
+ 210 000c FFF7FEFF 		bl	I2C_AS7262_Read
+ 211              	.LVL26:
+ 212 0010 044B     		ldr	r3, .L16
+ 213 0012 1855     		strb	r0, [r3, r4]
+ 288:AS7262_psoc4.c ****         all_calibrated_data.data_bytes[i] = I2C_AS7262_Read(AS7262_DATA_START_ADDR + i);
+ 214              		.loc 1 288 0 discriminator 3
+ 215 0014 0134     		adds	r4, r4, #1
+ 216              	.LVL27:
+ 217 0016 E4B2     		uxtb	r4, r4
+ 218              	.LVL28:
+ 219              	.L14:
+ 288:AS7262_psoc4.c ****         all_calibrated_data.data_bytes[i] = I2C_AS7262_Read(AS7262_DATA_START_ADDR + i);
+ 220              		.loc 1 288 0 is_stmt 0 discriminator 1
+ 221 0018 172C     		cmp	r4, #23
+ 222 001a F4D9     		bls	.L15
+ 223              	.LBE3:
+ 291:AS7262_psoc4.c **** //    LCD_Position(0, 0);
+ 224              		.loc 1 291 0 is_stmt 1
+ 225 001c 0022     		movs	r2, #0
+ 226 001e 014B     		ldr	r3, .L16
+ 227 0020 1A76     		strb	r2, [r3, #24]
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 12
+
+
+ 296:AS7262_psoc4.c **** 
+ 228              		.loc 1 296 0
+ 229              		@ sp needed
+ 230              	.LVL29:
+ 231 0022 10BD     		pop	{r4, pc}
+ 232              	.L17:
+ 233              		.align	2
+ 234              	.L16:
+ 235 0024 00000000 		.word	all_calibrated_data
+ 236              		.cfi_endproc
+ 237              	.LFE40:
+ 238              		.size	AS7262_ReadAllData, .-AS7262_ReadAllData
+ 239              		.section	.text.I2C_AS7262_Write,"ax",%progbits
+ 240              		.align	2
+ 241              		.global	I2C_AS7262_Write
+ 242              		.code	16
+ 243              		.thumb_func
+ 244              		.type	I2C_AS7262_Write, %function
+ 245              	I2C_AS7262_Write:
+ 246              	.LFB43:
+ 351:AS7262_psoc4.c ****     uint8 status;
+ 247              		.loc 1 351 0
+ 248              		.cfi_startproc
+ 249              		@ args = 0, pretend = 0, frame = 0
+ 250              		@ frame_needed = 0, uses_anonymous_args = 0
+ 251              	.LVL30:
+ 252 0000 70B5     		push	{r4, r5, r6, lr}
+ 253              		.cfi_def_cfa_offset 16
+ 254              		.cfi_offset 4, -16
+ 255              		.cfi_offset 5, -12
+ 256              		.cfi_offset 6, -8
+ 257              		.cfi_offset 14, -4
+ 258 0002 0400     		movs	r4, r0
+ 259 0004 0D00     		movs	r5, r1
+ 260              	.LVL31:
+ 261              	.L19:
+ 355:AS7262_psoc4.c ****         if( ( status & AS72XX_SLAVE_TX_VALID ) == 0 ) {
+ 262              		.loc 1 355 0
+ 263 0006 0020     		movs	r0, #0
+ 264 0008 FFF7FEFF 		bl	I2C_AS7262_ReadRegister
+ 265              	.LVL32:
+ 356:AS7262_psoc4.c ****             break;  // no data inbound so it can be written to
+ 266              		.loc 1 356 0
+ 267 000c 8307     		lsls	r3, r0, #30
+ 268 000e FAD4     		bmi	.L19
+ 361:AS7262_psoc4.c ****     // Wait for the write flag to clear
+ 269              		.loc 1 361 0
+ 270 0010 8021     		movs	r1, #128
+ 271 0012 4942     		rsbs	r1, r1, #0
+ 272 0014 0C43     		orrs	r4, r1
+ 273 0016 E1B2     		uxtb	r1, r4
+ 274 0018 0120     		movs	r0, #1
+ 275              	.LVL33:
+ 276 001a FFF7FEFF 		bl	I2C_AS7262_WriteRegister
+ 277              	.LVL34:
+ 278              	.L20:
+ 364:AS7262_psoc4.c ****         if( ( status & AS72XX_SLAVE_TX_VALID ) == 0 ) {
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 13
+
+
+ 279              		.loc 1 364 0
+ 280 001e 0020     		movs	r0, #0
+ 281 0020 FFF7FEFF 		bl	I2C_AS7262_ReadRegister
+ 282              	.LVL35:
+ 365:AS7262_psoc4.c ****             break;  // no data inbound so it can be written to
+ 283              		.loc 1 365 0
+ 284 0024 8307     		lsls	r3, r0, #30
+ 285 0026 FAD4     		bmi	.L20
+ 370:AS7262_psoc4.c **** }
+ 286              		.loc 1 370 0
+ 287 0028 2900     		movs	r1, r5
+ 288 002a 0120     		movs	r0, #1
+ 289              	.LVL36:
+ 290 002c FFF7FEFF 		bl	I2C_AS7262_WriteRegister
+ 291              	.LVL37:
+ 371:AS7262_psoc4.c **** 
+ 292              		.loc 1 371 0
+ 293              		@ sp needed
+ 294 0030 70BD     		pop	{r4, r5, r6, pc}
+ 295              		.cfi_endproc
+ 296              	.LFE43:
+ 297              		.size	I2C_AS7262_Write, .-I2C_AS7262_Write
+ 298 0032 C046     		.section	.text.update_control_reg_value,"ax",%progbits
+ 299              		.align	2
+ 300              		.global	update_control_reg_value
+ 301              		.code	16
+ 302              		.thumb_func
+ 303              		.type	update_control_reg_value, %function
+ 304              	update_control_reg_value:
+ 305              	.LFB37:
+ 229:AS7262_psoc4.c ****     uint8 control_reg = (as7262_ptr->interrupt_on << 6) | 
+ 306              		.loc 1 229 0
+ 307              		.cfi_startproc
+ 308              		@ args = 0, pretend = 0, frame = 0
+ 309              		@ frame_needed = 0, uses_anonymous_args = 0
+ 310              	.LVL38:
+ 311 0000 70B5     		push	{r4, r5, r6, lr}
+ 312              		.cfi_def_cfa_offset 16
+ 313              		.cfi_offset 4, -16
+ 314              		.cfi_offset 5, -12
+ 315              		.cfi_offset 6, -8
+ 316              		.cfi_offset 14, -4
+ 317 0002 0500     		movs	r5, r0
+ 230:AS7262_psoc4.c ****                         (as7262_ptr->gain << 4) | 
+ 318              		.loc 1 230 0
+ 319 0004 8478     		ldrb	r4, [r0, #2]
+ 320 0006 A401     		lsls	r4, r4, #6
+ 231:AS7262_psoc4.c ****                         (as7262_ptr->measurement_mode << 2);
+ 321              		.loc 1 231 0
+ 322 0008 4278     		ldrb	r2, [r0, #1]
+ 323 000a 1201     		lsls	r2, r2, #4
+ 232:AS7262_psoc4.c ****     I2C_AS7262_Write( AS726x_REG_CONTROL, control_reg );
+ 324              		.loc 1 232 0
+ 325 000c 0378     		ldrb	r3, [r0]
+ 326 000e 9B00     		lsls	r3, r3, #2
+ 230:AS7262_psoc4.c ****                         (as7262_ptr->gain << 4) | 
+ 327              		.loc 1 230 0
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 14
+
+
+ 328 0010 1443     		orrs	r4, r2
+ 329 0012 1C43     		orrs	r4, r3
+ 330 0014 E4B2     		uxtb	r4, r4
+ 331              	.LVL39:
+ 233:AS7262_psoc4.c ****     as7262_ptr->control_reg_value = control_reg;
+ 332              		.loc 1 233 0
+ 333 0016 2100     		movs	r1, r4
+ 334 0018 0420     		movs	r0, #4
+ 335              	.LVL40:
+ 336 001a FFF7FEFF 		bl	I2C_AS7262_Write
+ 337              	.LVL41:
+ 234:AS7262_psoc4.c ****     return control_reg;
+ 338              		.loc 1 234 0
+ 339 001e 2C74     		strb	r4, [r5, #16]
+ 236:AS7262_psoc4.c **** 
+ 340              		.loc 1 236 0
+ 341 0020 2000     		movs	r0, r4
+ 342              		@ sp needed
+ 343              	.LVL42:
+ 344              	.LVL43:
+ 345 0022 70BD     		pop	{r4, r5, r6, pc}
+ 346              		.cfi_endproc
+ 347              	.LFE37:
+ 348              		.size	update_control_reg_value, .-update_control_reg_value
+ 349              		.section	.text.update_LED_reg_value,"ax",%progbits
+ 350              		.align	2
+ 351              		.global	update_LED_reg_value
+ 352              		.code	16
+ 353              		.thumb_func
+ 354              		.type	update_LED_reg_value, %function
+ 355              	update_LED_reg_value:
+ 356              	.LFB38:
+ 238:AS7262_psoc4.c ****     uint8 led_control_reg = (as7262_ptr->LED_power_level << 4) | 
+ 357              		.loc 1 238 0
+ 358              		.cfi_startproc
+ 359              		@ args = 0, pretend = 0, frame = 0
+ 360              		@ frame_needed = 0, uses_anonymous_args = 0
+ 361              	.LVL44:
+ 362 0000 70B5     		push	{r4, r5, r6, lr}
+ 363              		.cfi_def_cfa_offset 16
+ 364              		.cfi_offset 4, -16
+ 365              		.cfi_offset 5, -12
+ 366              		.cfi_offset 6, -8
+ 367              		.cfi_offset 14, -4
+ 368 0002 0500     		movs	r5, r0
+ 239:AS7262_psoc4.c ****                             (as7262_ptr->LED_on << 3) | 
+ 369              		.loc 1 239 0
+ 370 0004 0479     		ldrb	r4, [r0, #4]
+ 371 0006 2401     		lsls	r4, r4, #4
+ 240:AS7262_psoc4.c ****                             (as7262_ptr->indicator_power_level << 1) |
+ 372              		.loc 1 240 0
+ 373 0008 4179     		ldrb	r1, [r0, #5]
+ 374 000a C900     		lsls	r1, r1, #3
+ 241:AS7262_psoc4.c ****                             (as7262_ptr->indicator_on);
+ 375              		.loc 1 241 0
+ 376 000c 8279     		ldrb	r2, [r0, #6]
+ 377 000e 5200     		lsls	r2, r2, #1
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 15
+
+
+ 242:AS7262_psoc4.c ****     I2C_AS7262_Write( AS726x_REG_LED, led_control_reg );
+ 378              		.loc 1 242 0
+ 379 0010 C379     		ldrb	r3, [r0, #7]
+ 239:AS7262_psoc4.c ****                             (as7262_ptr->LED_on << 3) | 
+ 380              		.loc 1 239 0
+ 381 0012 0C43     		orrs	r4, r1
+ 382 0014 1443     		orrs	r4, r2
+ 383 0016 1C43     		orrs	r4, r3
+ 384 0018 E4B2     		uxtb	r4, r4
+ 385              	.LVL45:
+ 243:AS7262_psoc4.c ****     as7262_ptr->LED_control_reg_value = led_control_reg;
+ 386              		.loc 1 243 0
+ 387 001a 2100     		movs	r1, r4
+ 388 001c 0720     		movs	r0, #7
+ 389              	.LVL46:
+ 390 001e FFF7FEFF 		bl	I2C_AS7262_Write
+ 391              	.LVL47:
+ 244:AS7262_psoc4.c ****     return led_control_reg;
+ 392              		.loc 1 244 0
+ 393 0022 6C74     		strb	r4, [r5, #17]
+ 246:AS7262_psoc4.c **** 
+ 394              		.loc 1 246 0
+ 395 0024 2000     		movs	r0, r4
+ 396              		@ sp needed
+ 397              	.LVL48:
+ 398              	.LVL49:
+ 399 0026 70BD     		pop	{r4, r5, r6, pc}
+ 400              		.cfi_endproc
+ 401              	.LFE38:
+ 402              		.size	update_LED_reg_value, .-update_LED_reg_value
+ 403              		.section	.text.AS7262_Init,"ax",%progbits
+ 404              		.align	2
+ 405              		.global	AS7262_Init
+ 406              		.code	16
+ 407              		.thumb_func
+ 408              		.type	AS7262_Init, %function
+ 409              	AS7262_Init:
+ 410              	.LFB35:
+  94:AS7262_psoc4.c ****     // get the hardware and firmware data and save it to the struct
+ 411              		.loc 1 94 0
+ 412              		.cfi_startproc
+ 413              		@ args = 0, pretend = 0, frame = 0
+ 414              		@ frame_needed = 0, uses_anonymous_args = 0
+ 415 0000 10B5     		push	{r4, lr}
+ 416              		.cfi_def_cfa_offset 8
+ 417              		.cfi_offset 4, -8
+ 418              		.cfi_offset 14, -4
+  96:AS7262_psoc4.c ****     as7262.device_type = data;
+ 419              		.loc 1 96 0
+ 420 0002 0020     		movs	r0, #0
+ 421 0004 FFF7FEFF 		bl	I2C_AS7262_Read
+ 422              	.LVL50:
+  97:AS7262_psoc4.c ****     data = I2C_AS7262_Read(AS726x_REG_HW_VERSION);
+ 423              		.loc 1 97 0
+ 424 0008 104C     		ldr	r4, .L26
+ 425 000a 2072     		strb	r0, [r4, #8]
+  98:AS7262_psoc4.c ****     as7262.hw_version = data;
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 16
+
+
+ 426              		.loc 1 98 0
+ 427 000c 0120     		movs	r0, #1
+ 428              	.LVL51:
+ 429 000e FFF7FEFF 		bl	I2C_AS7262_Read
+ 430              	.LVL52:
+  99:AS7262_psoc4.c ****     data = I2C_AS7262_Read(AS726x_REG_FW1_VERSION);
+ 431              		.loc 1 99 0
+ 432 0012 6072     		strb	r0, [r4, #9]
+ 100:AS7262_psoc4.c ****     as7262.fw_version = ( data << 8 );
+ 433              		.loc 1 100 0
+ 434 0014 0220     		movs	r0, #2
+ 435              	.LVL53:
+ 436 0016 FFF7FEFF 		bl	I2C_AS7262_Read
+ 437              	.LVL54:
+ 101:AS7262_psoc4.c ****     data = I2C_AS7262_Read(AS726x_REG_FW2_VERSION);
+ 438              		.loc 1 101 0
+ 439 001a 0002     		lsls	r0, r0, #8
+ 440              	.LVL55:
+ 441 001c 6081     		strh	r0, [r4, #10]
+ 102:AS7262_psoc4.c ****     as7262.fw_version += data;
+ 442              		.loc 1 102 0
+ 443 001e 0320     		movs	r0, #3
+ 444 0020 FFF7FEFF 		bl	I2C_AS7262_Read
+ 445              	.LVL56:
+ 103:AS7262_psoc4.c ****     
+ 446              		.loc 1 103 0
+ 447 0024 6389     		ldrh	r3, [r4, #10]
+ 448 0026 1818     		adds	r0, r3, r0
+ 449              	.LVL57:
+ 450 0028 6081     		strh	r0, [r4, #10]
+ 106:AS7262_psoc4.c ****     update_LED_reg_value( &as7262 );
+ 451              		.loc 1 106 0
+ 452 002a 2000     		movs	r0, r4
+ 453 002c FFF7FEFF 		bl	update_control_reg_value
+ 454              	.LVL58:
+ 107:AS7262_psoc4.c ****     I2C_AS7262_Write(AS726x_REG_INT, as7262.integration_time);
+ 455              		.loc 1 107 0
+ 456 0030 2000     		movs	r0, r4
+ 457 0032 FFF7FEFF 		bl	update_LED_reg_value
+ 458              	.LVL59:
+ 108:AS7262_psoc4.c ****     
+ 459              		.loc 1 108 0
+ 460 0036 E178     		ldrb	r1, [r4, #3]
+ 461 0038 0520     		movs	r0, #5
+ 462 003a FFF7FEFF 		bl	I2C_AS7262_Write
+ 463              	.LVL60:
+ 111:AS7262_psoc4.c ****         return true;
+ 464              		.loc 1 111 0
+ 465 003e 237A     		ldrb	r3, [r4, #8]
+ 466 0040 402B     		cmp	r3, #64
+ 467 0042 01D1     		bne	.L25
+ 112:AS7262_psoc4.c ****     }
+ 468              		.loc 1 112 0
+ 469 0044 0120     		movs	r0, #1
+ 470 0046 00E0     		b	.L24
+ 471              	.L25:
+ 114:AS7262_psoc4.c **** }
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 17
+
+
+ 472              		.loc 1 114 0
+ 473 0048 0020     		movs	r0, #0
+ 474              	.L24:
+ 115:AS7262_psoc4.c **** 
+ 475              		.loc 1 115 0
+ 476              		@ sp needed
+ 477 004a 10BD     		pop	{r4, pc}
+ 478              	.L27:
+ 479              		.align	2
+ 480              	.L26:
+ 481 004c 00000000 		.word	.LANCHOR0
+ 482              		.cfi_endproc
+ 483              	.LFE35:
+ 484              		.size	AS7262_Init, .-AS7262_Init
+ 485              		.global	__aeabi_i2d
+ 486              		.global	__aeabi_dmul
+ 487              		.global	__aeabi_d2uiz
+ 488              		.section	.text.AS7262_SingleRead,"ax",%progbits
+ 489              		.align	2
+ 490              		.global	AS7262_SingleRead
+ 491              		.code	16
+ 492              		.thumb_func
+ 493              		.type	AS7262_SingleRead, %function
+ 494              	AS7262_SingleRead:
+ 495              	.LFB39:
+ 249:AS7262_psoc4.c ****     // send command to run a single shot read
+ 496              		.loc 1 249 0
+ 497              		.cfi_startproc
+ 498              		@ args = 0, pretend = 0, frame = 0
+ 499              		@ frame_needed = 0, uses_anonymous_args = 0
+ 500 0000 70B5     		push	{r4, r5, r6, lr}
+ 501              		.cfi_def_cfa_offset 16
+ 502              		.cfi_offset 4, -16
+ 503              		.cfi_offset 5, -12
+ 504              		.cfi_offset 6, -8
+ 505              		.cfi_offset 14, -4
+ 254:AS7262_psoc4.c **** //    LCD_Position(0, 0);
+ 506              		.loc 1 254 0
+ 507 0002 164C     		ldr	r4, .L31
+ 508 0004 217C     		ldrb	r1, [r4, #16]
+ 509 0006 0420     		movs	r0, #4
+ 510 0008 FFF7FEFF 		bl	I2C_AS7262_Write
+ 511              	.LVL61:
+ 257:AS7262_psoc4.c **** //    LCD_Position(0, 0);
+ 512              		.loc 1 257 0
+ 513 000c 0420     		movs	r0, #4
+ 514 000e FFF7FEFF 		bl	I2C_AS7262_Read
+ 515              	.LVL62:
+ 261:AS7262_psoc4.c ****     uint8 data;
+ 516              		.loc 1 261 0
+ 517 0012 E078     		ldrb	r0, [r4, #3]
+ 518 0014 FFF7FEFF 		bl	__aeabi_i2d
+ 519              	.LVL63:
+ 520 0018 114A     		ldr	r2, .L31+4
+ 521 001a 124B     		ldr	r3, .L31+8
+ 522 001c FFF7FEFF 		bl	__aeabi_dmul
+ 523              	.LVL64:
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 18
+
+
+ 524 0020 FFF7FEFF 		bl	__aeabi_d2uiz
+ 525              	.LVL65:
+ 526 0024 FFF7FEFF 		bl	CyDelay
+ 527              	.LVL66:
+ 263:AS7262_psoc4.c ****     do {
+ 528              		.loc 1 263 0
+ 529 0028 0024     		movs	r4, #0
+ 530              	.LVL67:
+ 531              	.L30:
+ 265:AS7262_psoc4.c ****         data = I2C_AS7262_Read( AS726x_REG_CONTROL );
+ 532              		.loc 1 265 0
+ 533 002a 0120     		movs	r0, #1
+ 534 002c FFF7FEFF 		bl	CyDelay
+ 535              	.LVL68:
+ 266:AS7262_psoc4.c ****         failed_tries++;
+ 536              		.loc 1 266 0
+ 537 0030 0420     		movs	r0, #4
+ 538 0032 FFF7FEFF 		bl	I2C_AS7262_Read
+ 539              	.LVL69:
+ 540 0036 0500     		movs	r5, r0
+ 541              	.LVL70:
+ 267:AS7262_psoc4.c ****         if ( failed_tries > 200 ) {
+ 542              		.loc 1 267 0
+ 543 0038 0134     		adds	r4, r4, #1
+ 544              	.LVL71:
+ 545 003a E4B2     		uxtb	r4, r4
+ 546              	.LVL72:
+ 268:AS7262_psoc4.c ****             USB_Export_Data((uint8*)"FAILED", 6);
+ 547              		.loc 1 268 0
+ 548 003c C82C     		cmp	r4, #200
+ 549 003e 03D9     		bls	.L29
+ 269:AS7262_psoc4.c ****         }
+ 550              		.loc 1 269 0
+ 551 0040 0621     		movs	r1, #6
+ 552 0042 0948     		ldr	r0, .L31+12
+ 553 0044 FFF7FEFF 		bl	USB_Export_Data
+ 554              	.LVL73:
+ 555              	.L29:
+ 271:AS7262_psoc4.c **** //    LCD_Position(1, 0); 
+ 556              		.loc 1 271 0
+ 557 0048 AB07     		lsls	r3, r5, #30
+ 558 004a EED5     		bpl	.L30
+ 279:AS7262_psoc4.c **** //    LCD_Position(0, 0);
+ 559              		.loc 1 279 0
+ 560 004c FFF7FEFF 		bl	AS7262_ReadAllData
+ 561              	.LVL74:
+ 282:AS7262_psoc4.c **** //    LCD_Position(0, 0);
+ 562              		.loc 1 282 0
+ 563 0050 1921     		movs	r1, #25
+ 564 0052 0648     		ldr	r0, .L31+16
+ 565 0054 FFF7FEFF 		bl	USB_Export_Data
+ 566              	.LVL75:
+ 285:AS7262_psoc4.c **** 
+ 567              		.loc 1 285 0
+ 568              		@ sp needed
+ 569              	.LVL76:
+ 570              	.LVL77:
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 19
+
+
+ 571 0058 70BD     		pop	{r4, r5, r6, pc}
+ 572              	.L32:
+ 573 005a C046     		.align	2
+ 574              	.L31:
+ 575 005c 00000000 		.word	.LANCHOR0
+ 576 0060 33333333 		.word	858993459
+ 577 0064 33331740 		.word	1075262259
+ 578 0068 00000000 		.word	.LC6
+ 579 006c 00000000 		.word	all_calibrated_data
+ 580              		.cfi_endproc
+ 581              	.LFE39:
+ 582              		.size	AS7262_SingleRead, .-AS7262_SingleRead
+ 583              		.section	.text.hex_value_from_char,"ax",%progbits
+ 584              		.align	2
+ 585              		.global	hex_value_from_char
+ 586              		.code	16
+ 587              		.thumb_func
+ 588              		.type	hex_value_from_char, %function
+ 589              	hex_value_from_char:
+ 590              	.LFB46:
+ 380:AS7262_psoc4.c **** 
+ 381:AS7262_psoc4.c **** uint8 convert_hex_string(uint8 array[]) {
+ 382:AS7262_psoc4.c ****     uint8 num = hex_value_from_char(array[0]) << 4;
+ 383:AS7262_psoc4.c ****     num |= hex_value_from_char(array[1]);
+ 384:AS7262_psoc4.c ****     return num;
+ 385:AS7262_psoc4.c ****     
+ 386:AS7262_psoc4.c **** }
+ 387:AS7262_psoc4.c **** 
+ 388:AS7262_psoc4.c **** uint8 hex_value_from_char(uint8 _char) {
+ 591              		.loc 1 388 0
+ 592              		.cfi_startproc
+ 593              		@ args = 0, pretend = 0, frame = 0
+ 594              		@ frame_needed = 0, uses_anonymous_args = 0
+ 595              		@ link register save eliminated.
+ 596              	.LVL78:
+ 389:AS7262_psoc4.c ****     if ( ('0' <= _char) && (_char <= '9') ) {  // char is between 0-9
+ 597              		.loc 1 389 0
+ 598 0000 0300     		movs	r3, r0
+ 599 0002 303B     		subs	r3, r3, #48
+ 600 0004 DBB2     		uxtb	r3, r3
+ 601 0006 092B     		cmp	r3, #9
+ 602 0008 10D9     		bls	.L34
+ 390:AS7262_psoc4.c ****         return (_char - '0');
+ 391:AS7262_psoc4.c ****     }
+ 392:AS7262_psoc4.c ****     else if ( ('A' <= _char) && (_char <= 'F') ) {  // char is between A-F
+ 603              		.loc 1 392 0
+ 604 000a 0300     		movs	r3, r0
+ 605 000c 413B     		subs	r3, r3, #65
+ 606 000e DBB2     		uxtb	r3, r3
+ 607 0010 052B     		cmp	r3, #5
+ 608 0012 02D8     		bhi	.L35
+ 393:AS7262_psoc4.c ****         return (10 + _char - 'A');
+ 609              		.loc 1 393 0
+ 610 0014 3738     		subs	r0, r0, #55
+ 611              	.LVL79:
+ 612 0016 C3B2     		uxtb	r3, r0
+ 613 0018 08E0     		b	.L34
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 20
+
+
+ 614              	.LVL80:
+ 615              	.L35:
+ 394:AS7262_psoc4.c ****     }
+ 395:AS7262_psoc4.c ****     else if ( ('a' <= _char) && (_char <= 'f') ) {  // char is between a-f
+ 616              		.loc 1 395 0
+ 617 001a 0300     		movs	r3, r0
+ 618 001c 613B     		subs	r3, r3, #97
+ 619 001e DBB2     		uxtb	r3, r3
+ 620 0020 052B     		cmp	r3, #5
+ 621 0022 02D8     		bhi	.L36
+ 396:AS7262_psoc4.c ****         return (10 + _char - 'a');
+ 622              		.loc 1 396 0
+ 623 0024 5738     		subs	r0, r0, #87
+ 624              	.LVL81:
+ 625 0026 C3B2     		uxtb	r3, r0
+ 626 0028 00E0     		b	.L34
+ 627              	.LVL82:
+ 628              	.L36:
+ 397:AS7262_psoc4.c ****     }
+ 398:AS7262_psoc4.c ****     return 0;
+ 629              		.loc 1 398 0
+ 630 002a 0023     		movs	r3, #0
+ 631              	.LVL83:
+ 632              	.L34:
+ 399:AS7262_psoc4.c **** }
+ 633              		.loc 1 399 0
+ 634 002c 1800     		movs	r0, r3
+ 635              		@ sp needed
+ 636 002e 7047     		bx	lr
+ 637              		.cfi_endproc
+ 638              	.LFE46:
+ 639              		.size	hex_value_from_char, .-hex_value_from_char
+ 640              		.section	.text.convert_hex_string,"ax",%progbits
+ 641              		.align	2
+ 642              		.global	convert_hex_string
+ 643              		.code	16
+ 644              		.thumb_func
+ 645              		.type	convert_hex_string, %function
+ 646              	convert_hex_string:
+ 647              	.LFB45:
+ 381:AS7262_psoc4.c ****     uint8 num = hex_value_from_char(array[0]) << 4;
+ 648              		.loc 1 381 0
+ 649              		.cfi_startproc
+ 650              		@ args = 0, pretend = 0, frame = 0
+ 651              		@ frame_needed = 0, uses_anonymous_args = 0
+ 652              	.LVL84:
+ 653 0000 70B5     		push	{r4, r5, r6, lr}
+ 654              		.cfi_def_cfa_offset 16
+ 655              		.cfi_offset 4, -16
+ 656              		.cfi_offset 5, -12
+ 657              		.cfi_offset 6, -8
+ 658              		.cfi_offset 14, -4
+ 659 0002 0500     		movs	r5, r0
+ 382:AS7262_psoc4.c ****     num |= hex_value_from_char(array[1]);
+ 660              		.loc 1 382 0
+ 661 0004 0078     		ldrb	r0, [r0]
+ 662              	.LVL85:
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 21
+
+
+ 663 0006 FFF7FEFF 		bl	hex_value_from_char
+ 664              	.LVL86:
+ 665 000a 0001     		lsls	r0, r0, #4
+ 666 000c C4B2     		uxtb	r4, r0
+ 667              	.LVL87:
+ 383:AS7262_psoc4.c ****     return num;
+ 668              		.loc 1 383 0
+ 669 000e 6878     		ldrb	r0, [r5, #1]
+ 670 0010 FFF7FEFF 		bl	hex_value_from_char
+ 671              	.LVL88:
+ 672 0014 2043     		orrs	r0, r4
+ 673 0016 C0B2     		uxtb	r0, r0
+ 674              	.LVL89:
+ 386:AS7262_psoc4.c **** 
+ 675              		.loc 1 386 0
+ 676              		@ sp needed
+ 677              	.LVL90:
+ 678 0018 70BD     		pop	{r4, r5, r6, pc}
+ 679              		.cfi_endproc
+ 680              	.LFE45:
+ 681              		.size	convert_hex_string, .-convert_hex_string
+ 682 001a C046     		.section	.text.ConvertDecimal,"ax",%progbits
+ 683              		.align	2
+ 684              		.global	ConvertDecimal
+ 685              		.code	16
+ 686              		.thumb_func
+ 687              		.type	ConvertDecimal, %function
+ 688              	ConvertDecimal:
+ 689              	.LFB47:
+ 400:AS7262_psoc4.c **** 
+ 401:AS7262_psoc4.c **** uint16 ConvertDecimal(uint8 array[], uint8 len) {
+ 690              		.loc 1 401 0
+ 691              		.cfi_startproc
+ 692              		@ args = 0, pretend = 0, frame = 0
+ 693              		@ frame_needed = 0, uses_anonymous_args = 0
+ 694              	.LVL91:
+ 695 0000 70B5     		push	{r4, r5, r6, lr}
+ 696              		.cfi_def_cfa_offset 16
+ 697              		.cfi_offset 4, -16
+ 698              		.cfi_offset 5, -12
+ 699              		.cfi_offset 6, -8
+ 700              		.cfi_offset 14, -4
+ 701 0002 0600     		movs	r6, r0
+ 702              	.LVL92:
+ 703              	.LBB4:
+ 402:AS7262_psoc4.c ****     uint16 num = 0;
+ 403:AS7262_psoc4.c ****     for (int i = 0; i < len; i++){
+ 704              		.loc 1 403 0
+ 705 0004 0025     		movs	r5, #0
+ 706              	.LBE4:
+ 402:AS7262_psoc4.c ****     uint16 num = 0;
+ 707              		.loc 1 402 0
+ 708 0006 0020     		movs	r0, #0
+ 709              	.LVL93:
+ 710              	.LBB5:
+ 711              		.loc 1 403 0
+ 712 0008 08E0     		b	.L39
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 22
+
+
+ 713              	.LVL94:
+ 714              	.L40:
+ 404:AS7262_psoc4.c ****         num = num * 10 + (array[i] - '0');
+ 715              		.loc 1 404 0 discriminator 3
+ 716 000a 725D     		ldrb	r2, [r6, r5]
+ 717 000c 8400     		lsls	r4, r0, #2
+ 718 000e 0019     		adds	r0, r0, r4
+ 719              	.LVL95:
+ 720 0010 4300     		lsls	r3, r0, #1
+ 721 0012 9B18     		adds	r3, r3, r2
+ 722 0014 9BB2     		uxth	r3, r3
+ 723 0016 303B     		subs	r3, r3, #48
+ 724 0018 98B2     		uxth	r0, r3
+ 725              	.LVL96:
+ 403:AS7262_psoc4.c ****         num = num * 10 + (array[i] - '0');
+ 726              		.loc 1 403 0 discriminator 3
+ 727 001a 0135     		adds	r5, r5, #1
+ 728              	.LVL97:
+ 729              	.L39:
+ 403:AS7262_psoc4.c ****         num = num * 10 + (array[i] - '0');
+ 730              		.loc 1 403 0 is_stmt 0 discriminator 1
+ 731 001c 8D42     		cmp	r5, r1
+ 732 001e F4DB     		blt	.L40
+ 733              	.LBE5:
+ 405:AS7262_psoc4.c ****     }
+ 406:AS7262_psoc4.c ****     return num;
+ 407:AS7262_psoc4.c **** }
+ 734              		.loc 1 407 0 is_stmt 1
+ 735              		@ sp needed
+ 736              	.LVL98:
+ 737              	.LVL99:
+ 738 0020 70BD     		pop	{r4, r5, r6, pc}
+ 739              		.cfi_endproc
+ 740              	.LFE47:
+ 741              		.size	ConvertDecimal, .-ConvertDecimal
+ 742 0022 C046     		.section	.text.AS7262_Commands,"ax",%progbits
+ 743              		.align	2
+ 744              		.global	AS7262_Commands
+ 745              		.code	16
+ 746              		.thumb_func
+ 747              		.type	AS7262_Commands, %function
+ 748              	AS7262_Commands:
+ 749              	.LFB36:
+ 132:AS7262_psoc4.c ****     switch ( buffer[7] ) {
+ 750              		.loc 1 132 0
+ 751              		.cfi_startproc
+ 752              		@ args = 0, pretend = 0, frame = 0
+ 753              		@ frame_needed = 0, uses_anonymous_args = 0
+ 754              	.LVL100:
+ 755 0000 70B5     		push	{r4, r5, r6, lr}
+ 756              		.cfi_def_cfa_offset 16
+ 757              		.cfi_offset 4, -16
+ 758              		.cfi_offset 5, -12
+ 759              		.cfi_offset 6, -8
+ 760              		.cfi_offset 14, -4
+ 761 0002 0400     		movs	r4, r0
+ 133:AS7262_psoc4.c ****         case READ_COMMANDS: ;  // a command to read 'READ' data is given, or register commands 'REG
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 23
+
+
+ 762              		.loc 1 133 0
+ 763 0004 C379     		ldrb	r3, [r0, #7]
+ 764 0006 473B     		subs	r3, r3, #71
+ 765 0008 DAB2     		uxtb	r2, r3
+ 766 000a 0B2A     		cmp	r2, #11
+ 767 000c 7AD8     		bhi	.L41
+ 768 000e 9300     		lsls	r3, r2, #2
+ 769 0010 3D4A     		ldr	r2, .L56
+ 770 0012 D358     		ldr	r3, [r2, r3]
+ 771 0014 9F46     		mov	pc, r3
+ 772              		.section	.rodata
+ 773              		.align	2
+ 774              	.L44:
+ 775 0000 AE000000 		.word	.L43
+ 776 0004 04010000 		.word	.L41
+ 777 0008 98000000 		.word	.L45
+ 778 000c 04010000 		.word	.L41
+ 779 0010 04010000 		.word	.L41
+ 780 0014 DE000000 		.word	.L46
+ 781 0018 04010000 		.word	.L41
+ 782 001c 04010000 		.word	.L41
+ 783 0020 04010000 		.word	.L41
+ 784 0024 C6000000 		.word	.L47
+ 785 0028 04010000 		.word	.L41
+ 786 002c 16000000 		.word	.L48
+ 787              		.section	.text.AS7262_Commands
+ 788              	.L48:
+ 789              	.LBB6:
+ 135:AS7262_psoc4.c ****                 if ( buffer[11] == 'W' ) {  // Write a register value
+ 790              		.loc 1 135 0
+ 791 0016 437A     		ldrb	r3, [r0, #9]
+ 792 0018 472B     		cmp	r3, #71
+ 793 001a 20D1     		bne	.L49
+ 136:AS7262_psoc4.c ****                     uint8 reg_to_write = convert_hex_string(&buffer[19]);
+ 794              		.loc 1 136 0
+ 795 001c C37A     		ldrb	r3, [r0, #11]
+ 796 001e 572B     		cmp	r3, #87
+ 797 0020 0CD1     		bne	.L50
+ 798              	.LBB7:
+ 137:AS7262_psoc4.c ****                     uint8 value_to_write = convert_hex_string(&buffer[24]);
+ 799              		.loc 1 137 0
+ 800 0022 1330     		adds	r0, r0, #19
+ 801              	.LVL101:
+ 802 0024 FFF7FEFF 		bl	convert_hex_string
+ 803              	.LVL102:
+ 804 0028 0500     		movs	r5, r0
+ 805              	.LVL103:
+ 138:AS7262_psoc4.c ****                     I2C_AS7262_Write(reg_to_write, value_to_write);
+ 806              		.loc 1 138 0
+ 807 002a 2000     		movs	r0, r4
+ 808 002c 1830     		adds	r0, r0, #24
+ 809 002e FFF7FEFF 		bl	convert_hex_string
+ 810              	.LVL104:
+ 811 0032 0100     		movs	r1, r0
+ 812              	.LVL105:
+ 139:AS7262_psoc4.c **** //                    LCD_Position(0, 0); 
+ 813              		.loc 1 139 0
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 24
+
+
+ 814 0034 2800     		movs	r0, r5
+ 815 0036 FFF7FEFF 		bl	I2C_AS7262_Write
+ 816              	.LVL106:
+ 817              	.LBE7:
+ 818 003a 10E0     		b	.L49
+ 819              	.LVL107:
+ 820              	.L50:
+ 148:AS7262_psoc4.c ****                     uint8 reg_to_read = convert_hex_string(&buffer[18]);
+ 821              		.loc 1 148 0
+ 822 003c 522B     		cmp	r3, #82
+ 823 003e 0ED1     		bne	.L49
+ 824              	.LBB8:
+ 149:AS7262_psoc4.c ****                     uint8 reg_value = I2C_AS7262_Read(reg_to_read);
+ 825              		.loc 1 149 0
+ 826 0040 1230     		adds	r0, r0, #18
+ 827              	.LVL108:
+ 828 0042 FFF7FEFF 		bl	convert_hex_string
+ 829              	.LVL109:
+ 150:AS7262_psoc4.c ****                     sprintf(USB_str, "REG_VALUE|0x%02X", reg_value);
+ 830              		.loc 1 150 0
+ 831 0046 FFF7FEFF 		bl	I2C_AS7262_Read
+ 832              	.LVL110:
+ 833 004a 0200     		movs	r2, r0
+ 834              	.LVL111:
+ 151:AS7262_psoc4.c **** //                    LCD_Position(0, 0); 
+ 835              		.loc 1 151 0
+ 836 004c 2F4D     		ldr	r5, .L56+4
+ 837 004e 3049     		ldr	r1, .L56+8
+ 838 0050 2800     		movs	r0, r5
+ 839 0052 FFF7FEFF 		bl	sprintf
+ 840              	.LVL112:
+ 156:AS7262_psoc4.c ****                 }
+ 841              		.loc 1 156 0
+ 842 0056 0E21     		movs	r1, #14
+ 843 0058 2800     		movs	r0, r5
+ 844 005a FFF7FEFF 		bl	USB_Export_Data
+ 845              	.LVL113:
+ 846              	.L49:
+ 847              	.LBE8:
+ 159:AS7262_psoc4.c **** //                LCD_Position(0, 0);
+ 848              		.loc 1 159 0
+ 849 005e 237B     		ldrb	r3, [r4, #12]
+ 850 0060 532B     		cmp	r3, #83
+ 851 0062 4FD1     		bne	.L41
+ 163:AS7262_psoc4.c **** //                    LCD_Position(0, 0);
+ 852              		.loc 1 163 0
+ 853 0064 E37C     		ldrb	r3, [r4, #19]
+ 854 0066 462B     		cmp	r3, #70
+ 855 0068 11D1     		bne	.L51
+ 856              	.LBB9:
+ 173:AS7262_psoc4.c ****                     uint led_reg_on = led_reg_hold;
+ 857              		.loc 1 173 0
+ 858 006a 2A4B     		ldr	r3, .L56+12
+ 859 006c 5C7C     		ldrb	r4, [r3, #17]
+ 860              	.LVL114:
+ 176:AS7262_psoc4.c ****                     
+ 861              		.loc 1 176 0
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 25
+
+
+ 862 006e 0821     		movs	r1, #8
+ 863 0070 2143     		orrs	r1, r4
+ 864 0072 C9B2     		uxtb	r1, r1
+ 865 0074 0720     		movs	r0, #7
+ 866 0076 FFF7FEFF 		bl	I2C_AS7262_Write
+ 867              	.LVL115:
+ 178:AS7262_psoc4.c ****                     
+ 868              		.loc 1 178 0
+ 869 007a 0720     		movs	r0, #7
+ 870 007c FFF7FEFF 		bl	I2C_AS7262_Read
+ 871              	.LVL116:
+ 181:AS7262_psoc4.c ****                     
+ 872              		.loc 1 181 0
+ 873 0080 FFF7FEFF 		bl	AS7262_SingleRead
+ 874              	.LVL117:
+ 183:AS7262_psoc4.c **** //                    LCD_Position(0, 0);
+ 875              		.loc 1 183 0
+ 876 0084 2100     		movs	r1, r4
+ 877 0086 0720     		movs	r0, #7
+ 878 0088 FFF7FEFF 		bl	I2C_AS7262_Write
+ 879              	.LVL118:
+ 880              	.LBE9:
+ 881 008c 3AE0     		b	.L41
+ 882              	.LVL119:
+ 883              	.L51:
+ 191:AS7262_psoc4.c **** //                    LCD_Position(0, 0);
+ 884              		.loc 1 191 0
+ 885 008e 4E2B     		cmp	r3, #78
+ 886 0090 38D1     		bne	.L41
+ 194:AS7262_psoc4.c **** //                    LCD_Position(0, 0);
+ 887              		.loc 1 194 0
+ 888 0092 FFF7FEFF 		bl	AS7262_SingleRead
+ 889              	.LVL120:
+ 890 0096 35E0     		b	.L41
+ 891              	.LVL121:
+ 892              	.L45:
+ 203:AS7262_psoc4.c ****             as7262.integration_time = new_integration_time;
+ 893              		.loc 1 203 0
+ 894 0098 1630     		adds	r0, r0, #22
+ 895              	.LVL122:
+ 896 009a 0321     		movs	r1, #3
+ 897 009c FFF7FEFF 		bl	ConvertDecimal
+ 898              	.LVL123:
+ 899 00a0 C1B2     		uxtb	r1, r0
+ 900              	.LVL124:
+ 204:AS7262_psoc4.c ****             I2C_AS7262_Write( AS726x_REG_INT, as7262.integration_time );
+ 901              		.loc 1 204 0
+ 902 00a2 1C4B     		ldr	r3, .L56+12
+ 903 00a4 D970     		strb	r1, [r3, #3]
+ 205:AS7262_psoc4.c ****             break;
+ 904              		.loc 1 205 0
+ 905 00a6 0520     		movs	r0, #5
+ 906 00a8 FFF7FEFF 		bl	I2C_AS7262_Write
+ 907              	.LVL125:
+ 206:AS7262_psoc4.c ****             
+ 908              		.loc 1 206 0
+ 909 00ac 2AE0     		b	.L41
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 26
+
+
+ 910              	.LVL126:
+ 911              	.L43:
+ 209:AS7262_psoc4.c ****             update_control_reg_value( &as7262 );
+ 912              		.loc 1 209 0
+ 913 00ae 0C30     		adds	r0, r0, #12
+ 914              	.LVL127:
+ 915 00b0 0121     		movs	r1, #1
+ 916 00b2 FFF7FEFF 		bl	ConvertDecimal
+ 917              	.LVL128:
+ 918 00b6 0300     		movs	r3, r0
+ 919 00b8 1648     		ldr	r0, .L56+12
+ 920 00ba 0322     		movs	r2, #3
+ 921 00bc 1340     		ands	r3, r2
+ 922 00be 4370     		strb	r3, [r0, #1]
+ 210:AS7262_psoc4.c ****             
+ 923              		.loc 1 210 0
+ 924 00c0 FFF7FEFF 		bl	update_control_reg_value
+ 925              	.LVL129:
+ 212:AS7262_psoc4.c ****         case SET_LED_POWER: ; // set the current through the main light source
+ 926              		.loc 1 212 0
+ 927 00c4 1EE0     		b	.L41
+ 928              	.LVL130:
+ 929              	.L47:
+ 214:AS7262_psoc4.c ****             update_LED_reg_value( &as7262 );
+ 930              		.loc 1 214 0
+ 931 00c6 1330     		adds	r0, r0, #19
+ 932              	.LVL131:
+ 933 00c8 0121     		movs	r1, #1
+ 934 00ca FFF7FEFF 		bl	ConvertDecimal
+ 935              	.LVL132:
+ 936 00ce 0300     		movs	r3, r0
+ 937 00d0 1048     		ldr	r0, .L56+12
+ 938 00d2 0322     		movs	r2, #3
+ 939 00d4 1340     		ands	r3, r2
+ 940 00d6 0371     		strb	r3, [r0, #4]
+ 215:AS7262_psoc4.c ****             break;
+ 941              		.loc 1 215 0
+ 942 00d8 FFF7FEFF 		bl	update_LED_reg_value
+ 943              	.LVL133:
+ 216:AS7262_psoc4.c ****         case LED_ON_OFF: ;  //  set if the LED should be on or off
+ 944              		.loc 1 216 0
+ 945 00dc 12E0     		b	.L41
+ 946              	.LVL134:
+ 947              	.L46:
+ 218:AS7262_psoc4.c ****                 as7262.LED_on = True;
+ 948              		.loc 1 218 0
+ 949 00de 437C     		ldrb	r3, [r0, #17]
+ 950 00e0 4E2B     		cmp	r3, #78
+ 951 00e2 01D0     		beq	.L52
+ 218:AS7262_psoc4.c ****                 as7262.LED_on = True;
+ 952              		.loc 1 218 0 is_stmt 0 discriminator 1
+ 953 00e4 6E2B     		cmp	r3, #110
+ 954 00e6 03D1     		bne	.L53
+ 955              	.L52:
+ 219:AS7262_psoc4.c ****             }
+ 956              		.loc 1 219 0 is_stmt 1
+ 957 00e8 0122     		movs	r2, #1
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 27
+
+
+ 958 00ea 0A4B     		ldr	r3, .L56+12
+ 959 00ec 5A71     		strb	r2, [r3, #5]
+ 960 00ee 06E0     		b	.L54
+ 961              	.L53:
+ 221:AS7262_psoc4.c ****                 as7262.LED_on = False;
+ 962              		.loc 1 221 0
+ 963 00f0 462B     		cmp	r3, #70
+ 964 00f2 01D0     		beq	.L55
+ 221:AS7262_psoc4.c ****                 as7262.LED_on = False;
+ 965              		.loc 1 221 0 is_stmt 0 discriminator 1
+ 966 00f4 662B     		cmp	r3, #102
+ 967 00f6 02D1     		bne	.L54
+ 968              	.L55:
+ 222:AS7262_psoc4.c ****             }
+ 969              		.loc 1 222 0 is_stmt 1
+ 970 00f8 0022     		movs	r2, #0
+ 971 00fa 064B     		ldr	r3, .L56+12
+ 972 00fc 5A71     		strb	r2, [r3, #5]
+ 973              	.L54:
+ 224:AS7262_psoc4.c ****             break;
+ 974              		.loc 1 224 0
+ 975 00fe 0548     		ldr	r0, .L56+12
+ 976              	.LVL135:
+ 977 0100 FFF7FEFF 		bl	update_LED_reg_value
+ 978              	.LVL136:
+ 979              	.L41:
+ 980              	.LBE6:
+ 227:AS7262_psoc4.c **** 
+ 981              		.loc 1 227 0
+ 982              		@ sp needed
+ 983 0104 70BD     		pop	{r4, r5, r6, pc}
+ 984              	.L57:
+ 985 0106 C046     		.align	2
+ 986              	.L56:
+ 987 0108 00000000 		.word	.L44
+ 988 010c 00000000 		.word	USB_str
+ 989 0110 08000000 		.word	.LC10
+ 990 0114 00000000 		.word	.LANCHOR0
+ 991              		.cfi_endproc
+ 992              	.LFE36:
+ 993              		.size	AS7262_Commands, .-AS7262_Commands
+ 994              		.comm	color_data,24,4
+ 995              		.comm	all_calibrated_data,28,4
+ 996              		.global	as7262
+ 997              		.comm	write_buffer,2,4
+ 998              		.comm	read_buffer,24,4
+ 999              		.comm	USB_str,40,4
+ 1000              		.comm	OUT_Data_Buffer,40,4
+ 1001              		.data
+ 1002              		.align	2
+ 1003              		.set	.LANCHOR0,. + 0
+ 1004              		.type	as7262, %object
+ 1005              		.size	as7262, 20
+ 1006              	as7262:
+ 1007 0000 03       		.byte	3
+ 1008 0001 00       		.byte	0
+ 1009 0002 01       		.byte	1
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 28
+
+
+ 1010 0003 FF       		.byte	-1
+ 1011 0004 00       		.byte	0
+ 1012 0005 00       		.byte	0
+ 1013 0006 02       		.byte	2
+ 1014 0007 00       		.byte	0
+ 1015 0008 00000000 		.space	12
+ 1015      00000000 
+ 1015      00000000 
+ 1016              		.section	.rodata.str1.4,"aMS",%progbits,1
+ 1017              		.align	2
+ 1018              	.LC6:
+ 1019 0000 4641494C 		.ascii	"FAILED\000"
+ 1019      454400
+ 1020 0007 00       		.space	1
+ 1021              	.LC10:
+ 1022 0008 5245475F 		.ascii	"REG_VALUE|0x%02X\000"
+ 1022      56414C55 
+ 1022      457C3078 
+ 1022      25303258 
+ 1022      00
+ 1023              		.text
+ 1024              	.Letext0:
+ 1025              		.file 2 "Generated_Source\\PSoC4/cytypes.h"
+ 1026              		.file 3 "c:\\program files (x86)\\cypress\\psoc creator\\4.1\\psoc creator\\import\\gnu\\arm\\5.4.
+ 1027              		.file 4 "AS7262_psoc4.h"
+ 1028              		.file 5 "usb_psoc4.h"
+ 1029              		.file 6 "i2c_functions.h"
+ 1030              		.file 7 "Generated_Source\\PSoC4/CyLib.h"
+ 1031              		.file 8 "c:\\program files (x86)\\cypress\\psoc creator\\4.1\\psoc creator\\import\\gnu\\arm\\5.4.
+ 1032              		.section	.debug_info,"",%progbits
+ 1033              	.Ldebug_info0:
+ 1034 0000 620A0000 		.4byte	0xa62
+ 1035 0004 0400     		.2byte	0x4
+ 1036 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 1037 000a 04       		.byte	0x4
+ 1038 000b 01       		.uleb128 0x1
+ 1039 000c DE000000 		.4byte	.LASF80
+ 1040 0010 0C       		.byte	0xc
+ 1041 0011 9D020000 		.4byte	.LASF81
+ 1042 0015 98010000 		.4byte	.LASF82
+ 1043 0019 18000000 		.4byte	.Ldebug_ranges0+0x18
+ 1044 001d 00000000 		.4byte	0
+ 1045 0021 00000000 		.4byte	.Ldebug_line0
+ 1046 0025 02       		.uleb128 0x2
+ 1047 0026 01       		.byte	0x1
+ 1048 0027 06       		.byte	0x6
+ 1049 0028 C6020000 		.4byte	.LASF0
+ 1050 002c 02       		.uleb128 0x2
+ 1051 002d 01       		.byte	0x1
+ 1052 002e 08       		.byte	0x8
+ 1053 002f 8F020000 		.4byte	.LASF1
+ 1054 0033 02       		.uleb128 0x2
+ 1055 0034 02       		.byte	0x2
+ 1056 0035 05       		.byte	0x5
+ 1057 0036 C7000000 		.4byte	.LASF2
+ 1058 003a 02       		.uleb128 0x2
+ 1059 003b 02       		.byte	0x2
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 29
+
+
+ 1060 003c 07       		.byte	0x7
+ 1061 003d 74030000 		.4byte	.LASF3
+ 1062 0041 02       		.uleb128 0x2
+ 1063 0042 04       		.byte	0x4
+ 1064 0043 05       		.byte	0x5
+ 1065 0044 39020000 		.4byte	.LASF4
+ 1066 0048 02       		.uleb128 0x2
+ 1067 0049 04       		.byte	0x4
+ 1068 004a 07       		.byte	0x7
+ 1069 004b FC030000 		.4byte	.LASF5
+ 1070 004f 02       		.uleb128 0x2
+ 1071 0050 08       		.byte	0x8
+ 1072 0051 05       		.byte	0x5
+ 1073 0052 0A020000 		.4byte	.LASF6
+ 1074 0056 02       		.uleb128 0x2
+ 1075 0057 08       		.byte	0x8
+ 1076 0058 07       		.byte	0x7
+ 1077 0059 D2020000 		.4byte	.LASF7
+ 1078 005d 03       		.uleb128 0x3
+ 1079 005e 04       		.byte	0x4
+ 1080 005f 05       		.byte	0x5
+ 1081 0060 696E7400 		.ascii	"int\000"
+ 1082 0064 02       		.uleb128 0x2
+ 1083 0065 04       		.byte	0x4
+ 1084 0066 07       		.byte	0x7
+ 1085 0067 E9020000 		.4byte	.LASF8
+ 1086 006b 04       		.uleb128 0x4
+ 1087 006c 82010000 		.4byte	.LASF9
+ 1088 0070 02       		.byte	0x2
+ 1089 0071 D201     		.2byte	0x1d2
+ 1090 0073 2C000000 		.4byte	0x2c
+ 1091 0077 04       		.uleb128 0x4
+ 1092 0078 C2030000 		.4byte	.LASF10
+ 1093 007c 02       		.byte	0x2
+ 1094 007d D301     		.2byte	0x1d3
+ 1095 007f 3A000000 		.4byte	0x3a
+ 1096 0083 04       		.uleb128 0x4
+ 1097 0084 17000000 		.4byte	.LASF11
+ 1098 0088 02       		.byte	0x2
+ 1099 0089 D801     		.2byte	0x1d8
+ 1100 008b 8F000000 		.4byte	0x8f
+ 1101 008f 02       		.uleb128 0x2
+ 1102 0090 04       		.byte	0x4
+ 1103 0091 04       		.byte	0x4
+ 1104 0092 F2010000 		.4byte	.LASF12
+ 1105 0096 02       		.uleb128 0x2
+ 1106 0097 08       		.byte	0x8
+ 1107 0098 04       		.byte	0x4
+ 1108 0099 6D040000 		.4byte	.LASF13
+ 1109 009d 02       		.uleb128 0x2
+ 1110 009e 01       		.byte	0x1
+ 1111 009f 08       		.byte	0x8
+ 1112 00a0 8E030000 		.4byte	.LASF14
+ 1113 00a4 02       		.uleb128 0x2
+ 1114 00a5 08       		.byte	0x8
+ 1115 00a6 04       		.byte	0x4
+ 1116 00a7 7A020000 		.4byte	.LASF15
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 30
+
+
+ 1117 00ab 02       		.uleb128 0x2
+ 1118 00ac 04       		.byte	0x4
+ 1119 00ad 07       		.byte	0x7
+ 1120 00ae 57000000 		.4byte	.LASF16
+ 1121 00b2 05       		.uleb128 0x5
+ 1122 00b3 04       		.byte	0x4
+ 1123 00b4 6B000000 		.4byte	0x6b
+ 1124 00b8 06       		.uleb128 0x6
+ 1125 00b9 9F000000 		.4byte	.LASF17
+ 1126 00bd 03       		.byte	0x3
+ 1127 00be 6C       		.byte	0x6c
+ 1128 00bf 64000000 		.4byte	0x64
+ 1129 00c3 07       		.uleb128 0x7
+ 1130 00c4 14       		.byte	0x14
+ 1131 00c5 04       		.byte	0x4
+ 1132 00c6 1A       		.byte	0x1a
+ 1133 00c7 74010000 		.4byte	0x174
+ 1134 00cb 08       		.uleb128 0x8
+ 1135 00cc AC030000 		.4byte	.LASF18
+ 1136 00d0 04       		.byte	0x4
+ 1137 00d1 1B       		.byte	0x1b
+ 1138 00d2 6B000000 		.4byte	0x6b
+ 1139 00d6 00       		.byte	0
+ 1140 00d7 08       		.uleb128 0x8
+ 1141 00d8 5F030000 		.4byte	.LASF19
+ 1142 00dc 04       		.byte	0x4
+ 1143 00dd 1C       		.byte	0x1c
+ 1144 00de 6B000000 		.4byte	0x6b
+ 1145 00e2 01       		.byte	0x1
+ 1146 00e3 08       		.uleb128 0x8
+ 1147 00e4 4A000000 		.4byte	.LASF20
+ 1148 00e8 04       		.byte	0x4
+ 1149 00e9 1D       		.byte	0x1d
+ 1150 00ea 6B000000 		.4byte	0x6b
+ 1151 00ee 02       		.byte	0x2
+ 1152 00ef 08       		.uleb128 0x8
+ 1153 00f0 22030000 		.4byte	.LASF21
+ 1154 00f4 04       		.byte	0x4
+ 1155 00f5 1E       		.byte	0x1e
+ 1156 00f6 6B000000 		.4byte	0x6b
+ 1157 00fa 03       		.byte	0x3
+ 1158 00fb 08       		.uleb128 0x8
+ 1159 00fc E0030000 		.4byte	.LASF22
+ 1160 0100 04       		.byte	0x4
+ 1161 0101 1F       		.byte	0x1f
+ 1162 0102 6B000000 		.4byte	0x6b
+ 1163 0106 04       		.byte	0x4
+ 1164 0107 08       		.uleb128 0x8
+ 1165 0108 D1000000 		.4byte	.LASF23
+ 1166 010c 04       		.byte	0x4
+ 1167 010d 20       		.byte	0x20
+ 1168 010e 6B000000 		.4byte	0x6b
+ 1169 0112 05       		.byte	0x5
+ 1170 0113 08       		.uleb128 0x8
+ 1171 0114 0C030000 		.4byte	.LASF24
+ 1172 0118 04       		.byte	0x4
+ 1173 0119 21       		.byte	0x21
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 31
+
+
+ 1174 011a 6B000000 		.4byte	0x6b
+ 1175 011e 06       		.byte	0x6
+ 1176 011f 08       		.uleb128 0x8
+ 1177 0120 43030000 		.4byte	.LASF25
+ 1178 0124 04       		.byte	0x4
+ 1179 0125 22       		.byte	0x22
+ 1180 0126 6B000000 		.4byte	0x6b
+ 1181 012a 07       		.byte	0x7
+ 1182 012b 08       		.uleb128 0x8
+ 1183 012c 1F000000 		.4byte	.LASF26
+ 1184 0130 04       		.byte	0x4
+ 1185 0131 23       		.byte	0x23
+ 1186 0132 6B000000 		.4byte	0x6b
+ 1187 0136 08       		.byte	0x8
+ 1188 0137 08       		.uleb128 0x8
+ 1189 0138 C5040000 		.4byte	.LASF27
+ 1190 013c 04       		.byte	0x4
+ 1191 013d 24       		.byte	0x24
+ 1192 013e 6B000000 		.4byte	0x6b
+ 1193 0142 09       		.byte	0x9
+ 1194 0143 08       		.uleb128 0x8
+ 1195 0144 7C000000 		.4byte	.LASF28
+ 1196 0148 04       		.byte	0x4
+ 1197 0149 25       		.byte	0x25
+ 1198 014a 77000000 		.4byte	0x77
+ 1199 014e 0A       		.byte	0xa
+ 1200 014f 08       		.uleb128 0x8
+ 1201 0150 01030000 		.4byte	.LASF29
+ 1202 0154 04       		.byte	0x4
+ 1203 0155 26       		.byte	0x26
+ 1204 0156 B2000000 		.4byte	0xb2
+ 1205 015a 0C       		.byte	0xc
+ 1206 015b 08       		.uleb128 0x8
+ 1207 015c D0040000 		.4byte	.LASF30
+ 1208 0160 04       		.byte	0x4
+ 1209 0161 27       		.byte	0x27
+ 1210 0162 6B000000 		.4byte	0x6b
+ 1211 0166 10       		.byte	0x10
+ 1212 0167 08       		.uleb128 0x8
+ 1213 0168 6C010000 		.4byte	.LASF31
+ 1214 016c 04       		.byte	0x4
+ 1215 016d 28       		.byte	0x28
+ 1216 016e 6B000000 		.4byte	0x6b
+ 1217 0172 11       		.byte	0x11
+ 1218 0173 00       		.byte	0
+ 1219 0174 06       		.uleb128 0x6
+ 1220 0175 64030000 		.4byte	.LASF32
+ 1221 0179 04       		.byte	0x4
+ 1222 017a 29       		.byte	0x29
+ 1223 017b C3000000 		.4byte	0xc3
+ 1224 017f 09       		.uleb128 0x9
+ 1225 0180 60000000 		.4byte	.LASF83
+ 1226 0184 1C       		.byte	0x1c
+ 1227 0185 01       		.byte	0x1
+ 1228 0186 46       		.byte	0x46
+ 1229 0187 A2010000 		.4byte	0x1a2
+ 1230 018b 0A       		.uleb128 0xa
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 32
+
+
+ 1231 018c A5040000 		.4byte	.LASF33
+ 1232 0190 01       		.byte	0x1
+ 1233 0191 47       		.byte	0x47
+ 1234 0192 A2010000 		.4byte	0x1a2
+ 1235 0196 0A       		.uleb128 0xa
+ 1236 0197 5D020000 		.4byte	.LASF34
+ 1237 019b 01       		.byte	0x1
+ 1238 019c 48       		.byte	0x48
+ 1239 019d B2010000 		.4byte	0x1b2
+ 1240 01a1 00       		.byte	0
+ 1241 01a2 0B       		.uleb128 0xb
+ 1242 01a3 6B000000 		.4byte	0x6b
+ 1243 01a7 B2010000 		.4byte	0x1b2
+ 1244 01ab 0C       		.uleb128 0xc
+ 1245 01ac AB000000 		.4byte	0xab
+ 1246 01b0 18       		.byte	0x18
+ 1247 01b1 00       		.byte	0
+ 1248 01b2 0B       		.uleb128 0xb
+ 1249 01b3 83000000 		.4byte	0x83
+ 1250 01b7 C2010000 		.4byte	0x1c2
+ 1251 01bb 0C       		.uleb128 0xc
+ 1252 01bc AB000000 		.4byte	0xab
+ 1253 01c0 05       		.byte	0x5
+ 1254 01c1 00       		.byte	0
+ 1255 01c2 0D       		.uleb128 0xd
+ 1256 01c3 85040000 		.4byte	.LASF35
+ 1257 01c7 01       		.byte	0x1
+ 1258 01c8 5501     		.2byte	0x155
+ 1259 01ca 6B000000 		.4byte	0x6b
+ 1260 01ce 00000000 		.4byte	.LFB42
+ 1261 01d2 20000000 		.4byte	.LFE42-.LFB42
+ 1262 01d6 01       		.uleb128 0x1
+ 1263 01d7 9C       		.byte	0x9c
+ 1264 01d8 18020000 		.4byte	0x218
+ 1265 01dc 0E       		.uleb128 0xe
+ 1266 01dd 86020000 		.4byte	.LASF37
+ 1267 01e1 01       		.byte	0x1
+ 1268 01e2 5501     		.2byte	0x155
+ 1269 01e4 6B000000 		.4byte	0x6b
+ 1270 01e8 00000000 		.4byte	.LLST0
+ 1271 01ec 0F       		.uleb128 0xf
+ 1272 01ed 87030000 		.4byte	.LASF39
+ 1273 01f1 01       		.byte	0x1
+ 1274 01f2 5601     		.2byte	0x156
+ 1275 01f4 6B000000 		.4byte	0x6b
+ 1276 01f8 10       		.uleb128 0x10
+ 1277 01f9 12000000 		.4byte	.LVL2
+ 1278 01fd 2E0A0000 		.4byte	0xa2e
+ 1279 0201 11       		.uleb128 0x11
+ 1280 0202 01       		.uleb128 0x1
+ 1281 0203 50       		.byte	0x50
+ 1282 0204 02       		.uleb128 0x2
+ 1283 0205 08       		.byte	0x8
+ 1284 0206 49       		.byte	0x49
+ 1285 0207 11       		.uleb128 0x11
+ 1286 0208 01       		.uleb128 0x1
+ 1287 0209 51       		.byte	0x51
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 33
+
+
+ 1288 020a 02       		.uleb128 0x2
+ 1289 020b 74       		.byte	0x74
+ 1290 020c 00       		.sleb128 0
+ 1291 020d 11       		.uleb128 0x11
+ 1292 020e 01       		.uleb128 0x1
+ 1293 020f 53       		.byte	0x53
+ 1294 0210 05       		.uleb128 0x5
+ 1295 0211 03       		.byte	0x3
+ 1296 0212 0C000000 		.4byte	.LANCHOR0+12
+ 1297 0216 00       		.byte	0
+ 1298 0217 00       		.byte	0
+ 1299 0218 0D       		.uleb128 0xd
+ 1300 0219 93030000 		.4byte	.LASF36
+ 1301 021d 01       		.byte	0x1
+ 1302 021e 7601     		.2byte	0x176
+ 1303 0220 6B000000 		.4byte	0x6b
+ 1304 0224 00000000 		.4byte	.LFB44
+ 1305 0228 18000000 		.4byte	.LFE44-.LFB44
+ 1306 022c 01       		.uleb128 0x1
+ 1307 022d 9C       		.byte	0x9c
+ 1308 022e 78020000 		.4byte	0x278
+ 1309 0232 0E       		.uleb128 0xe
+ 1310 0233 86020000 		.4byte	.LASF37
+ 1311 0237 01       		.byte	0x1
+ 1312 0238 7601     		.2byte	0x176
+ 1313 023a 6B000000 		.4byte	0x6b
+ 1314 023e 21000000 		.4byte	.LLST1
+ 1315 0242 0E       		.uleb128 0xe
+ 1316 0243 D8000000 		.4byte	.LASF38
+ 1317 0247 01       		.byte	0x1
+ 1318 0248 7601     		.2byte	0x176
+ 1319 024a 6B000000 		.4byte	0x6b
+ 1320 024e 51000000 		.4byte	.LLST2
+ 1321 0252 0F       		.uleb128 0xf
+ 1322 0253 87030000 		.4byte	.LASF39
+ 1323 0257 01       		.byte	0x1
+ 1324 0258 7701     		.2byte	0x177
+ 1325 025a 6B000000 		.4byte	0x6b
+ 1326 025e 10       		.uleb128 0x10
+ 1327 025f 10000000 		.4byte	.LVL6
+ 1328 0263 390A0000 		.4byte	0xa39
+ 1329 0267 11       		.uleb128 0x11
+ 1330 0268 01       		.uleb128 0x1
+ 1331 0269 50       		.byte	0x50
+ 1332 026a 02       		.uleb128 0x2
+ 1333 026b 08       		.byte	0x8
+ 1334 026c 49       		.byte	0x49
+ 1335 026d 11       		.uleb128 0x11
+ 1336 026e 01       		.uleb128 0x1
+ 1337 026f 51       		.byte	0x51
+ 1338 0270 05       		.uleb128 0x5
+ 1339 0271 03       		.byte	0x3
+ 1340 0272 00000000 		.4byte	write_buffer
+ 1341 0276 00       		.byte	0
+ 1342 0277 00       		.byte	0
+ 1343 0278 0D       		.uleb128 0xd
+ 1344 0279 33030000 		.4byte	.LASF40
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 34
+
+
+ 1345 027d 01       		.byte	0x1
+ 1346 027e 2B01     		.2byte	0x12b
+ 1347 0280 6B000000 		.4byte	0x6b
+ 1348 0284 00000000 		.4byte	.LFB41
+ 1349 0288 48000000 		.4byte	.LFE41-.LFB41
+ 1350 028c 01       		.uleb128 0x1
+ 1351 028d 9C       		.byte	0x9c
+ 1352 028e 64030000 		.4byte	0x364
+ 1353 0292 0E       		.uleb128 0xe
+ 1354 0293 86020000 		.4byte	.LASF37
+ 1355 0297 01       		.byte	0x1
+ 1356 0298 2B01     		.2byte	0x12b
+ 1357 029a 6B000000 		.4byte	0x6b
+ 1358 029e 81000000 		.4byte	.LLST3
+ 1359 02a2 12       		.uleb128 0x12
+ 1360 02a3 87030000 		.4byte	.LASF39
+ 1361 02a7 01       		.byte	0x1
+ 1362 02a8 2C01     		.2byte	0x12c
+ 1363 02aa 6B000000 		.4byte	0x6b
+ 1364 02ae A2000000 		.4byte	.LLST4
+ 1365 02b2 13       		.uleb128 0x13
+ 1366 02b3 0E000000 		.4byte	.LBB2
+ 1367 02b7 06000000 		.4byte	.LBE2-.LBB2
+ 1368 02bb DC020000 		.4byte	0x2dc
+ 1369 02bf 0F       		.uleb128 0xf
+ 1370 02c0 BD030000 		.4byte	.LASF41
+ 1371 02c4 01       		.byte	0x1
+ 1372 02c5 3301     		.2byte	0x133
+ 1373 02c7 6B000000 		.4byte	0x6b
+ 1374 02cb 10       		.uleb128 0x10
+ 1375 02cc 14000000 		.4byte	.LVL11
+ 1376 02d0 C2010000 		.4byte	0x1c2
+ 1377 02d4 11       		.uleb128 0x11
+ 1378 02d5 01       		.uleb128 0x1
+ 1379 02d6 50       		.byte	0x50
+ 1380 02d7 02       		.uleb128 0x2
+ 1381 02d8 74       		.byte	0x74
+ 1382 02d9 00       		.sleb128 0
+ 1383 02da 00       		.byte	0
+ 1384 02db 00       		.byte	0
+ 1385 02dc 14       		.uleb128 0x14
+ 1386 02dd 0A000000 		.4byte	.LVL9
+ 1387 02e1 C2010000 		.4byte	0x1c2
+ 1388 02e5 EF020000 		.4byte	0x2ef
+ 1389 02e9 11       		.uleb128 0x11
+ 1390 02ea 01       		.uleb128 0x1
+ 1391 02eb 50       		.byte	0x50
+ 1392 02ec 01       		.uleb128 0x1
+ 1393 02ed 30       		.byte	0x30
+ 1394 02ee 00       		.byte	0
+ 1395 02ef 14       		.uleb128 0x14
+ 1396 02f0 1A000000 		.4byte	.LVL12
+ 1397 02f4 C2010000 		.4byte	0x1c2
+ 1398 02f8 02030000 		.4byte	0x302
+ 1399 02fc 11       		.uleb128 0x11
+ 1400 02fd 01       		.uleb128 0x1
+ 1401 02fe 50       		.byte	0x50
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 35
+
+
+ 1402 02ff 01       		.uleb128 0x1
+ 1403 0300 30       		.byte	0x30
+ 1404 0301 00       		.byte	0
+ 1405 0302 14       		.uleb128 0x14
+ 1406 0303 24000000 		.4byte	.LVL14
+ 1407 0307 440A0000 		.4byte	0xa44
+ 1408 030b 15030000 		.4byte	0x315
+ 1409 030f 11       		.uleb128 0x11
+ 1410 0310 01       		.uleb128 0x1
+ 1411 0311 50       		.byte	0x50
+ 1412 0312 01       		.uleb128 0x1
+ 1413 0313 31       		.byte	0x31
+ 1414 0314 00       		.byte	0
+ 1415 0315 14       		.uleb128 0x14
+ 1416 0316 2E000000 		.4byte	.LVL17
+ 1417 031a 18020000 		.4byte	0x218
+ 1418 031e 2E030000 		.4byte	0x32e
+ 1419 0322 11       		.uleb128 0x11
+ 1420 0323 01       		.uleb128 0x1
+ 1421 0324 50       		.byte	0x50
+ 1422 0325 01       		.uleb128 0x1
+ 1423 0326 31       		.byte	0x31
+ 1424 0327 11       		.uleb128 0x11
+ 1425 0328 01       		.uleb128 0x1
+ 1426 0329 51       		.byte	0x51
+ 1427 032a 02       		.uleb128 0x2
+ 1428 032b 74       		.byte	0x74
+ 1429 032c 00       		.sleb128 0
+ 1430 032d 00       		.byte	0
+ 1431 032e 14       		.uleb128 0x14
+ 1432 032f 34000000 		.4byte	.LVL18
+ 1433 0333 C2010000 		.4byte	0x1c2
+ 1434 0337 41030000 		.4byte	0x341
+ 1435 033b 11       		.uleb128 0x11
+ 1436 033c 01       		.uleb128 0x1
+ 1437 033d 50       		.byte	0x50
+ 1438 033e 01       		.uleb128 0x1
+ 1439 033f 30       		.byte	0x30
+ 1440 0340 00       		.byte	0
+ 1441 0341 14       		.uleb128 0x14
+ 1442 0342 3E000000 		.4byte	.LVL20
+ 1443 0346 440A0000 		.4byte	0xa44
+ 1444 034a 54030000 		.4byte	0x354
+ 1445 034e 11       		.uleb128 0x11
+ 1446 034f 01       		.uleb128 0x1
+ 1447 0350 50       		.byte	0x50
+ 1448 0351 01       		.uleb128 0x1
+ 1449 0352 31       		.byte	0x31
+ 1450 0353 00       		.byte	0
+ 1451 0354 10       		.uleb128 0x10
+ 1452 0355 46000000 		.4byte	.LVL23
+ 1453 0359 C2010000 		.4byte	0x1c2
+ 1454 035d 11       		.uleb128 0x11
+ 1455 035e 01       		.uleb128 0x1
+ 1456 035f 50       		.byte	0x50
+ 1457 0360 01       		.uleb128 0x1
+ 1458 0361 32       		.byte	0x32
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 36
+
+
+ 1459 0362 00       		.byte	0
+ 1460 0363 00       		.byte	0
+ 1461 0364 15       		.uleb128 0x15
+ 1462 0365 21040000 		.4byte	.LASF49
+ 1463 0369 01       		.byte	0x1
+ 1464 036a 1F01     		.2byte	0x11f
+ 1465 036c 00000000 		.4byte	.LFB40
+ 1466 0370 28000000 		.4byte	.LFE40-.LFB40
+ 1467 0374 01       		.uleb128 0x1
+ 1468 0375 9C       		.byte	0x9c
+ 1469 0376 A3030000 		.4byte	0x3a3
+ 1470 037a 16       		.uleb128 0x16
+ 1471 037b 02000000 		.4byte	.LBB3
+ 1472 037f 1A000000 		.4byte	.LBE3-.LBB3
+ 1473 0383 17       		.uleb128 0x17
+ 1474 0384 6900     		.ascii	"i\000"
+ 1475 0386 01       		.byte	0x1
+ 1476 0387 2001     		.2byte	0x120
+ 1477 0389 6B000000 		.4byte	0x6b
+ 1478 038d E1000000 		.4byte	.LLST5
+ 1479 0391 10       		.uleb128 0x10
+ 1480 0392 10000000 		.4byte	.LVL26
+ 1481 0396 78020000 		.4byte	0x278
+ 1482 039a 11       		.uleb128 0x11
+ 1483 039b 01       		.uleb128 0x1
+ 1484 039c 50       		.byte	0x50
+ 1485 039d 02       		.uleb128 0x2
+ 1486 039e 74       		.byte	0x74
+ 1487 039f 14       		.sleb128 20
+ 1488 03a0 00       		.byte	0
+ 1489 03a1 00       		.byte	0
+ 1490 03a2 00       		.byte	0
+ 1491 03a3 0D       		.uleb128 0xd
+ 1492 03a4 74040000 		.4byte	.LASF42
+ 1493 03a8 01       		.byte	0x1
+ 1494 03a9 5F01     		.2byte	0x15f
+ 1495 03ab 6B000000 		.4byte	0x6b
+ 1496 03af 00000000 		.4byte	.LFB43
+ 1497 03b3 32000000 		.4byte	.LFE43-.LFB43
+ 1498 03b7 01       		.uleb128 0x1
+ 1499 03b8 9C       		.byte	0x9c
+ 1500 03b9 42040000 		.4byte	0x442
+ 1501 03bd 0E       		.uleb128 0xe
+ 1502 03be 86020000 		.4byte	.LASF37
+ 1503 03c2 01       		.byte	0x1
+ 1504 03c3 5F01     		.2byte	0x15f
+ 1505 03c5 6B000000 		.4byte	0x6b
+ 1506 03c9 0B010000 		.4byte	.LLST6
+ 1507 03cd 0E       		.uleb128 0xe
+ 1508 03ce D8000000 		.4byte	.LASF38
+ 1509 03d2 01       		.byte	0x1
+ 1510 03d3 5F01     		.2byte	0x15f
+ 1511 03d5 6B000000 		.4byte	0x6b
+ 1512 03d9 2C010000 		.4byte	.LLST7
+ 1513 03dd 12       		.uleb128 0x12
+ 1514 03de 87030000 		.4byte	.LASF39
+ 1515 03e2 01       		.byte	0x1
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 37
+
+
+ 1516 03e3 6001     		.2byte	0x160
+ 1517 03e5 6B000000 		.4byte	0x6b
+ 1518 03e9 4D010000 		.4byte	.LLST8
+ 1519 03ed 14       		.uleb128 0x14
+ 1520 03ee 0C000000 		.4byte	.LVL32
+ 1521 03f2 C2010000 		.4byte	0x1c2
+ 1522 03f6 00040000 		.4byte	0x400
+ 1523 03fa 11       		.uleb128 0x11
+ 1524 03fb 01       		.uleb128 0x1
+ 1525 03fc 50       		.byte	0x50
+ 1526 03fd 01       		.uleb128 0x1
+ 1527 03fe 30       		.byte	0x30
+ 1528 03ff 00       		.byte	0
+ 1529 0400 14       		.uleb128 0x14
+ 1530 0401 1E000000 		.4byte	.LVL34
+ 1531 0405 18020000 		.4byte	0x218
+ 1532 0409 19040000 		.4byte	0x419
+ 1533 040d 11       		.uleb128 0x11
+ 1534 040e 01       		.uleb128 0x1
+ 1535 040f 50       		.byte	0x50
+ 1536 0410 01       		.uleb128 0x1
+ 1537 0411 31       		.byte	0x31
+ 1538 0412 11       		.uleb128 0x11
+ 1539 0413 01       		.uleb128 0x1
+ 1540 0414 51       		.byte	0x51
+ 1541 0415 02       		.uleb128 0x2
+ 1542 0416 74       		.byte	0x74
+ 1543 0417 00       		.sleb128 0
+ 1544 0418 00       		.byte	0
+ 1545 0419 14       		.uleb128 0x14
+ 1546 041a 24000000 		.4byte	.LVL35
+ 1547 041e C2010000 		.4byte	0x1c2
+ 1548 0422 2C040000 		.4byte	0x42c
+ 1549 0426 11       		.uleb128 0x11
+ 1550 0427 01       		.uleb128 0x1
+ 1551 0428 50       		.byte	0x50
+ 1552 0429 01       		.uleb128 0x1
+ 1553 042a 30       		.byte	0x30
+ 1554 042b 00       		.byte	0
+ 1555 042c 10       		.uleb128 0x10
+ 1556 042d 30000000 		.4byte	.LVL37
+ 1557 0431 18020000 		.4byte	0x218
+ 1558 0435 11       		.uleb128 0x11
+ 1559 0436 01       		.uleb128 0x1
+ 1560 0437 50       		.byte	0x50
+ 1561 0438 01       		.uleb128 0x1
+ 1562 0439 31       		.byte	0x31
+ 1563 043a 11       		.uleb128 0x11
+ 1564 043b 01       		.uleb128 0x1
+ 1565 043c 51       		.byte	0x51
+ 1566 043d 02       		.uleb128 0x2
+ 1567 043e 75       		.byte	0x75
+ 1568 043f 00       		.sleb128 0
+ 1569 0440 00       		.byte	0
+ 1570 0441 00       		.byte	0
+ 1571 0442 18       		.uleb128 0x18
+ 1572 0443 E2040000 		.4byte	.LASF43
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 38
+
+
+ 1573 0447 01       		.byte	0x1
+ 1574 0448 E5       		.byte	0xe5
+ 1575 0449 6B000000 		.4byte	0x6b
+ 1576 044d 00000000 		.4byte	.LFB37
+ 1577 0451 24000000 		.4byte	.LFE37-.LFB37
+ 1578 0455 01       		.uleb128 0x1
+ 1579 0456 9C       		.byte	0x9c
+ 1580 0457 8F040000 		.4byte	0x48f
+ 1581 045b 19       		.uleb128 0x19
+ 1582 045c 3F000000 		.4byte	.LASF44
+ 1583 0460 01       		.byte	0x1
+ 1584 0461 E5       		.byte	0xe5
+ 1585 0462 8F040000 		.4byte	0x48f
+ 1586 0466 6B010000 		.4byte	.LLST9
+ 1587 046a 1A       		.uleb128 0x1a
+ 1588 046b F0030000 		.4byte	.LASF45
+ 1589 046f 01       		.byte	0x1
+ 1590 0470 E6       		.byte	0xe6
+ 1591 0471 6B000000 		.4byte	0x6b
+ 1592 0475 97010000 		.4byte	.LLST10
+ 1593 0479 10       		.uleb128 0x10
+ 1594 047a 1E000000 		.4byte	.LVL41
+ 1595 047e A3030000 		.4byte	0x3a3
+ 1596 0482 11       		.uleb128 0x11
+ 1597 0483 01       		.uleb128 0x1
+ 1598 0484 50       		.byte	0x50
+ 1599 0485 01       		.uleb128 0x1
+ 1600 0486 34       		.byte	0x34
+ 1601 0487 11       		.uleb128 0x11
+ 1602 0488 01       		.uleb128 0x1
+ 1603 0489 51       		.byte	0x51
+ 1604 048a 02       		.uleb128 0x2
+ 1605 048b 74       		.byte	0x74
+ 1606 048c 00       		.sleb128 0
+ 1607 048d 00       		.byte	0
+ 1608 048e 00       		.byte	0
+ 1609 048f 05       		.uleb128 0x5
+ 1610 0490 04       		.byte	0x4
+ 1611 0491 74010000 		.4byte	0x174
+ 1612 0495 18       		.uleb128 0x18
+ 1613 0496 B0040000 		.4byte	.LASF46
+ 1614 049a 01       		.byte	0x1
+ 1615 049b EE       		.byte	0xee
+ 1616 049c 6B000000 		.4byte	0x6b
+ 1617 04a0 00000000 		.4byte	.LFB38
+ 1618 04a4 28000000 		.4byte	.LFE38-.LFB38
+ 1619 04a8 01       		.uleb128 0x1
+ 1620 04a9 9C       		.byte	0x9c
+ 1621 04aa E2040000 		.4byte	0x4e2
+ 1622 04ae 19       		.uleb128 0x19
+ 1623 04af 3F000000 		.4byte	.LASF44
+ 1624 04b3 01       		.byte	0x1
+ 1625 04b4 EE       		.byte	0xee
+ 1626 04b5 8F040000 		.4byte	0x48f
+ 1627 04b9 C1010000 		.4byte	.LLST11
+ 1628 04bd 1A       		.uleb128 0x1a
+ 1629 04be 87000000 		.4byte	.LASF47
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 39
+
+
+ 1630 04c2 01       		.byte	0x1
+ 1631 04c3 EF       		.byte	0xef
+ 1632 04c4 6B000000 		.4byte	0x6b
+ 1633 04c8 ED010000 		.4byte	.LLST12
+ 1634 04cc 10       		.uleb128 0x10
+ 1635 04cd 22000000 		.4byte	.LVL47
+ 1636 04d1 A3030000 		.4byte	0x3a3
+ 1637 04d5 11       		.uleb128 0x11
+ 1638 04d6 01       		.uleb128 0x1
+ 1639 04d7 50       		.byte	0x50
+ 1640 04d8 01       		.uleb128 0x1
+ 1641 04d9 37       		.byte	0x37
+ 1642 04da 11       		.uleb128 0x11
+ 1643 04db 01       		.uleb128 0x1
+ 1644 04dc 51       		.byte	0x51
+ 1645 04dd 02       		.uleb128 0x2
+ 1646 04de 74       		.byte	0x74
+ 1647 04df 00       		.sleb128 0
+ 1648 04e0 00       		.byte	0
+ 1649 04e1 00       		.byte	0
+ 1650 04e2 18       		.uleb128 0x18
+ 1651 04e3 F8010000 		.4byte	.LASF48
+ 1652 04e7 01       		.byte	0x1
+ 1653 04e8 5E       		.byte	0x5e
+ 1654 04e9 6B000000 		.4byte	0x6b
+ 1655 04ed 00000000 		.4byte	.LFB35
+ 1656 04f1 50000000 		.4byte	.LFE35-.LFB35
+ 1657 04f5 01       		.uleb128 0x1
+ 1658 04f6 9C       		.byte	0x9c
+ 1659 04f7 8E050000 		.4byte	0x58e
+ 1660 04fb 1A       		.uleb128 0x1a
+ 1661 04fc BD030000 		.4byte	.LASF41
+ 1662 0500 01       		.byte	0x1
+ 1663 0501 60       		.byte	0x60
+ 1664 0502 6B000000 		.4byte	0x6b
+ 1665 0506 17020000 		.4byte	.LLST13
+ 1666 050a 14       		.uleb128 0x14
+ 1667 050b 08000000 		.4byte	.LVL50
+ 1668 050f 78020000 		.4byte	0x278
+ 1669 0513 1D050000 		.4byte	0x51d
+ 1670 0517 11       		.uleb128 0x11
+ 1671 0518 01       		.uleb128 0x1
+ 1672 0519 50       		.byte	0x50
+ 1673 051a 01       		.uleb128 0x1
+ 1674 051b 30       		.byte	0x30
+ 1675 051c 00       		.byte	0
+ 1676 051d 14       		.uleb128 0x14
+ 1677 051e 12000000 		.4byte	.LVL52
+ 1678 0522 78020000 		.4byte	0x278
+ 1679 0526 30050000 		.4byte	0x530
+ 1680 052a 11       		.uleb128 0x11
+ 1681 052b 01       		.uleb128 0x1
+ 1682 052c 50       		.byte	0x50
+ 1683 052d 01       		.uleb128 0x1
+ 1684 052e 31       		.byte	0x31
+ 1685 052f 00       		.byte	0
+ 1686 0530 14       		.uleb128 0x14
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 40
+
+
+ 1687 0531 1A000000 		.4byte	.LVL54
+ 1688 0535 78020000 		.4byte	0x278
+ 1689 0539 43050000 		.4byte	0x543
+ 1690 053d 11       		.uleb128 0x11
+ 1691 053e 01       		.uleb128 0x1
+ 1692 053f 50       		.byte	0x50
+ 1693 0540 01       		.uleb128 0x1
+ 1694 0541 32       		.byte	0x32
+ 1695 0542 00       		.byte	0
+ 1696 0543 14       		.uleb128 0x14
+ 1697 0544 24000000 		.4byte	.LVL56
+ 1698 0548 78020000 		.4byte	0x278
+ 1699 054c 56050000 		.4byte	0x556
+ 1700 0550 11       		.uleb128 0x11
+ 1701 0551 01       		.uleb128 0x1
+ 1702 0552 50       		.byte	0x50
+ 1703 0553 01       		.uleb128 0x1
+ 1704 0554 33       		.byte	0x33
+ 1705 0555 00       		.byte	0
+ 1706 0556 14       		.uleb128 0x14
+ 1707 0557 30000000 		.4byte	.LVL58
+ 1708 055b 42040000 		.4byte	0x442
+ 1709 055f 6A050000 		.4byte	0x56a
+ 1710 0563 11       		.uleb128 0x11
+ 1711 0564 01       		.uleb128 0x1
+ 1712 0565 50       		.byte	0x50
+ 1713 0566 02       		.uleb128 0x2
+ 1714 0567 74       		.byte	0x74
+ 1715 0568 00       		.sleb128 0
+ 1716 0569 00       		.byte	0
+ 1717 056a 14       		.uleb128 0x14
+ 1718 056b 36000000 		.4byte	.LVL59
+ 1719 056f 95040000 		.4byte	0x495
+ 1720 0573 7E050000 		.4byte	0x57e
+ 1721 0577 11       		.uleb128 0x11
+ 1722 0578 01       		.uleb128 0x1
+ 1723 0579 50       		.byte	0x50
+ 1724 057a 02       		.uleb128 0x2
+ 1725 057b 74       		.byte	0x74
+ 1726 057c 00       		.sleb128 0
+ 1727 057d 00       		.byte	0
+ 1728 057e 10       		.uleb128 0x10
+ 1729 057f 3E000000 		.4byte	.LVL60
+ 1730 0583 A3030000 		.4byte	0x3a3
+ 1731 0587 11       		.uleb128 0x11
+ 1732 0588 01       		.uleb128 0x1
+ 1733 0589 50       		.byte	0x50
+ 1734 058a 01       		.uleb128 0x1
+ 1735 058b 35       		.byte	0x35
+ 1736 058c 00       		.byte	0
+ 1737 058d 00       		.byte	0
+ 1738 058e 1B       		.uleb128 0x1b
+ 1739 058f AC020000 		.4byte	.LASF50
+ 1740 0593 01       		.byte	0x1
+ 1741 0594 F9       		.byte	0xf9
+ 1742 0595 00000000 		.4byte	.LFB39
+ 1743 0599 70000000 		.4byte	.LFE39-.LFB39
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 41
+
+
+ 1744 059d 01       		.uleb128 0x1
+ 1745 059e 9C       		.byte	0x9c
+ 1746 059f 62060000 		.4byte	0x662
+ 1747 05a3 0F       		.uleb128 0xf
+ 1748 05a4 BE000000 		.4byte	.LASF51
+ 1749 05a8 01       		.byte	0x1
+ 1750 05a9 0101     		.2byte	0x101
+ 1751 05ab B8000000 		.4byte	0xb8
+ 1752 05af 12       		.uleb128 0x12
+ 1753 05b0 BD030000 		.4byte	.LASF41
+ 1754 05b4 01       		.byte	0x1
+ 1755 05b5 0601     		.2byte	0x106
+ 1756 05b7 6B000000 		.4byte	0x6b
+ 1757 05bb 69020000 		.4byte	.LLST14
+ 1758 05bf 12       		.uleb128 0x12
+ 1759 05c0 0E040000 		.4byte	.LASF52
+ 1760 05c4 01       		.byte	0x1
+ 1761 05c5 0701     		.2byte	0x107
+ 1762 05c7 6B000000 		.4byte	0x6b
+ 1763 05cb 7C020000 		.4byte	.LLST15
+ 1764 05cf 14       		.uleb128 0x14
+ 1765 05d0 0C000000 		.4byte	.LVL61
+ 1766 05d4 A3030000 		.4byte	0x3a3
+ 1767 05d8 E2050000 		.4byte	0x5e2
+ 1768 05dc 11       		.uleb128 0x11
+ 1769 05dd 01       		.uleb128 0x1
+ 1770 05de 50       		.byte	0x50
+ 1771 05df 01       		.uleb128 0x1
+ 1772 05e0 34       		.byte	0x34
+ 1773 05e1 00       		.byte	0
+ 1774 05e2 14       		.uleb128 0x14
+ 1775 05e3 12000000 		.4byte	.LVL62
+ 1776 05e7 78020000 		.4byte	0x278
+ 1777 05eb F5050000 		.4byte	0x5f5
+ 1778 05ef 11       		.uleb128 0x11
+ 1779 05f0 01       		.uleb128 0x1
+ 1780 05f1 50       		.byte	0x50
+ 1781 05f2 01       		.uleb128 0x1
+ 1782 05f3 34       		.byte	0x34
+ 1783 05f4 00       		.byte	0
+ 1784 05f5 1C       		.uleb128 0x1c
+ 1785 05f6 28000000 		.4byte	.LVL66
+ 1786 05fa 440A0000 		.4byte	0xa44
+ 1787 05fe 14       		.uleb128 0x14
+ 1788 05ff 30000000 		.4byte	.LVL68
+ 1789 0603 440A0000 		.4byte	0xa44
+ 1790 0607 11060000 		.4byte	0x611
+ 1791 060b 11       		.uleb128 0x11
+ 1792 060c 01       		.uleb128 0x1
+ 1793 060d 50       		.byte	0x50
+ 1794 060e 01       		.uleb128 0x1
+ 1795 060f 31       		.byte	0x31
+ 1796 0610 00       		.byte	0
+ 1797 0611 14       		.uleb128 0x14
+ 1798 0612 36000000 		.4byte	.LVL69
+ 1799 0616 78020000 		.4byte	0x278
+ 1800 061a 24060000 		.4byte	0x624
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 42
+
+
+ 1801 061e 11       		.uleb128 0x11
+ 1802 061f 01       		.uleb128 0x1
+ 1803 0620 50       		.byte	0x50
+ 1804 0621 01       		.uleb128 0x1
+ 1805 0622 34       		.byte	0x34
+ 1806 0623 00       		.byte	0
+ 1807 0624 14       		.uleb128 0x14
+ 1808 0625 48000000 		.4byte	.LVL73
+ 1809 0629 4F0A0000 		.4byte	0xa4f
+ 1810 062d 40060000 		.4byte	0x640
+ 1811 0631 11       		.uleb128 0x11
+ 1812 0632 01       		.uleb128 0x1
+ 1813 0633 50       		.byte	0x50
+ 1814 0634 05       		.uleb128 0x5
+ 1815 0635 03       		.byte	0x3
+ 1816 0636 00000000 		.4byte	.LC6
+ 1817 063a 11       		.uleb128 0x11
+ 1818 063b 01       		.uleb128 0x1
+ 1819 063c 51       		.byte	0x51
+ 1820 063d 01       		.uleb128 0x1
+ 1821 063e 36       		.byte	0x36
+ 1822 063f 00       		.byte	0
+ 1823 0640 1C       		.uleb128 0x1c
+ 1824 0641 50000000 		.4byte	.LVL74
+ 1825 0645 64030000 		.4byte	0x364
+ 1826 0649 10       		.uleb128 0x10
+ 1827 064a 58000000 		.4byte	.LVL75
+ 1828 064e 4F0A0000 		.4byte	0xa4f
+ 1829 0652 11       		.uleb128 0x11
+ 1830 0653 01       		.uleb128 0x1
+ 1831 0654 50       		.byte	0x50
+ 1832 0655 05       		.uleb128 0x5
+ 1833 0656 03       		.byte	0x3
+ 1834 0657 00000000 		.4byte	all_calibrated_data
+ 1835 065b 11       		.uleb128 0x11
+ 1836 065c 01       		.uleb128 0x1
+ 1837 065d 51       		.byte	0x51
+ 1838 065e 01       		.uleb128 0x1
+ 1839 065f 49       		.byte	0x49
+ 1840 0660 00       		.byte	0
+ 1841 0661 00       		.byte	0
+ 1842 0662 0D       		.uleb128 0xd
+ 1843 0663 25020000 		.4byte	.LASF53
+ 1844 0667 01       		.byte	0x1
+ 1845 0668 8401     		.2byte	0x184
+ 1846 066a 6B000000 		.4byte	0x6b
+ 1847 066e 00000000 		.4byte	.LFB46
+ 1848 0672 30000000 		.4byte	.LFE46-.LFB46
+ 1849 0676 01       		.uleb128 0x1
+ 1850 0677 9C       		.byte	0x9c
+ 1851 0678 8D060000 		.4byte	0x68d
+ 1852 067c 0E       		.uleb128 0xe
+ 1853 067d 04020000 		.4byte	.LASF54
+ 1854 0681 01       		.byte	0x1
+ 1855 0682 8401     		.2byte	0x184
+ 1856 0684 6B000000 		.4byte	0x6b
+ 1857 0688 A6020000 		.4byte	.LLST16
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 43
+
+
+ 1858 068c 00       		.byte	0
+ 1859 068d 0D       		.uleb128 0xd
+ 1860 068e 42020000 		.4byte	.LASF55
+ 1861 0692 01       		.byte	0x1
+ 1862 0693 7D01     		.2byte	0x17d
+ 1863 0695 6B000000 		.4byte	0x6b
+ 1864 0699 00000000 		.4byte	.LFB45
+ 1865 069d 1A000000 		.4byte	.LFE45-.LFB45
+ 1866 06a1 01       		.uleb128 0x1
+ 1867 06a2 9C       		.byte	0x9c
+ 1868 06a3 DA060000 		.4byte	0x6da
+ 1869 06a7 0E       		.uleb128 0xe
+ 1870 06a8 1B040000 		.4byte	.LASF56
+ 1871 06ac 01       		.byte	0x1
+ 1872 06ad 7D01     		.2byte	0x17d
+ 1873 06af B2000000 		.4byte	0xb2
+ 1874 06b3 F9020000 		.4byte	.LLST17
+ 1875 06b7 17       		.uleb128 0x17
+ 1876 06b8 6E756D00 		.ascii	"num\000"
+ 1877 06bc 01       		.byte	0x1
+ 1878 06bd 7E01     		.2byte	0x17e
+ 1879 06bf 6B000000 		.4byte	0x6b
+ 1880 06c3 25030000 		.4byte	.LLST18
+ 1881 06c7 1C       		.uleb128 0x1c
+ 1882 06c8 0A000000 		.4byte	.LVL86
+ 1883 06cc 62060000 		.4byte	0x662
+ 1884 06d0 1C       		.uleb128 0x1c
+ 1885 06d1 14000000 		.4byte	.LVL88
+ 1886 06d5 62060000 		.4byte	0x662
+ 1887 06d9 00       		.byte	0
+ 1888 06da 0D       		.uleb128 0xd
+ 1889 06db 3E040000 		.4byte	.LASF57
+ 1890 06df 01       		.byte	0x1
+ 1891 06e0 9101     		.2byte	0x191
+ 1892 06e2 77000000 		.4byte	0x77
+ 1893 06e6 00000000 		.4byte	.LFB47
+ 1894 06ea 22000000 		.4byte	.LFE47-.LFB47
+ 1895 06ee 01       		.uleb128 0x1
+ 1896 06ef 9C       		.byte	0x9c
+ 1897 06f0 37070000 		.4byte	0x737
+ 1898 06f4 0E       		.uleb128 0xe
+ 1899 06f5 1B040000 		.4byte	.LASF56
+ 1900 06f9 01       		.byte	0x1
+ 1901 06fa 9101     		.2byte	0x191
+ 1902 06fc B2000000 		.4byte	0xb2
+ 1903 0700 43030000 		.4byte	.LLST19
+ 1904 0704 1D       		.uleb128 0x1d
+ 1905 0705 6C656E00 		.ascii	"len\000"
+ 1906 0709 01       		.byte	0x1
+ 1907 070a 9101     		.2byte	0x191
+ 1908 070c 6B000000 		.4byte	0x6b
+ 1909 0710 01       		.uleb128 0x1
+ 1910 0711 51       		.byte	0x51
+ 1911 0712 17       		.uleb128 0x17
+ 1912 0713 6E756D00 		.ascii	"num\000"
+ 1913 0717 01       		.byte	0x1
+ 1914 0718 9201     		.2byte	0x192
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 44
+
+
+ 1915 071a 77000000 		.4byte	0x77
+ 1916 071e 6F030000 		.4byte	.LLST20
+ 1917 0722 1E       		.uleb128 0x1e
+ 1918 0723 00000000 		.4byte	.Ldebug_ranges0+0
+ 1919 0727 17       		.uleb128 0x17
+ 1920 0728 6900     		.ascii	"i\000"
+ 1921 072a 01       		.byte	0x1
+ 1922 072b 9301     		.2byte	0x193
+ 1923 072d 5D000000 		.4byte	0x5d
+ 1924 0731 99030000 		.4byte	.LLST21
+ 1925 0735 00       		.byte	0
+ 1926 0736 00       		.byte	0
+ 1927 0737 1F       		.uleb128 0x1f
+ 1928 0738 D0030000 		.4byte	.LASF58
+ 1929 073c 01       		.byte	0x1
+ 1930 073d 84       		.byte	0x84
+ 1931 073e 00000000 		.4byte	.LFB36
+ 1932 0742 18010000 		.4byte	.LFE36-.LFB36
+ 1933 0746 01       		.uleb128 0x1
+ 1934 0747 9C       		.byte	0x9c
+ 1935 0748 77090000 		.4byte	0x977
+ 1936 074c 19       		.uleb128 0x19
+ 1937 074d C9030000 		.4byte	.LASF59
+ 1938 0751 01       		.byte	0x1
+ 1939 0752 84       		.byte	0x84
+ 1940 0753 B2000000 		.4byte	0xb2
+ 1941 0757 B8030000 		.4byte	.LLST22
+ 1942 075b 16       		.uleb128 0x16
+ 1943 075c 16000000 		.4byte	.LBB6
+ 1944 0760 EE000000 		.4byte	.LBE6-.LBB6
+ 1945 0764 1A       		.uleb128 0x1a
+ 1946 0765 4D040000 		.4byte	.LASF60
+ 1947 0769 01       		.byte	0x1
+ 1948 076a CB       		.byte	0xcb
+ 1949 076b 6B000000 		.4byte	0x6b
+ 1950 076f 6B040000 		.4byte	.LLST23
+ 1951 0773 13       		.uleb128 0x13
+ 1952 0774 22000000 		.4byte	.LBB7
+ 1953 0778 18000000 		.4byte	.LBE7-.LBB7
+ 1954 077c D7070000 		.4byte	0x7d7
+ 1955 0780 1A       		.uleb128 0x1a
+ 1956 0781 6F000000 		.4byte	.LASF61
+ 1957 0785 01       		.byte	0x1
+ 1958 0786 89       		.byte	0x89
+ 1959 0787 6B000000 		.4byte	0x6b
+ 1960 078b 7E040000 		.4byte	.LLST24
+ 1961 078f 1A       		.uleb128 0x1a
+ 1962 0790 50030000 		.4byte	.LASF62
+ 1963 0794 01       		.byte	0x1
+ 1964 0795 8A       		.byte	0x8a
+ 1965 0796 6B000000 		.4byte	0x6b
+ 1966 079a 91040000 		.4byte	.LLST25
+ 1967 079e 14       		.uleb128 0x14
+ 1968 079f 28000000 		.4byte	.LVL102
+ 1969 07a3 8D060000 		.4byte	0x68d
+ 1970 07a7 B2070000 		.4byte	0x7b2
+ 1971 07ab 11       		.uleb128 0x11
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 45
+
+
+ 1972 07ac 01       		.uleb128 0x1
+ 1973 07ad 50       		.byte	0x50
+ 1974 07ae 02       		.uleb128 0x2
+ 1975 07af 74       		.byte	0x74
+ 1976 07b0 13       		.sleb128 19
+ 1977 07b1 00       		.byte	0
+ 1978 07b2 14       		.uleb128 0x14
+ 1979 07b3 32000000 		.4byte	.LVL104
+ 1980 07b7 8D060000 		.4byte	0x68d
+ 1981 07bb C6070000 		.4byte	0x7c6
+ 1982 07bf 11       		.uleb128 0x11
+ 1983 07c0 01       		.uleb128 0x1
+ 1984 07c1 50       		.byte	0x50
+ 1985 07c2 02       		.uleb128 0x2
+ 1986 07c3 74       		.byte	0x74
+ 1987 07c4 18       		.sleb128 24
+ 1988 07c5 00       		.byte	0
+ 1989 07c6 10       		.uleb128 0x10
+ 1990 07c7 3A000000 		.4byte	.LVL106
+ 1991 07cb A3030000 		.4byte	0x3a3
+ 1992 07cf 11       		.uleb128 0x11
+ 1993 07d0 01       		.uleb128 0x1
+ 1994 07d1 50       		.byte	0x50
+ 1995 07d2 02       		.uleb128 0x2
+ 1996 07d3 75       		.byte	0x75
+ 1997 07d4 00       		.sleb128 0
+ 1998 07d5 00       		.byte	0
+ 1999 07d6 00       		.byte	0
+ 2000 07d7 13       		.uleb128 0x13
+ 2001 07d8 40000000 		.4byte	.LBB8
+ 2002 07dc 1E000000 		.4byte	.LBE8-.LBB8
+ 2003 07e0 52080000 		.4byte	0x852
+ 2004 07e4 1A       		.uleb128 0x1a
+ 2005 07e5 B2000000 		.4byte	.LASF63
+ 2006 07e9 01       		.byte	0x1
+ 2007 07ea 95       		.byte	0x95
+ 2008 07eb 6B000000 		.4byte	0x6b
+ 2009 07ef A4040000 		.4byte	.LLST26
+ 2010 07f3 1A       		.uleb128 0x1a
+ 2011 07f4 34040000 		.4byte	.LASF64
+ 2012 07f8 01       		.byte	0x1
+ 2013 07f9 96       		.byte	0x96
+ 2014 07fa 6B000000 		.4byte	0x6b
+ 2015 07fe B7040000 		.4byte	.LLST27
+ 2016 0802 14       		.uleb128 0x14
+ 2017 0803 46000000 		.4byte	.LVL109
+ 2018 0807 8D060000 		.4byte	0x68d
+ 2019 080b 16080000 		.4byte	0x816
+ 2020 080f 11       		.uleb128 0x11
+ 2021 0810 01       		.uleb128 0x1
+ 2022 0811 50       		.byte	0x50
+ 2023 0812 02       		.uleb128 0x2
+ 2024 0813 74       		.byte	0x74
+ 2025 0814 12       		.sleb128 18
+ 2026 0815 00       		.byte	0
+ 2027 0816 1C       		.uleb128 0x1c
+ 2028 0817 4A000000 		.4byte	.LVL110
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 46
+
+
+ 2029 081b 78020000 		.4byte	0x278
+ 2030 081f 14       		.uleb128 0x14
+ 2031 0820 56000000 		.4byte	.LVL112
+ 2032 0824 5A0A0000 		.4byte	0xa5a
+ 2033 0828 3C080000 		.4byte	0x83c
+ 2034 082c 11       		.uleb128 0x11
+ 2035 082d 01       		.uleb128 0x1
+ 2036 082e 50       		.byte	0x50
+ 2037 082f 02       		.uleb128 0x2
+ 2038 0830 75       		.byte	0x75
+ 2039 0831 00       		.sleb128 0
+ 2040 0832 11       		.uleb128 0x11
+ 2041 0833 01       		.uleb128 0x1
+ 2042 0834 51       		.byte	0x51
+ 2043 0835 05       		.uleb128 0x5
+ 2044 0836 03       		.byte	0x3
+ 2045 0837 08000000 		.4byte	.LC10
+ 2046 083b 00       		.byte	0
+ 2047 083c 10       		.uleb128 0x10
+ 2048 083d 5E000000 		.4byte	.LVL113
+ 2049 0841 4F0A0000 		.4byte	0xa4f
+ 2050 0845 11       		.uleb128 0x11
+ 2051 0846 01       		.uleb128 0x1
+ 2052 0847 50       		.byte	0x50
+ 2053 0848 02       		.uleb128 0x2
+ 2054 0849 75       		.byte	0x75
+ 2055 084a 00       		.sleb128 0
+ 2056 084b 11       		.uleb128 0x11
+ 2057 084c 01       		.uleb128 0x1
+ 2058 084d 51       		.byte	0x51
+ 2059 084e 01       		.uleb128 0x1
+ 2060 084f 3E       		.byte	0x3e
+ 2061 0850 00       		.byte	0
+ 2062 0851 00       		.byte	0
+ 2063 0852 13       		.uleb128 0x13
+ 2064 0853 6A000000 		.4byte	.LBB9
+ 2065 0857 22000000 		.4byte	.LBE9-.LBB9
+ 2066 085b CD080000 		.4byte	0x8cd
+ 2067 085f 1A       		.uleb128 0x1a
+ 2068 0860 E5010000 		.4byte	.LASF65
+ 2069 0864 01       		.byte	0x1
+ 2070 0865 AD       		.byte	0xad
+ 2071 0866 6B000000 		.4byte	0x6b
+ 2072 086a CA040000 		.4byte	.LLST28
+ 2073 086e 1A       		.uleb128 0x1a
+ 2074 086f F6020000 		.4byte	.LASF66
+ 2075 0873 01       		.byte	0x1
+ 2076 0874 AE       		.byte	0xae
+ 2077 0875 B8000000 		.4byte	0xb8
+ 2078 0879 DD040000 		.4byte	.LLST29
+ 2079 087d 20       		.uleb128 0x20
+ 2080 087e 97000000 		.4byte	.LASF67
+ 2081 0882 01       		.byte	0x1
+ 2082 0883 B2       		.byte	0xb2
+ 2083 0884 6B000000 		.4byte	0x6b
+ 2084 0888 14       		.uleb128 0x14
+ 2085 0889 7A000000 		.4byte	.LVL115
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 47
+
+
+ 2086 088d A3030000 		.4byte	0x3a3
+ 2087 0891 9B080000 		.4byte	0x89b
+ 2088 0895 11       		.uleb128 0x11
+ 2089 0896 01       		.uleb128 0x1
+ 2090 0897 50       		.byte	0x50
+ 2091 0898 01       		.uleb128 0x1
+ 2092 0899 37       		.byte	0x37
+ 2093 089a 00       		.byte	0
+ 2094 089b 14       		.uleb128 0x14
+ 2095 089c 80000000 		.4byte	.LVL116
+ 2096 08a0 78020000 		.4byte	0x278
+ 2097 08a4 AE080000 		.4byte	0x8ae
+ 2098 08a8 11       		.uleb128 0x11
+ 2099 08a9 01       		.uleb128 0x1
+ 2100 08aa 50       		.byte	0x50
+ 2101 08ab 01       		.uleb128 0x1
+ 2102 08ac 37       		.byte	0x37
+ 2103 08ad 00       		.byte	0
+ 2104 08ae 1C       		.uleb128 0x1c
+ 2105 08af 84000000 		.4byte	.LVL117
+ 2106 08b3 8E050000 		.4byte	0x58e
+ 2107 08b7 10       		.uleb128 0x10
+ 2108 08b8 8C000000 		.4byte	.LVL118
+ 2109 08bc A3030000 		.4byte	0x3a3
+ 2110 08c0 11       		.uleb128 0x11
+ 2111 08c1 01       		.uleb128 0x1
+ 2112 08c2 50       		.byte	0x50
+ 2113 08c3 01       		.uleb128 0x1
+ 2114 08c4 37       		.byte	0x37
+ 2115 08c5 11       		.uleb128 0x11
+ 2116 08c6 01       		.uleb128 0x1
+ 2117 08c7 51       		.byte	0x51
+ 2118 08c8 02       		.uleb128 0x2
+ 2119 08c9 74       		.byte	0x74
+ 2120 08ca 00       		.sleb128 0
+ 2121 08cb 00       		.byte	0
+ 2122 08cc 00       		.byte	0
+ 2123 08cd 1C       		.uleb128 0x1c
+ 2124 08ce 96000000 		.4byte	.LVL120
+ 2125 08d2 8E050000 		.4byte	0x58e
+ 2126 08d6 14       		.uleb128 0x14
+ 2127 08d7 A0000000 		.4byte	.LVL123
+ 2128 08db DA060000 		.4byte	0x6da
+ 2129 08df EF080000 		.4byte	0x8ef
+ 2130 08e3 11       		.uleb128 0x11
+ 2131 08e4 01       		.uleb128 0x1
+ 2132 08e5 50       		.byte	0x50
+ 2133 08e6 02       		.uleb128 0x2
+ 2134 08e7 74       		.byte	0x74
+ 2135 08e8 16       		.sleb128 22
+ 2136 08e9 11       		.uleb128 0x11
+ 2137 08ea 01       		.uleb128 0x1
+ 2138 08eb 51       		.byte	0x51
+ 2139 08ec 01       		.uleb128 0x1
+ 2140 08ed 33       		.byte	0x33
+ 2141 08ee 00       		.byte	0
+ 2142 08ef 14       		.uleb128 0x14
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 48
+
+
+ 2143 08f0 AC000000 		.4byte	.LVL125
+ 2144 08f4 A3030000 		.4byte	0x3a3
+ 2145 08f8 02090000 		.4byte	0x902
+ 2146 08fc 11       		.uleb128 0x11
+ 2147 08fd 01       		.uleb128 0x1
+ 2148 08fe 50       		.byte	0x50
+ 2149 08ff 01       		.uleb128 0x1
+ 2150 0900 35       		.byte	0x35
+ 2151 0901 00       		.byte	0
+ 2152 0902 14       		.uleb128 0x14
+ 2153 0903 B6000000 		.4byte	.LVL128
+ 2154 0907 DA060000 		.4byte	0x6da
+ 2155 090b 1B090000 		.4byte	0x91b
+ 2156 090f 11       		.uleb128 0x11
+ 2157 0910 01       		.uleb128 0x1
+ 2158 0911 50       		.byte	0x50
+ 2159 0912 02       		.uleb128 0x2
+ 2160 0913 74       		.byte	0x74
+ 2161 0914 0C       		.sleb128 12
+ 2162 0915 11       		.uleb128 0x11
+ 2163 0916 01       		.uleb128 0x1
+ 2164 0917 51       		.byte	0x51
+ 2165 0918 01       		.uleb128 0x1
+ 2166 0919 31       		.byte	0x31
+ 2167 091a 00       		.byte	0
+ 2168 091b 14       		.uleb128 0x14
+ 2169 091c C4000000 		.4byte	.LVL129
+ 2170 0920 42040000 		.4byte	0x442
+ 2171 0924 32090000 		.4byte	0x932
+ 2172 0928 11       		.uleb128 0x11
+ 2173 0929 01       		.uleb128 0x1
+ 2174 092a 50       		.byte	0x50
+ 2175 092b 05       		.uleb128 0x5
+ 2176 092c 03       		.byte	0x3
+ 2177 092d 00000000 		.4byte	.LANCHOR0
+ 2178 0931 00       		.byte	0
+ 2179 0932 14       		.uleb128 0x14
+ 2180 0933 CE000000 		.4byte	.LVL132
+ 2181 0937 DA060000 		.4byte	0x6da
+ 2182 093b 4B090000 		.4byte	0x94b
+ 2183 093f 11       		.uleb128 0x11
+ 2184 0940 01       		.uleb128 0x1
+ 2185 0941 50       		.byte	0x50
+ 2186 0942 02       		.uleb128 0x2
+ 2187 0943 74       		.byte	0x74
+ 2188 0944 13       		.sleb128 19
+ 2189 0945 11       		.uleb128 0x11
+ 2190 0946 01       		.uleb128 0x1
+ 2191 0947 51       		.byte	0x51
+ 2192 0948 01       		.uleb128 0x1
+ 2193 0949 31       		.byte	0x31
+ 2194 094a 00       		.byte	0
+ 2195 094b 14       		.uleb128 0x14
+ 2196 094c DC000000 		.4byte	.LVL133
+ 2197 0950 95040000 		.4byte	0x495
+ 2198 0954 62090000 		.4byte	0x962
+ 2199 0958 11       		.uleb128 0x11
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 49
+
+
+ 2200 0959 01       		.uleb128 0x1
+ 2201 095a 50       		.byte	0x50
+ 2202 095b 05       		.uleb128 0x5
+ 2203 095c 03       		.byte	0x3
+ 2204 095d 00000000 		.4byte	.LANCHOR0
+ 2205 0961 00       		.byte	0
+ 2206 0962 10       		.uleb128 0x10
+ 2207 0963 04010000 		.4byte	.LVL136
+ 2208 0967 95040000 		.4byte	0x495
+ 2209 096b 11       		.uleb128 0x11
+ 2210 096c 01       		.uleb128 0x1
+ 2211 096d 50       		.byte	0x50
+ 2212 096e 05       		.uleb128 0x5
+ 2213 096f 03       		.byte	0x3
+ 2214 0970 00000000 		.4byte	.LANCHOR0
+ 2215 0974 00       		.byte	0
+ 2216 0975 00       		.byte	0
+ 2217 0976 00       		.byte	0
+ 2218 0977 0B       		.uleb128 0xb
+ 2219 0978 9D000000 		.4byte	0x9d
+ 2220 097c 87090000 		.4byte	0x987
+ 2221 0980 0C       		.uleb128 0xc
+ 2222 0981 AB000000 		.4byte	0xab
+ 2223 0985 27       		.byte	0x27
+ 2224 0986 00       		.byte	0
+ 2225 0987 21       		.uleb128 0x21
+ 2226 0988 55020000 		.4byte	.LASF68
+ 2227 098c 05       		.byte	0x5
+ 2228 098d 30       		.byte	0x30
+ 2229 098e 77090000 		.4byte	0x977
+ 2230 0992 05       		.uleb128 0x5
+ 2231 0993 03       		.byte	0x3
+ 2232 0994 00000000 		.4byte	USB_str
+ 2233 0998 0B       		.uleb128 0xb
+ 2234 0999 6B000000 		.4byte	0x6b
+ 2235 099d A8090000 		.4byte	0x9a8
+ 2236 09a1 0C       		.uleb128 0xc
+ 2237 09a2 AB000000 		.4byte	0xab
+ 2238 09a6 27       		.byte	0x27
+ 2239 09a7 00       		.byte	0
+ 2240 09a8 21       		.uleb128 0x21
+ 2241 09a9 88010000 		.4byte	.LASF69
+ 2242 09ad 05       		.byte	0x5
+ 2243 09ae 2F       		.byte	0x2f
+ 2244 09af 98090000 		.4byte	0x998
+ 2245 09b3 05       		.uleb128 0x5
+ 2246 09b4 03       		.byte	0x3
+ 2247 09b5 00000000 		.4byte	OUT_Data_Buffer
+ 2248 09b9 0B       		.uleb128 0xb
+ 2249 09ba 6B000000 		.4byte	0x6b
+ 2250 09be C9090000 		.4byte	0x9c9
+ 2251 09c2 0C       		.uleb128 0xc
+ 2252 09c3 AB000000 		.4byte	0xab
+ 2253 09c7 17       		.byte	0x17
+ 2254 09c8 00       		.byte	0
+ 2255 09c9 21       		.uleb128 0x21
+ 2256 09ca FB040000 		.4byte	.LASF70
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 50
+
+
+ 2257 09ce 01       		.byte	0x1
+ 2258 09cf 1F       		.byte	0x1f
+ 2259 09d0 B9090000 		.4byte	0x9b9
+ 2260 09d4 05       		.uleb128 0x5
+ 2261 09d5 03       		.byte	0x3
+ 2262 09d6 00000000 		.4byte	read_buffer
+ 2263 09da 0B       		.uleb128 0xb
+ 2264 09db 6B000000 		.4byte	0x6b
+ 2265 09df EA090000 		.4byte	0x9ea
+ 2266 09e3 0C       		.uleb128 0xc
+ 2267 09e4 AB000000 		.4byte	0xab
+ 2268 09e8 01       		.byte	0x1
+ 2269 09e9 00       		.byte	0
+ 2270 09ea 21       		.uleb128 0x21
+ 2271 09eb 18020000 		.4byte	.LASF71
+ 2272 09ef 01       		.byte	0x1
+ 2273 09f0 20       		.byte	0x20
+ 2274 09f1 DA090000 		.4byte	0x9da
+ 2275 09f5 05       		.uleb128 0x5
+ 2276 09f6 03       		.byte	0x3
+ 2277 09f7 00000000 		.4byte	write_buffer
+ 2278 09fb 21       		.uleb128 0x21
+ 2279 09fc 00000000 		.4byte	.LASF72
+ 2280 0a00 01       		.byte	0x1
+ 2281 0a01 39       		.byte	0x39
+ 2282 0a02 74010000 		.4byte	0x174
+ 2283 0a06 05       		.uleb128 0x5
+ 2284 0a07 03       		.byte	0x3
+ 2285 0a08 00000000 		.4byte	as7262
+ 2286 0a0c 21       		.uleb128 0x21
+ 2287 0a0d 2B000000 		.4byte	.LASF73
+ 2288 0a11 01       		.byte	0x1
+ 2289 0a12 4B       		.byte	0x4b
+ 2290 0a13 7F010000 		.4byte	0x17f
+ 2291 0a17 05       		.uleb128 0x5
+ 2292 0a18 03       		.byte	0x3
+ 2293 0a19 00000000 		.4byte	all_calibrated_data
+ 2294 0a1d 21       		.uleb128 0x21
+ 2295 0a1e 62040000 		.4byte	.LASF74
+ 2296 0a22 01       		.byte	0x1
+ 2297 0a23 4D       		.byte	0x4d
+ 2298 0a24 B2010000 		.4byte	0x1b2
+ 2299 0a28 05       		.uleb128 0x5
+ 2300 0a29 03       		.byte	0x3
+ 2301 0a2a 00000000 		.4byte	color_data
+ 2302 0a2e 22       		.uleb128 0x22
+ 2303 0a2f 6D020000 		.4byte	.LASF75
+ 2304 0a33 6D020000 		.4byte	.LASF75
+ 2305 0a37 06       		.byte	0x6
+ 2306 0a38 24       		.byte	0x24
+ 2307 0a39 22       		.uleb128 0x22
+ 2308 0a3a A4000000 		.4byte	.LASF76
+ 2309 0a3e A4000000 		.4byte	.LASF76
+ 2310 0a42 06       		.byte	0x6
+ 2311 0a43 21       		.byte	0x21
+ 2312 0a44 22       		.uleb128 0x22
+ 2313 0a45 9D040000 		.4byte	.LASF77
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 51
+
+
+ 2314 0a49 9D040000 		.4byte	.LASF77
+ 2315 0a4d 07       		.byte	0x7
+ 2316 0a4e D9       		.byte	0xd9
+ 2317 0a4f 22       		.uleb128 0x22
+ 2318 0a50 07000000 		.4byte	.LASF78
+ 2319 0a54 07000000 		.4byte	.LASF78
+ 2320 0a58 05       		.byte	0x5
+ 2321 0a59 39       		.byte	0x39
+ 2322 0a5a 22       		.uleb128 0x22
+ 2323 0a5b BE020000 		.4byte	.LASF79
+ 2324 0a5f BE020000 		.4byte	.LASF79
+ 2325 0a63 08       		.byte	0x8
+ 2326 0a64 E7       		.byte	0xe7
+ 2327 0a65 00       		.byte	0
+ 2328              		.section	.debug_abbrev,"",%progbits
+ 2329              	.Ldebug_abbrev0:
+ 2330 0000 01       		.uleb128 0x1
+ 2331 0001 11       		.uleb128 0x11
+ 2332 0002 01       		.byte	0x1
+ 2333 0003 25       		.uleb128 0x25
+ 2334 0004 0E       		.uleb128 0xe
+ 2335 0005 13       		.uleb128 0x13
+ 2336 0006 0B       		.uleb128 0xb
+ 2337 0007 03       		.uleb128 0x3
+ 2338 0008 0E       		.uleb128 0xe
+ 2339 0009 1B       		.uleb128 0x1b
+ 2340 000a 0E       		.uleb128 0xe
+ 2341 000b 55       		.uleb128 0x55
+ 2342 000c 17       		.uleb128 0x17
+ 2343 000d 11       		.uleb128 0x11
+ 2344 000e 01       		.uleb128 0x1
+ 2345 000f 10       		.uleb128 0x10
+ 2346 0010 17       		.uleb128 0x17
+ 2347 0011 00       		.byte	0
+ 2348 0012 00       		.byte	0
+ 2349 0013 02       		.uleb128 0x2
+ 2350 0014 24       		.uleb128 0x24
+ 2351 0015 00       		.byte	0
+ 2352 0016 0B       		.uleb128 0xb
+ 2353 0017 0B       		.uleb128 0xb
+ 2354 0018 3E       		.uleb128 0x3e
+ 2355 0019 0B       		.uleb128 0xb
+ 2356 001a 03       		.uleb128 0x3
+ 2357 001b 0E       		.uleb128 0xe
+ 2358 001c 00       		.byte	0
+ 2359 001d 00       		.byte	0
+ 2360 001e 03       		.uleb128 0x3
+ 2361 001f 24       		.uleb128 0x24
+ 2362 0020 00       		.byte	0
+ 2363 0021 0B       		.uleb128 0xb
+ 2364 0022 0B       		.uleb128 0xb
+ 2365 0023 3E       		.uleb128 0x3e
+ 2366 0024 0B       		.uleb128 0xb
+ 2367 0025 03       		.uleb128 0x3
+ 2368 0026 08       		.uleb128 0x8
+ 2369 0027 00       		.byte	0
+ 2370 0028 00       		.byte	0
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 52
+
+
+ 2371 0029 04       		.uleb128 0x4
+ 2372 002a 16       		.uleb128 0x16
+ 2373 002b 00       		.byte	0
+ 2374 002c 03       		.uleb128 0x3
+ 2375 002d 0E       		.uleb128 0xe
+ 2376 002e 3A       		.uleb128 0x3a
+ 2377 002f 0B       		.uleb128 0xb
+ 2378 0030 3B       		.uleb128 0x3b
+ 2379 0031 05       		.uleb128 0x5
+ 2380 0032 49       		.uleb128 0x49
+ 2381 0033 13       		.uleb128 0x13
+ 2382 0034 00       		.byte	0
+ 2383 0035 00       		.byte	0
+ 2384 0036 05       		.uleb128 0x5
+ 2385 0037 0F       		.uleb128 0xf
+ 2386 0038 00       		.byte	0
+ 2387 0039 0B       		.uleb128 0xb
+ 2388 003a 0B       		.uleb128 0xb
+ 2389 003b 49       		.uleb128 0x49
+ 2390 003c 13       		.uleb128 0x13
+ 2391 003d 00       		.byte	0
+ 2392 003e 00       		.byte	0
+ 2393 003f 06       		.uleb128 0x6
+ 2394 0040 16       		.uleb128 0x16
+ 2395 0041 00       		.byte	0
+ 2396 0042 03       		.uleb128 0x3
+ 2397 0043 0E       		.uleb128 0xe
+ 2398 0044 3A       		.uleb128 0x3a
+ 2399 0045 0B       		.uleb128 0xb
+ 2400 0046 3B       		.uleb128 0x3b
+ 2401 0047 0B       		.uleb128 0xb
+ 2402 0048 49       		.uleb128 0x49
+ 2403 0049 13       		.uleb128 0x13
+ 2404 004a 00       		.byte	0
+ 2405 004b 00       		.byte	0
+ 2406 004c 07       		.uleb128 0x7
+ 2407 004d 13       		.uleb128 0x13
+ 2408 004e 01       		.byte	0x1
+ 2409 004f 0B       		.uleb128 0xb
+ 2410 0050 0B       		.uleb128 0xb
+ 2411 0051 3A       		.uleb128 0x3a
+ 2412 0052 0B       		.uleb128 0xb
+ 2413 0053 3B       		.uleb128 0x3b
+ 2414 0054 0B       		.uleb128 0xb
+ 2415 0055 01       		.uleb128 0x1
+ 2416 0056 13       		.uleb128 0x13
+ 2417 0057 00       		.byte	0
+ 2418 0058 00       		.byte	0
+ 2419 0059 08       		.uleb128 0x8
+ 2420 005a 0D       		.uleb128 0xd
+ 2421 005b 00       		.byte	0
+ 2422 005c 03       		.uleb128 0x3
+ 2423 005d 0E       		.uleb128 0xe
+ 2424 005e 3A       		.uleb128 0x3a
+ 2425 005f 0B       		.uleb128 0xb
+ 2426 0060 3B       		.uleb128 0x3b
+ 2427 0061 0B       		.uleb128 0xb
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 53
+
+
+ 2428 0062 49       		.uleb128 0x49
+ 2429 0063 13       		.uleb128 0x13
+ 2430 0064 38       		.uleb128 0x38
+ 2431 0065 0B       		.uleb128 0xb
+ 2432 0066 00       		.byte	0
+ 2433 0067 00       		.byte	0
+ 2434 0068 09       		.uleb128 0x9
+ 2435 0069 17       		.uleb128 0x17
+ 2436 006a 01       		.byte	0x1
+ 2437 006b 03       		.uleb128 0x3
+ 2438 006c 0E       		.uleb128 0xe
+ 2439 006d 0B       		.uleb128 0xb
+ 2440 006e 0B       		.uleb128 0xb
+ 2441 006f 3A       		.uleb128 0x3a
+ 2442 0070 0B       		.uleb128 0xb
+ 2443 0071 3B       		.uleb128 0x3b
+ 2444 0072 0B       		.uleb128 0xb
+ 2445 0073 01       		.uleb128 0x1
+ 2446 0074 13       		.uleb128 0x13
+ 2447 0075 00       		.byte	0
+ 2448 0076 00       		.byte	0
+ 2449 0077 0A       		.uleb128 0xa
+ 2450 0078 0D       		.uleb128 0xd
+ 2451 0079 00       		.byte	0
+ 2452 007a 03       		.uleb128 0x3
+ 2453 007b 0E       		.uleb128 0xe
+ 2454 007c 3A       		.uleb128 0x3a
+ 2455 007d 0B       		.uleb128 0xb
+ 2456 007e 3B       		.uleb128 0x3b
+ 2457 007f 0B       		.uleb128 0xb
+ 2458 0080 49       		.uleb128 0x49
+ 2459 0081 13       		.uleb128 0x13
+ 2460 0082 00       		.byte	0
+ 2461 0083 00       		.byte	0
+ 2462 0084 0B       		.uleb128 0xb
+ 2463 0085 01       		.uleb128 0x1
+ 2464 0086 01       		.byte	0x1
+ 2465 0087 49       		.uleb128 0x49
+ 2466 0088 13       		.uleb128 0x13
+ 2467 0089 01       		.uleb128 0x1
+ 2468 008a 13       		.uleb128 0x13
+ 2469 008b 00       		.byte	0
+ 2470 008c 00       		.byte	0
+ 2471 008d 0C       		.uleb128 0xc
+ 2472 008e 21       		.uleb128 0x21
+ 2473 008f 00       		.byte	0
+ 2474 0090 49       		.uleb128 0x49
+ 2475 0091 13       		.uleb128 0x13
+ 2476 0092 2F       		.uleb128 0x2f
+ 2477 0093 0B       		.uleb128 0xb
+ 2478 0094 00       		.byte	0
+ 2479 0095 00       		.byte	0
+ 2480 0096 0D       		.uleb128 0xd
+ 2481 0097 2E       		.uleb128 0x2e
+ 2482 0098 01       		.byte	0x1
+ 2483 0099 3F       		.uleb128 0x3f
+ 2484 009a 19       		.uleb128 0x19
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 54
+
+
+ 2485 009b 03       		.uleb128 0x3
+ 2486 009c 0E       		.uleb128 0xe
+ 2487 009d 3A       		.uleb128 0x3a
+ 2488 009e 0B       		.uleb128 0xb
+ 2489 009f 3B       		.uleb128 0x3b
+ 2490 00a0 05       		.uleb128 0x5
+ 2491 00a1 27       		.uleb128 0x27
+ 2492 00a2 19       		.uleb128 0x19
+ 2493 00a3 49       		.uleb128 0x49
+ 2494 00a4 13       		.uleb128 0x13
+ 2495 00a5 11       		.uleb128 0x11
+ 2496 00a6 01       		.uleb128 0x1
+ 2497 00a7 12       		.uleb128 0x12
+ 2498 00a8 06       		.uleb128 0x6
+ 2499 00a9 40       		.uleb128 0x40
+ 2500 00aa 18       		.uleb128 0x18
+ 2501 00ab 9742     		.uleb128 0x2117
+ 2502 00ad 19       		.uleb128 0x19
+ 2503 00ae 01       		.uleb128 0x1
+ 2504 00af 13       		.uleb128 0x13
+ 2505 00b0 00       		.byte	0
+ 2506 00b1 00       		.byte	0
+ 2507 00b2 0E       		.uleb128 0xe
+ 2508 00b3 05       		.uleb128 0x5
+ 2509 00b4 00       		.byte	0
+ 2510 00b5 03       		.uleb128 0x3
+ 2511 00b6 0E       		.uleb128 0xe
+ 2512 00b7 3A       		.uleb128 0x3a
+ 2513 00b8 0B       		.uleb128 0xb
+ 2514 00b9 3B       		.uleb128 0x3b
+ 2515 00ba 05       		.uleb128 0x5
+ 2516 00bb 49       		.uleb128 0x49
+ 2517 00bc 13       		.uleb128 0x13
+ 2518 00bd 02       		.uleb128 0x2
+ 2519 00be 17       		.uleb128 0x17
+ 2520 00bf 00       		.byte	0
+ 2521 00c0 00       		.byte	0
+ 2522 00c1 0F       		.uleb128 0xf
+ 2523 00c2 34       		.uleb128 0x34
+ 2524 00c3 00       		.byte	0
+ 2525 00c4 03       		.uleb128 0x3
+ 2526 00c5 0E       		.uleb128 0xe
+ 2527 00c6 3A       		.uleb128 0x3a
+ 2528 00c7 0B       		.uleb128 0xb
+ 2529 00c8 3B       		.uleb128 0x3b
+ 2530 00c9 05       		.uleb128 0x5
+ 2531 00ca 49       		.uleb128 0x49
+ 2532 00cb 13       		.uleb128 0x13
+ 2533 00cc 00       		.byte	0
+ 2534 00cd 00       		.byte	0
+ 2535 00ce 10       		.uleb128 0x10
+ 2536 00cf 898201   		.uleb128 0x4109
+ 2537 00d2 01       		.byte	0x1
+ 2538 00d3 11       		.uleb128 0x11
+ 2539 00d4 01       		.uleb128 0x1
+ 2540 00d5 31       		.uleb128 0x31
+ 2541 00d6 13       		.uleb128 0x13
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 55
+
+
+ 2542 00d7 00       		.byte	0
+ 2543 00d8 00       		.byte	0
+ 2544 00d9 11       		.uleb128 0x11
+ 2545 00da 8A8201   		.uleb128 0x410a
+ 2546 00dd 00       		.byte	0
+ 2547 00de 02       		.uleb128 0x2
+ 2548 00df 18       		.uleb128 0x18
+ 2549 00e0 9142     		.uleb128 0x2111
+ 2550 00e2 18       		.uleb128 0x18
+ 2551 00e3 00       		.byte	0
+ 2552 00e4 00       		.byte	0
+ 2553 00e5 12       		.uleb128 0x12
+ 2554 00e6 34       		.uleb128 0x34
+ 2555 00e7 00       		.byte	0
+ 2556 00e8 03       		.uleb128 0x3
+ 2557 00e9 0E       		.uleb128 0xe
+ 2558 00ea 3A       		.uleb128 0x3a
+ 2559 00eb 0B       		.uleb128 0xb
+ 2560 00ec 3B       		.uleb128 0x3b
+ 2561 00ed 05       		.uleb128 0x5
+ 2562 00ee 49       		.uleb128 0x49
+ 2563 00ef 13       		.uleb128 0x13
+ 2564 00f0 02       		.uleb128 0x2
+ 2565 00f1 17       		.uleb128 0x17
+ 2566 00f2 00       		.byte	0
+ 2567 00f3 00       		.byte	0
+ 2568 00f4 13       		.uleb128 0x13
+ 2569 00f5 0B       		.uleb128 0xb
+ 2570 00f6 01       		.byte	0x1
+ 2571 00f7 11       		.uleb128 0x11
+ 2572 00f8 01       		.uleb128 0x1
+ 2573 00f9 12       		.uleb128 0x12
+ 2574 00fa 06       		.uleb128 0x6
+ 2575 00fb 01       		.uleb128 0x1
+ 2576 00fc 13       		.uleb128 0x13
+ 2577 00fd 00       		.byte	0
+ 2578 00fe 00       		.byte	0
+ 2579 00ff 14       		.uleb128 0x14
+ 2580 0100 898201   		.uleb128 0x4109
+ 2581 0103 01       		.byte	0x1
+ 2582 0104 11       		.uleb128 0x11
+ 2583 0105 01       		.uleb128 0x1
+ 2584 0106 31       		.uleb128 0x31
+ 2585 0107 13       		.uleb128 0x13
+ 2586 0108 01       		.uleb128 0x1
+ 2587 0109 13       		.uleb128 0x13
+ 2588 010a 00       		.byte	0
+ 2589 010b 00       		.byte	0
+ 2590 010c 15       		.uleb128 0x15
+ 2591 010d 2E       		.uleb128 0x2e
+ 2592 010e 01       		.byte	0x1
+ 2593 010f 3F       		.uleb128 0x3f
+ 2594 0110 19       		.uleb128 0x19
+ 2595 0111 03       		.uleb128 0x3
+ 2596 0112 0E       		.uleb128 0xe
+ 2597 0113 3A       		.uleb128 0x3a
+ 2598 0114 0B       		.uleb128 0xb
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 56
+
+
+ 2599 0115 3B       		.uleb128 0x3b
+ 2600 0116 05       		.uleb128 0x5
+ 2601 0117 27       		.uleb128 0x27
+ 2602 0118 19       		.uleb128 0x19
+ 2603 0119 11       		.uleb128 0x11
+ 2604 011a 01       		.uleb128 0x1
+ 2605 011b 12       		.uleb128 0x12
+ 2606 011c 06       		.uleb128 0x6
+ 2607 011d 40       		.uleb128 0x40
+ 2608 011e 18       		.uleb128 0x18
+ 2609 011f 9742     		.uleb128 0x2117
+ 2610 0121 19       		.uleb128 0x19
+ 2611 0122 01       		.uleb128 0x1
+ 2612 0123 13       		.uleb128 0x13
+ 2613 0124 00       		.byte	0
+ 2614 0125 00       		.byte	0
+ 2615 0126 16       		.uleb128 0x16
+ 2616 0127 0B       		.uleb128 0xb
+ 2617 0128 01       		.byte	0x1
+ 2618 0129 11       		.uleb128 0x11
+ 2619 012a 01       		.uleb128 0x1
+ 2620 012b 12       		.uleb128 0x12
+ 2621 012c 06       		.uleb128 0x6
+ 2622 012d 00       		.byte	0
+ 2623 012e 00       		.byte	0
+ 2624 012f 17       		.uleb128 0x17
+ 2625 0130 34       		.uleb128 0x34
+ 2626 0131 00       		.byte	0
+ 2627 0132 03       		.uleb128 0x3
+ 2628 0133 08       		.uleb128 0x8
+ 2629 0134 3A       		.uleb128 0x3a
+ 2630 0135 0B       		.uleb128 0xb
+ 2631 0136 3B       		.uleb128 0x3b
+ 2632 0137 05       		.uleb128 0x5
+ 2633 0138 49       		.uleb128 0x49
+ 2634 0139 13       		.uleb128 0x13
+ 2635 013a 02       		.uleb128 0x2
+ 2636 013b 17       		.uleb128 0x17
+ 2637 013c 00       		.byte	0
+ 2638 013d 00       		.byte	0
+ 2639 013e 18       		.uleb128 0x18
+ 2640 013f 2E       		.uleb128 0x2e
+ 2641 0140 01       		.byte	0x1
+ 2642 0141 3F       		.uleb128 0x3f
+ 2643 0142 19       		.uleb128 0x19
+ 2644 0143 03       		.uleb128 0x3
+ 2645 0144 0E       		.uleb128 0xe
+ 2646 0145 3A       		.uleb128 0x3a
+ 2647 0146 0B       		.uleb128 0xb
+ 2648 0147 3B       		.uleb128 0x3b
+ 2649 0148 0B       		.uleb128 0xb
+ 2650 0149 27       		.uleb128 0x27
+ 2651 014a 19       		.uleb128 0x19
+ 2652 014b 49       		.uleb128 0x49
+ 2653 014c 13       		.uleb128 0x13
+ 2654 014d 11       		.uleb128 0x11
+ 2655 014e 01       		.uleb128 0x1
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 57
+
+
+ 2656 014f 12       		.uleb128 0x12
+ 2657 0150 06       		.uleb128 0x6
+ 2658 0151 40       		.uleb128 0x40
+ 2659 0152 18       		.uleb128 0x18
+ 2660 0153 9742     		.uleb128 0x2117
+ 2661 0155 19       		.uleb128 0x19
+ 2662 0156 01       		.uleb128 0x1
+ 2663 0157 13       		.uleb128 0x13
+ 2664 0158 00       		.byte	0
+ 2665 0159 00       		.byte	0
+ 2666 015a 19       		.uleb128 0x19
+ 2667 015b 05       		.uleb128 0x5
+ 2668 015c 00       		.byte	0
+ 2669 015d 03       		.uleb128 0x3
+ 2670 015e 0E       		.uleb128 0xe
+ 2671 015f 3A       		.uleb128 0x3a
+ 2672 0160 0B       		.uleb128 0xb
+ 2673 0161 3B       		.uleb128 0x3b
+ 2674 0162 0B       		.uleb128 0xb
+ 2675 0163 49       		.uleb128 0x49
+ 2676 0164 13       		.uleb128 0x13
+ 2677 0165 02       		.uleb128 0x2
+ 2678 0166 17       		.uleb128 0x17
+ 2679 0167 00       		.byte	0
+ 2680 0168 00       		.byte	0
+ 2681 0169 1A       		.uleb128 0x1a
+ 2682 016a 34       		.uleb128 0x34
+ 2683 016b 00       		.byte	0
+ 2684 016c 03       		.uleb128 0x3
+ 2685 016d 0E       		.uleb128 0xe
+ 2686 016e 3A       		.uleb128 0x3a
+ 2687 016f 0B       		.uleb128 0xb
+ 2688 0170 3B       		.uleb128 0x3b
+ 2689 0171 0B       		.uleb128 0xb
+ 2690 0172 49       		.uleb128 0x49
+ 2691 0173 13       		.uleb128 0x13
+ 2692 0174 02       		.uleb128 0x2
+ 2693 0175 17       		.uleb128 0x17
+ 2694 0176 00       		.byte	0
+ 2695 0177 00       		.byte	0
+ 2696 0178 1B       		.uleb128 0x1b
+ 2697 0179 2E       		.uleb128 0x2e
+ 2698 017a 01       		.byte	0x1
+ 2699 017b 3F       		.uleb128 0x3f
+ 2700 017c 19       		.uleb128 0x19
+ 2701 017d 03       		.uleb128 0x3
+ 2702 017e 0E       		.uleb128 0xe
+ 2703 017f 3A       		.uleb128 0x3a
+ 2704 0180 0B       		.uleb128 0xb
+ 2705 0181 3B       		.uleb128 0x3b
+ 2706 0182 0B       		.uleb128 0xb
+ 2707 0183 27       		.uleb128 0x27
+ 2708 0184 19       		.uleb128 0x19
+ 2709 0185 11       		.uleb128 0x11
+ 2710 0186 01       		.uleb128 0x1
+ 2711 0187 12       		.uleb128 0x12
+ 2712 0188 06       		.uleb128 0x6
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 58
+
+
+ 2713 0189 40       		.uleb128 0x40
+ 2714 018a 18       		.uleb128 0x18
+ 2715 018b 9642     		.uleb128 0x2116
+ 2716 018d 19       		.uleb128 0x19
+ 2717 018e 01       		.uleb128 0x1
+ 2718 018f 13       		.uleb128 0x13
+ 2719 0190 00       		.byte	0
+ 2720 0191 00       		.byte	0
+ 2721 0192 1C       		.uleb128 0x1c
+ 2722 0193 898201   		.uleb128 0x4109
+ 2723 0196 00       		.byte	0
+ 2724 0197 11       		.uleb128 0x11
+ 2725 0198 01       		.uleb128 0x1
+ 2726 0199 31       		.uleb128 0x31
+ 2727 019a 13       		.uleb128 0x13
+ 2728 019b 00       		.byte	0
+ 2729 019c 00       		.byte	0
+ 2730 019d 1D       		.uleb128 0x1d
+ 2731 019e 05       		.uleb128 0x5
+ 2732 019f 00       		.byte	0
+ 2733 01a0 03       		.uleb128 0x3
+ 2734 01a1 08       		.uleb128 0x8
+ 2735 01a2 3A       		.uleb128 0x3a
+ 2736 01a3 0B       		.uleb128 0xb
+ 2737 01a4 3B       		.uleb128 0x3b
+ 2738 01a5 05       		.uleb128 0x5
+ 2739 01a6 49       		.uleb128 0x49
+ 2740 01a7 13       		.uleb128 0x13
+ 2741 01a8 02       		.uleb128 0x2
+ 2742 01a9 18       		.uleb128 0x18
+ 2743 01aa 00       		.byte	0
+ 2744 01ab 00       		.byte	0
+ 2745 01ac 1E       		.uleb128 0x1e
+ 2746 01ad 0B       		.uleb128 0xb
+ 2747 01ae 01       		.byte	0x1
+ 2748 01af 55       		.uleb128 0x55
+ 2749 01b0 17       		.uleb128 0x17
+ 2750 01b1 00       		.byte	0
+ 2751 01b2 00       		.byte	0
+ 2752 01b3 1F       		.uleb128 0x1f
+ 2753 01b4 2E       		.uleb128 0x2e
+ 2754 01b5 01       		.byte	0x1
+ 2755 01b6 3F       		.uleb128 0x3f
+ 2756 01b7 19       		.uleb128 0x19
+ 2757 01b8 03       		.uleb128 0x3
+ 2758 01b9 0E       		.uleb128 0xe
+ 2759 01ba 3A       		.uleb128 0x3a
+ 2760 01bb 0B       		.uleb128 0xb
+ 2761 01bc 3B       		.uleb128 0x3b
+ 2762 01bd 0B       		.uleb128 0xb
+ 2763 01be 27       		.uleb128 0x27
+ 2764 01bf 19       		.uleb128 0x19
+ 2765 01c0 11       		.uleb128 0x11
+ 2766 01c1 01       		.uleb128 0x1
+ 2767 01c2 12       		.uleb128 0x12
+ 2768 01c3 06       		.uleb128 0x6
+ 2769 01c4 40       		.uleb128 0x40
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 59
+
+
+ 2770 01c5 18       		.uleb128 0x18
+ 2771 01c6 9742     		.uleb128 0x2117
+ 2772 01c8 19       		.uleb128 0x19
+ 2773 01c9 01       		.uleb128 0x1
+ 2774 01ca 13       		.uleb128 0x13
+ 2775 01cb 00       		.byte	0
+ 2776 01cc 00       		.byte	0
+ 2777 01cd 20       		.uleb128 0x20
+ 2778 01ce 34       		.uleb128 0x34
+ 2779 01cf 00       		.byte	0
+ 2780 01d0 03       		.uleb128 0x3
+ 2781 01d1 0E       		.uleb128 0xe
+ 2782 01d2 3A       		.uleb128 0x3a
+ 2783 01d3 0B       		.uleb128 0xb
+ 2784 01d4 3B       		.uleb128 0x3b
+ 2785 01d5 0B       		.uleb128 0xb
+ 2786 01d6 49       		.uleb128 0x49
+ 2787 01d7 13       		.uleb128 0x13
+ 2788 01d8 00       		.byte	0
+ 2789 01d9 00       		.byte	0
+ 2790 01da 21       		.uleb128 0x21
+ 2791 01db 34       		.uleb128 0x34
+ 2792 01dc 00       		.byte	0
+ 2793 01dd 03       		.uleb128 0x3
+ 2794 01de 0E       		.uleb128 0xe
+ 2795 01df 3A       		.uleb128 0x3a
+ 2796 01e0 0B       		.uleb128 0xb
+ 2797 01e1 3B       		.uleb128 0x3b
+ 2798 01e2 0B       		.uleb128 0xb
+ 2799 01e3 49       		.uleb128 0x49
+ 2800 01e4 13       		.uleb128 0x13
+ 2801 01e5 3F       		.uleb128 0x3f
+ 2802 01e6 19       		.uleb128 0x19
+ 2803 01e7 02       		.uleb128 0x2
+ 2804 01e8 18       		.uleb128 0x18
+ 2805 01e9 00       		.byte	0
+ 2806 01ea 00       		.byte	0
+ 2807 01eb 22       		.uleb128 0x22
+ 2808 01ec 2E       		.uleb128 0x2e
+ 2809 01ed 00       		.byte	0
+ 2810 01ee 3F       		.uleb128 0x3f
+ 2811 01ef 19       		.uleb128 0x19
+ 2812 01f0 3C       		.uleb128 0x3c
+ 2813 01f1 19       		.uleb128 0x19
+ 2814 01f2 6E       		.uleb128 0x6e
+ 2815 01f3 0E       		.uleb128 0xe
+ 2816 01f4 03       		.uleb128 0x3
+ 2817 01f5 0E       		.uleb128 0xe
+ 2818 01f6 3A       		.uleb128 0x3a
+ 2819 01f7 0B       		.uleb128 0xb
+ 2820 01f8 3B       		.uleb128 0x3b
+ 2821 01f9 0B       		.uleb128 0xb
+ 2822 01fa 00       		.byte	0
+ 2823 01fb 00       		.byte	0
+ 2824 01fc 00       		.byte	0
+ 2825              		.section	.debug_loc,"",%progbits
+ 2826              	.Ldebug_loc0:
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 60
+
+
+ 2827              	.LLST0:
+ 2828 0000 00000000 		.4byte	.LVL0
+ 2829 0004 0E000000 		.4byte	.LVL1
+ 2830 0008 0100     		.2byte	0x1
+ 2831 000a 50       		.byte	0x50
+ 2832 000b 0E000000 		.4byte	.LVL1
+ 2833 000f 20000000 		.4byte	.LFE42
+ 2834 0013 0400     		.2byte	0x4
+ 2835 0015 F3       		.byte	0xf3
+ 2836 0016 01       		.uleb128 0x1
+ 2837 0017 50       		.byte	0x50
+ 2838 0018 9F       		.byte	0x9f
+ 2839 0019 00000000 		.4byte	0
+ 2840 001d 00000000 		.4byte	0
+ 2841              	.LLST1:
+ 2842 0021 00000000 		.4byte	.LVL3
+ 2843 0025 0C000000 		.4byte	.LVL5
+ 2844 0029 0100     		.2byte	0x1
+ 2845 002b 50       		.byte	0x50
+ 2846 002c 0C000000 		.4byte	.LVL5
+ 2847 0030 0F000000 		.4byte	.LVL6-1
+ 2848 0034 0500     		.2byte	0x5
+ 2849 0036 03       		.byte	0x3
+ 2850 0037 00000000 		.4byte	write_buffer
+ 2851 003b 0F000000 		.4byte	.LVL6-1
+ 2852 003f 18000000 		.4byte	.LFE44
+ 2853 0043 0400     		.2byte	0x4
+ 2854 0045 F3       		.byte	0xf3
+ 2855 0046 01       		.uleb128 0x1
+ 2856 0047 50       		.byte	0x50
+ 2857 0048 9F       		.byte	0x9f
+ 2858 0049 00000000 		.4byte	0
+ 2859 004d 00000000 		.4byte	0
+ 2860              	.LLST2:
+ 2861 0051 00000000 		.4byte	.LVL3
+ 2862 0055 0A000000 		.4byte	.LVL4
+ 2863 0059 0100     		.2byte	0x1
+ 2864 005b 51       		.byte	0x51
+ 2865 005c 0A000000 		.4byte	.LVL4
+ 2866 0060 0F000000 		.4byte	.LVL6-1
+ 2867 0064 0500     		.2byte	0x5
+ 2868 0066 03       		.byte	0x3
+ 2869 0067 01000000 		.4byte	write_buffer+1
+ 2870 006b 0F000000 		.4byte	.LVL6-1
+ 2871 006f 18000000 		.4byte	.LFE44
+ 2872 0073 0400     		.2byte	0x4
+ 2873 0075 F3       		.byte	0xf3
+ 2874 0076 01       		.uleb128 0x1
+ 2875 0077 51       		.byte	0x51
+ 2876 0078 9F       		.byte	0x9f
+ 2877 0079 00000000 		.4byte	0
+ 2878 007d 00000000 		.4byte	0
+ 2879              	.LLST3:
+ 2880 0081 00000000 		.4byte	.LVL7
+ 2881 0085 06000000 		.4byte	.LVL8
+ 2882 0089 0100     		.2byte	0x1
+ 2883 008b 50       		.byte	0x50
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 61
+
+
+ 2884 008c 06000000 		.4byte	.LVL8
+ 2885 0090 48000000 		.4byte	.LFE41
+ 2886 0094 0400     		.2byte	0x4
+ 2887 0096 F3       		.byte	0xf3
+ 2888 0097 01       		.uleb128 0x1
+ 2889 0098 50       		.byte	0x50
+ 2890 0099 9F       		.byte	0x9f
+ 2891 009a 00000000 		.4byte	0
+ 2892 009e 00000000 		.4byte	0
+ 2893              	.LLST4:
+ 2894 00a2 0A000000 		.4byte	.LVL9
+ 2895 00a6 10000000 		.4byte	.LVL10
+ 2896 00aa 0100     		.2byte	0x1
+ 2897 00ac 50       		.byte	0x50
+ 2898 00ad 1A000000 		.4byte	.LVL12
+ 2899 00b1 20000000 		.4byte	.LVL13
+ 2900 00b5 0100     		.2byte	0x1
+ 2901 00b7 50       		.byte	0x50
+ 2902 00b8 26000000 		.4byte	.LVL15
+ 2903 00bc 2A000000 		.4byte	.LVL16
+ 2904 00c0 0100     		.2byte	0x1
+ 2905 00c2 50       		.byte	0x50
+ 2906 00c3 34000000 		.4byte	.LVL18
+ 2907 00c7 3A000000 		.4byte	.LVL19
+ 2908 00cb 0100     		.2byte	0x1
+ 2909 00cd 50       		.byte	0x50
+ 2910 00ce 40000000 		.4byte	.LVL21
+ 2911 00d2 42000000 		.4byte	.LVL22
+ 2912 00d6 0100     		.2byte	0x1
+ 2913 00d8 50       		.byte	0x50
+ 2914 00d9 00000000 		.4byte	0
+ 2915 00dd 00000000 		.4byte	0
+ 2916              	.LLST5:
+ 2917 00e1 02000000 		.4byte	.LVL24
+ 2918 00e5 06000000 		.4byte	.LVL25
+ 2919 00e9 0200     		.2byte	0x2
+ 2920 00eb 30       		.byte	0x30
+ 2921 00ec 9F       		.byte	0x9f
+ 2922 00ed 06000000 		.4byte	.LVL25
+ 2923 00f1 16000000 		.4byte	.LVL27
+ 2924 00f5 0100     		.2byte	0x1
+ 2925 00f7 54       		.byte	0x54
+ 2926 00f8 18000000 		.4byte	.LVL28
+ 2927 00fc 22000000 		.4byte	.LVL29
+ 2928 0100 0100     		.2byte	0x1
+ 2929 0102 54       		.byte	0x54
+ 2930 0103 00000000 		.4byte	0
+ 2931 0107 00000000 		.4byte	0
+ 2932              	.LLST6:
+ 2933 010b 00000000 		.4byte	.LVL30
+ 2934 010f 06000000 		.4byte	.LVL31
+ 2935 0113 0100     		.2byte	0x1
+ 2936 0115 50       		.byte	0x50
+ 2937 0116 06000000 		.4byte	.LVL31
+ 2938 011a 32000000 		.4byte	.LFE43
+ 2939 011e 0400     		.2byte	0x4
+ 2940 0120 F3       		.byte	0xf3
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 62
+
+
+ 2941 0121 01       		.uleb128 0x1
+ 2942 0122 50       		.byte	0x50
+ 2943 0123 9F       		.byte	0x9f
+ 2944 0124 00000000 		.4byte	0
+ 2945 0128 00000000 		.4byte	0
+ 2946              	.LLST7:
+ 2947 012c 00000000 		.4byte	.LVL30
+ 2948 0130 06000000 		.4byte	.LVL31
+ 2949 0134 0100     		.2byte	0x1
+ 2950 0136 51       		.byte	0x51
+ 2951 0137 06000000 		.4byte	.LVL31
+ 2952 013b 32000000 		.4byte	.LFE43
+ 2953 013f 0400     		.2byte	0x4
+ 2954 0141 F3       		.byte	0xf3
+ 2955 0142 01       		.uleb128 0x1
+ 2956 0143 51       		.byte	0x51
+ 2957 0144 9F       		.byte	0x9f
+ 2958 0145 00000000 		.4byte	0
+ 2959 0149 00000000 		.4byte	0
+ 2960              	.LLST8:
+ 2961 014d 0C000000 		.4byte	.LVL32
+ 2962 0151 1A000000 		.4byte	.LVL33
+ 2963 0155 0100     		.2byte	0x1
+ 2964 0157 50       		.byte	0x50
+ 2965 0158 24000000 		.4byte	.LVL35
+ 2966 015c 2C000000 		.4byte	.LVL36
+ 2967 0160 0100     		.2byte	0x1
+ 2968 0162 50       		.byte	0x50
+ 2969 0163 00000000 		.4byte	0
+ 2970 0167 00000000 		.4byte	0
+ 2971              	.LLST9:
+ 2972 016b 00000000 		.4byte	.LVL38
+ 2973 016f 1A000000 		.4byte	.LVL40
+ 2974 0173 0100     		.2byte	0x1
+ 2975 0175 50       		.byte	0x50
+ 2976 0176 1A000000 		.4byte	.LVL40
+ 2977 017a 22000000 		.4byte	.LVL43
+ 2978 017e 0100     		.2byte	0x1
+ 2979 0180 55       		.byte	0x55
+ 2980 0181 22000000 		.4byte	.LVL43
+ 2981 0185 24000000 		.4byte	.LFE37
+ 2982 0189 0400     		.2byte	0x4
+ 2983 018b F3       		.byte	0xf3
+ 2984 018c 01       		.uleb128 0x1
+ 2985 018d 50       		.byte	0x50
+ 2986 018e 9F       		.byte	0x9f
+ 2987 018f 00000000 		.4byte	0
+ 2988 0193 00000000 		.4byte	0
+ 2989              	.LLST10:
+ 2990 0197 16000000 		.4byte	.LVL39
+ 2991 019b 22000000 		.4byte	.LVL42
+ 2992 019f 0100     		.2byte	0x1
+ 2993 01a1 54       		.byte	0x54
+ 2994 01a2 22000000 		.4byte	.LVL42
+ 2995 01a6 22000000 		.4byte	.LVL43
+ 2996 01aa 0200     		.2byte	0x2
+ 2997 01ac 75       		.byte	0x75
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 63
+
+
+ 2998 01ad 10       		.sleb128 16
+ 2999 01ae 22000000 		.4byte	.LVL43
+ 3000 01b2 24000000 		.4byte	.LFE37
+ 3001 01b6 0100     		.2byte	0x1
+ 3002 01b8 50       		.byte	0x50
+ 3003 01b9 00000000 		.4byte	0
+ 3004 01bd 00000000 		.4byte	0
+ 3005              	.LLST11:
+ 3006 01c1 00000000 		.4byte	.LVL44
+ 3007 01c5 1E000000 		.4byte	.LVL46
+ 3008 01c9 0100     		.2byte	0x1
+ 3009 01cb 50       		.byte	0x50
+ 3010 01cc 1E000000 		.4byte	.LVL46
+ 3011 01d0 26000000 		.4byte	.LVL49
+ 3012 01d4 0100     		.2byte	0x1
+ 3013 01d6 55       		.byte	0x55
+ 3014 01d7 26000000 		.4byte	.LVL49
+ 3015 01db 28000000 		.4byte	.LFE38
+ 3016 01df 0400     		.2byte	0x4
+ 3017 01e1 F3       		.byte	0xf3
+ 3018 01e2 01       		.uleb128 0x1
+ 3019 01e3 50       		.byte	0x50
+ 3020 01e4 9F       		.byte	0x9f
+ 3021 01e5 00000000 		.4byte	0
+ 3022 01e9 00000000 		.4byte	0
+ 3023              	.LLST12:
+ 3024 01ed 1A000000 		.4byte	.LVL45
+ 3025 01f1 26000000 		.4byte	.LVL48
+ 3026 01f5 0100     		.2byte	0x1
+ 3027 01f7 54       		.byte	0x54
+ 3028 01f8 26000000 		.4byte	.LVL48
+ 3029 01fc 26000000 		.4byte	.LVL49
+ 3030 0200 0200     		.2byte	0x2
+ 3031 0202 75       		.byte	0x75
+ 3032 0203 11       		.sleb128 17
+ 3033 0204 26000000 		.4byte	.LVL49
+ 3034 0208 28000000 		.4byte	.LFE38
+ 3035 020c 0100     		.2byte	0x1
+ 3036 020e 50       		.byte	0x50
+ 3037 020f 00000000 		.4byte	0
+ 3038 0213 00000000 		.4byte	0
+ 3039              	.LLST13:
+ 3040 0217 08000000 		.4byte	.LVL50
+ 3041 021b 0E000000 		.4byte	.LVL51
+ 3042 021f 0100     		.2byte	0x1
+ 3043 0221 50       		.byte	0x50
+ 3044 0222 0E000000 		.4byte	.LVL51
+ 3045 0226 11000000 		.4byte	.LVL52-1
+ 3046 022a 0500     		.2byte	0x5
+ 3047 022c 03       		.byte	0x3
+ 3048 022d 08000000 		.4byte	as7262+8
+ 3049 0231 12000000 		.4byte	.LVL52
+ 3050 0235 16000000 		.4byte	.LVL53
+ 3051 0239 0100     		.2byte	0x1
+ 3052 023b 50       		.byte	0x50
+ 3053 023c 16000000 		.4byte	.LVL53
+ 3054 0240 19000000 		.4byte	.LVL54-1
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 64
+
+
+ 3055 0244 0500     		.2byte	0x5
+ 3056 0246 03       		.byte	0x3
+ 3057 0247 09000000 		.4byte	as7262+9
+ 3058 024b 1A000000 		.4byte	.LVL54
+ 3059 024f 1C000000 		.4byte	.LVL55
+ 3060 0253 0100     		.2byte	0x1
+ 3061 0255 50       		.byte	0x50
+ 3062 0256 24000000 		.4byte	.LVL56
+ 3063 025a 28000000 		.4byte	.LVL57
+ 3064 025e 0100     		.2byte	0x1
+ 3065 0260 50       		.byte	0x50
+ 3066 0261 00000000 		.4byte	0
+ 3067 0265 00000000 		.4byte	0
+ 3068              	.LLST14:
+ 3069 0269 38000000 		.4byte	.LVL70
+ 3070 026d 58000000 		.4byte	.LVL77
+ 3071 0271 0100     		.2byte	0x1
+ 3072 0273 55       		.byte	0x55
+ 3073 0274 00000000 		.4byte	0
+ 3074 0278 00000000 		.4byte	0
+ 3075              	.LLST15:
+ 3076 027c 28000000 		.4byte	.LVL66
+ 3077 0280 2A000000 		.4byte	.LVL67
+ 3078 0284 0200     		.2byte	0x2
+ 3079 0286 30       		.byte	0x30
+ 3080 0287 9F       		.byte	0x9f
+ 3081 0288 2A000000 		.4byte	.LVL67
+ 3082 028c 3A000000 		.4byte	.LVL71
+ 3083 0290 0100     		.2byte	0x1
+ 3084 0292 54       		.byte	0x54
+ 3085 0293 3C000000 		.4byte	.LVL72
+ 3086 0297 58000000 		.4byte	.LVL76
+ 3087 029b 0100     		.2byte	0x1
+ 3088 029d 54       		.byte	0x54
+ 3089 029e 00000000 		.4byte	0
+ 3090 02a2 00000000 		.4byte	0
+ 3091              	.LLST16:
+ 3092 02a6 00000000 		.4byte	.LVL78
+ 3093 02aa 16000000 		.4byte	.LVL79
+ 3094 02ae 0100     		.2byte	0x1
+ 3095 02b0 50       		.byte	0x50
+ 3096 02b1 16000000 		.4byte	.LVL79
+ 3097 02b5 1A000000 		.4byte	.LVL80
+ 3098 02b9 0400     		.2byte	0x4
+ 3099 02bb F3       		.byte	0xf3
+ 3100 02bc 01       		.uleb128 0x1
+ 3101 02bd 50       		.byte	0x50
+ 3102 02be 9F       		.byte	0x9f
+ 3103 02bf 1A000000 		.4byte	.LVL80
+ 3104 02c3 26000000 		.4byte	.LVL81
+ 3105 02c7 0100     		.2byte	0x1
+ 3106 02c9 50       		.byte	0x50
+ 3107 02ca 26000000 		.4byte	.LVL81
+ 3108 02ce 2A000000 		.4byte	.LVL82
+ 3109 02d2 0400     		.2byte	0x4
+ 3110 02d4 F3       		.byte	0xf3
+ 3111 02d5 01       		.uleb128 0x1
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 65
+
+
+ 3112 02d6 50       		.byte	0x50
+ 3113 02d7 9F       		.byte	0x9f
+ 3114 02d8 2A000000 		.4byte	.LVL82
+ 3115 02dc 2C000000 		.4byte	.LVL83
+ 3116 02e0 0100     		.2byte	0x1
+ 3117 02e2 50       		.byte	0x50
+ 3118 02e3 2C000000 		.4byte	.LVL83
+ 3119 02e7 30000000 		.4byte	.LFE46
+ 3120 02eb 0400     		.2byte	0x4
+ 3121 02ed F3       		.byte	0xf3
+ 3122 02ee 01       		.uleb128 0x1
+ 3123 02ef 50       		.byte	0x50
+ 3124 02f0 9F       		.byte	0x9f
+ 3125 02f1 00000000 		.4byte	0
+ 3126 02f5 00000000 		.4byte	0
+ 3127              	.LLST17:
+ 3128 02f9 00000000 		.4byte	.LVL84
+ 3129 02fd 06000000 		.4byte	.LVL85
+ 3130 0301 0100     		.2byte	0x1
+ 3131 0303 50       		.byte	0x50
+ 3132 0304 06000000 		.4byte	.LVL85
+ 3133 0308 18000000 		.4byte	.LVL90
+ 3134 030c 0100     		.2byte	0x1
+ 3135 030e 55       		.byte	0x55
+ 3136 030f 18000000 		.4byte	.LVL90
+ 3137 0313 1A000000 		.4byte	.LFE45
+ 3138 0317 0400     		.2byte	0x4
+ 3139 0319 F3       		.byte	0xf3
+ 3140 031a 01       		.uleb128 0x1
+ 3141 031b 50       		.byte	0x50
+ 3142 031c 9F       		.byte	0x9f
+ 3143 031d 00000000 		.4byte	0
+ 3144 0321 00000000 		.4byte	0
+ 3145              	.LLST18:
+ 3146 0325 0E000000 		.4byte	.LVL87
+ 3147 0329 18000000 		.4byte	.LVL89
+ 3148 032d 0100     		.2byte	0x1
+ 3149 032f 54       		.byte	0x54
+ 3150 0330 18000000 		.4byte	.LVL89
+ 3151 0334 1A000000 		.4byte	.LFE45
+ 3152 0338 0100     		.2byte	0x1
+ 3153 033a 50       		.byte	0x50
+ 3154 033b 00000000 		.4byte	0
+ 3155 033f 00000000 		.4byte	0
+ 3156              	.LLST19:
+ 3157 0343 00000000 		.4byte	.LVL91
+ 3158 0347 08000000 		.4byte	.LVL93
+ 3159 034b 0100     		.2byte	0x1
+ 3160 034d 50       		.byte	0x50
+ 3161 034e 08000000 		.4byte	.LVL93
+ 3162 0352 20000000 		.4byte	.LVL99
+ 3163 0356 0100     		.2byte	0x1
+ 3164 0358 56       		.byte	0x56
+ 3165 0359 20000000 		.4byte	.LVL99
+ 3166 035d 22000000 		.4byte	.LFE47
+ 3167 0361 0400     		.2byte	0x4
+ 3168 0363 F3       		.byte	0xf3
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 66
+
+
+ 3169 0364 01       		.uleb128 0x1
+ 3170 0365 50       		.byte	0x50
+ 3171 0366 9F       		.byte	0x9f
+ 3172 0367 00000000 		.4byte	0
+ 3173 036b 00000000 		.4byte	0
+ 3174              	.LLST20:
+ 3175 036f 04000000 		.4byte	.LVL92
+ 3176 0373 0A000000 		.4byte	.LVL94
+ 3177 0377 0200     		.2byte	0x2
+ 3178 0379 30       		.byte	0x30
+ 3179 037a 9F       		.byte	0x9f
+ 3180 037b 0A000000 		.4byte	.LVL94
+ 3181 037f 10000000 		.4byte	.LVL95
+ 3182 0383 0100     		.2byte	0x1
+ 3183 0385 50       		.byte	0x50
+ 3184 0386 1A000000 		.4byte	.LVL96
+ 3185 038a 22000000 		.4byte	.LFE47
+ 3186 038e 0100     		.2byte	0x1
+ 3187 0390 50       		.byte	0x50
+ 3188 0391 00000000 		.4byte	0
+ 3189 0395 00000000 		.4byte	0
+ 3190              	.LLST21:
+ 3191 0399 04000000 		.4byte	.LVL92
+ 3192 039d 0A000000 		.4byte	.LVL94
+ 3193 03a1 0200     		.2byte	0x2
+ 3194 03a3 30       		.byte	0x30
+ 3195 03a4 9F       		.byte	0x9f
+ 3196 03a5 0A000000 		.4byte	.LVL94
+ 3197 03a9 20000000 		.4byte	.LVL98
+ 3198 03ad 0100     		.2byte	0x1
+ 3199 03af 55       		.byte	0x55
+ 3200 03b0 00000000 		.4byte	0
+ 3201 03b4 00000000 		.4byte	0
+ 3202              	.LLST22:
+ 3203 03b8 00000000 		.4byte	.LVL100
+ 3204 03bc 24000000 		.4byte	.LVL101
+ 3205 03c0 0100     		.2byte	0x1
+ 3206 03c2 50       		.byte	0x50
+ 3207 03c3 24000000 		.4byte	.LVL101
+ 3208 03c7 3C000000 		.4byte	.LVL107
+ 3209 03cb 0100     		.2byte	0x1
+ 3210 03cd 54       		.byte	0x54
+ 3211 03ce 3C000000 		.4byte	.LVL107
+ 3212 03d2 42000000 		.4byte	.LVL108
+ 3213 03d6 0100     		.2byte	0x1
+ 3214 03d8 50       		.byte	0x50
+ 3215 03d9 42000000 		.4byte	.LVL108
+ 3216 03dd 6E000000 		.4byte	.LVL114
+ 3217 03e1 0100     		.2byte	0x1
+ 3218 03e3 54       		.byte	0x54
+ 3219 03e4 6E000000 		.4byte	.LVL114
+ 3220 03e8 8E000000 		.4byte	.LVL119
+ 3221 03ec 0400     		.2byte	0x4
+ 3222 03ee F3       		.byte	0xf3
+ 3223 03ef 01       		.uleb128 0x1
+ 3224 03f0 50       		.byte	0x50
+ 3225 03f1 9F       		.byte	0x9f
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 67
+
+
+ 3226 03f2 8E000000 		.4byte	.LVL119
+ 3227 03f6 98000000 		.4byte	.LVL121
+ 3228 03fa 0100     		.2byte	0x1
+ 3229 03fc 54       		.byte	0x54
+ 3230 03fd 98000000 		.4byte	.LVL121
+ 3231 0401 9A000000 		.4byte	.LVL122
+ 3232 0405 0100     		.2byte	0x1
+ 3233 0407 50       		.byte	0x50
+ 3234 0408 9A000000 		.4byte	.LVL122
+ 3235 040c AE000000 		.4byte	.LVL126
+ 3236 0410 0100     		.2byte	0x1
+ 3237 0412 54       		.byte	0x54
+ 3238 0413 AE000000 		.4byte	.LVL126
+ 3239 0417 B0000000 		.4byte	.LVL127
+ 3240 041b 0100     		.2byte	0x1
+ 3241 041d 50       		.byte	0x50
+ 3242 041e B0000000 		.4byte	.LVL127
+ 3243 0422 C6000000 		.4byte	.LVL130
+ 3244 0426 0100     		.2byte	0x1
+ 3245 0428 54       		.byte	0x54
+ 3246 0429 C6000000 		.4byte	.LVL130
+ 3247 042d C8000000 		.4byte	.LVL131
+ 3248 0431 0100     		.2byte	0x1
+ 3249 0433 50       		.byte	0x50
+ 3250 0434 C8000000 		.4byte	.LVL131
+ 3251 0438 DE000000 		.4byte	.LVL134
+ 3252 043c 0100     		.2byte	0x1
+ 3253 043e 54       		.byte	0x54
+ 3254 043f DE000000 		.4byte	.LVL134
+ 3255 0443 00010000 		.4byte	.LVL135
+ 3256 0447 0100     		.2byte	0x1
+ 3257 0449 50       		.byte	0x50
+ 3258 044a 00010000 		.4byte	.LVL135
+ 3259 044e 04010000 		.4byte	.LVL136
+ 3260 0452 0100     		.2byte	0x1
+ 3261 0454 54       		.byte	0x54
+ 3262 0455 04010000 		.4byte	.LVL136
+ 3263 0459 18010000 		.4byte	.LFE36
+ 3264 045d 0400     		.2byte	0x4
+ 3265 045f F3       		.byte	0xf3
+ 3266 0460 01       		.uleb128 0x1
+ 3267 0461 50       		.byte	0x50
+ 3268 0462 9F       		.byte	0x9f
+ 3269 0463 00000000 		.4byte	0
+ 3270 0467 00000000 		.4byte	0
+ 3271              	.LLST23:
+ 3272 046b A2000000 		.4byte	.LVL124
+ 3273 046f AB000000 		.4byte	.LVL125-1
+ 3274 0473 0100     		.2byte	0x1
+ 3275 0475 51       		.byte	0x51
+ 3276 0476 00000000 		.4byte	0
+ 3277 047a 00000000 		.4byte	0
+ 3278              	.LLST24:
+ 3279 047e 2A000000 		.4byte	.LVL103
+ 3280 0482 3C000000 		.4byte	.LVL107
+ 3281 0486 0100     		.2byte	0x1
+ 3282 0488 55       		.byte	0x55
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 68
+
+
+ 3283 0489 00000000 		.4byte	0
+ 3284 048d 00000000 		.4byte	0
+ 3285              	.LLST25:
+ 3286 0491 34000000 		.4byte	.LVL105
+ 3287 0495 39000000 		.4byte	.LVL106-1
+ 3288 0499 0100     		.2byte	0x1
+ 3289 049b 51       		.byte	0x51
+ 3290 049c 00000000 		.4byte	0
+ 3291 04a0 00000000 		.4byte	0
+ 3292              	.LLST26:
+ 3293 04a4 46000000 		.4byte	.LVL109
+ 3294 04a8 49000000 		.4byte	.LVL110-1
+ 3295 04ac 0100     		.2byte	0x1
+ 3296 04ae 50       		.byte	0x50
+ 3297 04af 00000000 		.4byte	0
+ 3298 04b3 00000000 		.4byte	0
+ 3299              	.LLST27:
+ 3300 04b7 4C000000 		.4byte	.LVL111
+ 3301 04bb 55000000 		.4byte	.LVL112-1
+ 3302 04bf 0100     		.2byte	0x1
+ 3303 04c1 52       		.byte	0x52
+ 3304 04c2 00000000 		.4byte	0
+ 3305 04c6 00000000 		.4byte	0
+ 3306              	.LLST28:
+ 3307 04ca 6E000000 		.4byte	.LVL114
+ 3308 04ce 8E000000 		.4byte	.LVL119
+ 3309 04d2 0100     		.2byte	0x1
+ 3310 04d4 54       		.byte	0x54
+ 3311 04d5 00000000 		.4byte	0
+ 3312 04d9 00000000 		.4byte	0
+ 3313              	.LLST29:
+ 3314 04dd 6E000000 		.4byte	.LVL114
+ 3315 04e1 8E000000 		.4byte	.LVL119
+ 3316 04e5 0800     		.2byte	0x8
+ 3317 04e7 74       		.byte	0x74
+ 3318 04e8 00       		.sleb128 0
+ 3319 04e9 38       		.byte	0x38
+ 3320 04ea 21       		.byte	0x21
+ 3321 04eb 08       		.byte	0x8
+ 3322 04ec FF       		.byte	0xff
+ 3323 04ed 1A       		.byte	0x1a
+ 3324 04ee 9F       		.byte	0x9f
+ 3325 04ef 00000000 		.4byte	0
+ 3326 04f3 00000000 		.4byte	0
+ 3327              		.section	.debug_aranges,"",%progbits
+ 3328 0000 7C000000 		.4byte	0x7c
+ 3329 0004 0200     		.2byte	0x2
+ 3330 0006 00000000 		.4byte	.Ldebug_info0
+ 3331 000a 04       		.byte	0x4
+ 3332 000b 00       		.byte	0
+ 3333 000c 0000     		.2byte	0
+ 3334 000e 0000     		.2byte	0
+ 3335 0010 00000000 		.4byte	.LFB42
+ 3336 0014 20000000 		.4byte	.LFE42-.LFB42
+ 3337 0018 00000000 		.4byte	.LFB44
+ 3338 001c 18000000 		.4byte	.LFE44-.LFB44
+ 3339 0020 00000000 		.4byte	.LFB41
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 69
+
+
+ 3340 0024 48000000 		.4byte	.LFE41-.LFB41
+ 3341 0028 00000000 		.4byte	.LFB40
+ 3342 002c 28000000 		.4byte	.LFE40-.LFB40
+ 3343 0030 00000000 		.4byte	.LFB43
+ 3344 0034 32000000 		.4byte	.LFE43-.LFB43
+ 3345 0038 00000000 		.4byte	.LFB37
+ 3346 003c 24000000 		.4byte	.LFE37-.LFB37
+ 3347 0040 00000000 		.4byte	.LFB38
+ 3348 0044 28000000 		.4byte	.LFE38-.LFB38
+ 3349 0048 00000000 		.4byte	.LFB35
+ 3350 004c 50000000 		.4byte	.LFE35-.LFB35
+ 3351 0050 00000000 		.4byte	.LFB39
+ 3352 0054 70000000 		.4byte	.LFE39-.LFB39
+ 3353 0058 00000000 		.4byte	.LFB46
+ 3354 005c 30000000 		.4byte	.LFE46-.LFB46
+ 3355 0060 00000000 		.4byte	.LFB45
+ 3356 0064 1A000000 		.4byte	.LFE45-.LFB45
+ 3357 0068 00000000 		.4byte	.LFB47
+ 3358 006c 22000000 		.4byte	.LFE47-.LFB47
+ 3359 0070 00000000 		.4byte	.LFB36
+ 3360 0074 18010000 		.4byte	.LFE36-.LFB36
+ 3361 0078 00000000 		.4byte	0
+ 3362 007c 00000000 		.4byte	0
+ 3363              		.section	.debug_ranges,"",%progbits
+ 3364              	.Ldebug_ranges0:
+ 3365 0000 04000000 		.4byte	.LBB4
+ 3366 0004 06000000 		.4byte	.LBE4
+ 3367 0008 08000000 		.4byte	.LBB5
+ 3368 000c 20000000 		.4byte	.LBE5
+ 3369 0010 00000000 		.4byte	0
+ 3370 0014 00000000 		.4byte	0
+ 3371 0018 00000000 		.4byte	.LFB42
+ 3372 001c 20000000 		.4byte	.LFE42
+ 3373 0020 00000000 		.4byte	.LFB44
+ 3374 0024 18000000 		.4byte	.LFE44
+ 3375 0028 00000000 		.4byte	.LFB41
+ 3376 002c 48000000 		.4byte	.LFE41
+ 3377 0030 00000000 		.4byte	.LFB40
+ 3378 0034 28000000 		.4byte	.LFE40
+ 3379 0038 00000000 		.4byte	.LFB43
+ 3380 003c 32000000 		.4byte	.LFE43
+ 3381 0040 00000000 		.4byte	.LFB37
+ 3382 0044 24000000 		.4byte	.LFE37
+ 3383 0048 00000000 		.4byte	.LFB38
+ 3384 004c 28000000 		.4byte	.LFE38
+ 3385 0050 00000000 		.4byte	.LFB35
+ 3386 0054 50000000 		.4byte	.LFE35
+ 3387 0058 00000000 		.4byte	.LFB39
+ 3388 005c 70000000 		.4byte	.LFE39
+ 3389 0060 00000000 		.4byte	.LFB46
+ 3390 0064 30000000 		.4byte	.LFE46
+ 3391 0068 00000000 		.4byte	.LFB45
+ 3392 006c 1A000000 		.4byte	.LFE45
+ 3393 0070 00000000 		.4byte	.LFB47
+ 3394 0074 22000000 		.4byte	.LFE47
+ 3395 0078 00000000 		.4byte	.LFB36
+ 3396 007c 18010000 		.4byte	.LFE36
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 70
+
+
+ 3397 0080 00000000 		.4byte	0
+ 3398 0084 00000000 		.4byte	0
+ 3399              		.section	.debug_line,"",%progbits
+ 3400              	.Ldebug_line0:
+ 3401 0000 FC020000 		.section	.debug_str,"MS",%progbits,1
+ 3401      02007201 
+ 3401      00000201 
+ 3401      FB0E0D00 
+ 3401      01010101 
+ 3402              	.LASF72:
+ 3403 0000 61733732 		.ascii	"as7262\000"
+ 3403      363200
+ 3404              	.LASF78:
+ 3405 0007 5553425F 		.ascii	"USB_Export_Data\000"
+ 3405      4578706F 
+ 3405      72745F44 
+ 3405      61746100 
+ 3406              	.LASF11:
+ 3407 0017 666C6F61 		.ascii	"float32\000"
+ 3407      74333200 
+ 3408              	.LASF26:
+ 3409 001f 64657669 		.ascii	"device_type\000"
+ 3409      63655F74 
+ 3409      79706500 
+ 3410              	.LASF73:
+ 3411 002b 616C6C5F 		.ascii	"all_calibrated_data\000"
+ 3411      63616C69 
+ 3411      62726174 
+ 3411      65645F64 
+ 3411      61746100 
+ 3412              	.LASF44:
+ 3413 003f 61733732 		.ascii	"as7262_ptr\000"
+ 3413      36325F70 
+ 3413      747200
+ 3414              	.LASF20:
+ 3415 004a 696E7465 		.ascii	"interrupt_on\000"
+ 3415      72727570 
+ 3415      745F6F6E 
+ 3415      00
+ 3416              	.LASF16:
+ 3417 0057 73697A65 		.ascii	"sizetype\000"
+ 3417      74797065 
+ 3417      00
+ 3418              	.LASF83:
+ 3419 0060 43616C69 		.ascii	"CalibratedData\000"
+ 3419      62726174 
+ 3419      65644461 
+ 3419      746100
+ 3420              	.LASF61:
+ 3421 006f 7265675F 		.ascii	"reg_to_write\000"
+ 3421      746F5F77 
+ 3421      72697465 
+ 3421      00
+ 3422              	.LASF28:
+ 3423 007c 66775F76 		.ascii	"fw_version\000"
+ 3423      65727369 
+ 3423      6F6E00
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 71
+
+
+ 3424              	.LASF47:
+ 3425 0087 6C65645F 		.ascii	"led_control_reg\000"
+ 3425      636F6E74 
+ 3425      726F6C5F 
+ 3425      72656700 
+ 3426              	.LASF67:
+ 3427 0097 6C65645F 		.ascii	"led_reg\000"
+ 3427      72656700 
+ 3428              	.LASF17:
+ 3429 009f 75696E74 		.ascii	"uint\000"
+ 3429      00
+ 3430              	.LASF76:
+ 3431 00a4 73656E73 		.ascii	"sensor_write8\000"
+ 3431      6F725F77 
+ 3431      72697465 
+ 3431      3800
+ 3432              	.LASF63:
+ 3433 00b2 7265675F 		.ascii	"reg_to_read\000"
+ 3433      746F5F72 
+ 3433      65616400 
+ 3434              	.LASF51:
+ 3435 00be 7072655F 		.ascii	"pre_data\000"
+ 3435      64617461 
+ 3435      00
+ 3436              	.LASF2:
+ 3437 00c7 73686F72 		.ascii	"short int\000"
+ 3437      7420696E 
+ 3437      7400
+ 3438              	.LASF23:
+ 3439 00d1 4C45445F 		.ascii	"LED_on\000"
+ 3439      6F6E00
+ 3440              	.LASF38:
+ 3441 00d8 76616C75 		.ascii	"value\000"
+ 3441      6500
+ 3442              	.LASF80:
+ 3443 00de 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 3443      43313120 
+ 3443      352E342E 
+ 3443      31203230 
+ 3443      31363036 
+ 3444 0111 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m0 -mthumb -g -O"
+ 3444      20726576 
+ 3444      6973696F 
+ 3444      6E203233 
+ 3444      37373135 
+ 3445 0144 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 3445      66756E63 
+ 3445      74696F6E 
+ 3445      2D736563 
+ 3445      74696F6E 
+ 3446              	.LASF31:
+ 3447 016c 4C45445F 		.ascii	"LED_control_reg_value\000"
+ 3447      636F6E74 
+ 3447      726F6C5F 
+ 3447      7265675F 
+ 3447      76616C75 
+ 3448              	.LASF9:
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 72
+
+
+ 3449 0182 75696E74 		.ascii	"uint8\000"
+ 3449      3800
+ 3450              	.LASF69:
+ 3451 0188 4F55545F 		.ascii	"OUT_Data_Buffer\000"
+ 3451      44617461 
+ 3451      5F427566 
+ 3451      66657200 
+ 3452              	.LASF82:
+ 3453 0198 433A5C55 		.ascii	"C:\\Users\\Kyle\\Documents\\PSoC Creator\\Spectrome"
+ 3453      73657273 
+ 3453      5C4B796C 
+ 3453      655C446F 
+ 3453      63756D65 
+ 3454 01c6 74657273 		.ascii	"ters\\AS7262\\AS7262_psoc4.cydsn\000"
+ 3454      5C415337 
+ 3454      3236325C 
+ 3454      41533732 
+ 3454      36325F70 
+ 3455              	.LASF65:
+ 3456 01e5 6C65645F 		.ascii	"led_reg_hold\000"
+ 3456      7265675F 
+ 3456      686F6C64 
+ 3456      00
+ 3457              	.LASF12:
+ 3458 01f2 666C6F61 		.ascii	"float\000"
+ 3458      7400
+ 3459              	.LASF48:
+ 3460 01f8 41533732 		.ascii	"AS7262_Init\000"
+ 3460      36325F49 
+ 3460      6E697400 
+ 3461              	.LASF54:
+ 3462 0204 5F636861 		.ascii	"_char\000"
+ 3462      7200
+ 3463              	.LASF6:
+ 3464 020a 6C6F6E67 		.ascii	"long long int\000"
+ 3464      206C6F6E 
+ 3464      6720696E 
+ 3464      7400
+ 3465              	.LASF71:
+ 3466 0218 77726974 		.ascii	"write_buffer\000"
+ 3466      655F6275 
+ 3466      66666572 
+ 3466      00
+ 3467              	.LASF53:
+ 3468 0225 6865785F 		.ascii	"hex_value_from_char\000"
+ 3468      76616C75 
+ 3468      655F6672 
+ 3468      6F6D5F63 
+ 3468      68617200 
+ 3469              	.LASF4:
+ 3470 0239 6C6F6E67 		.ascii	"long int\000"
+ 3470      20696E74 
+ 3470      00
+ 3471              	.LASF55:
+ 3472 0242 636F6E76 		.ascii	"convert_hex_string\000"
+ 3472      6572745F 
+ 3472      6865785F 
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 73
+
+
+ 3472      73747269 
+ 3472      6E6700
+ 3473              	.LASF68:
+ 3474 0255 5553425F 		.ascii	"USB_str\000"
+ 3474      73747200 
+ 3475              	.LASF34:
+ 3476 025d 63616C69 		.ascii	"calibrated_data\000"
+ 3476      62726174 
+ 3476      65645F64 
+ 3476      61746100 
+ 3477              	.LASF75:
+ 3478 026d 73656E73 		.ascii	"sensor_read8\000"
+ 3478      6F725F72 
+ 3478      65616438 
+ 3478      00
+ 3479              	.LASF15:
+ 3480 027a 6C6F6E67 		.ascii	"long double\000"
+ 3480      20646F75 
+ 3480      626C6500 
+ 3481              	.LASF37:
+ 3482 0286 7265675F 		.ascii	"reg_addr\000"
+ 3482      61646472 
+ 3482      00
+ 3483              	.LASF1:
+ 3484 028f 756E7369 		.ascii	"unsigned char\000"
+ 3484      676E6564 
+ 3484      20636861 
+ 3484      7200
+ 3485              	.LASF81:
+ 3486 029d 41533732 		.ascii	"AS7262_psoc4.c\000"
+ 3486      36325F70 
+ 3486      736F6334 
+ 3486      2E6300
+ 3487              	.LASF50:
+ 3488 02ac 41533732 		.ascii	"AS7262_SingleRead\000"
+ 3488      36325F53 
+ 3488      696E676C 
+ 3488      65526561 
+ 3488      6400
+ 3489              	.LASF79:
+ 3490 02be 73707269 		.ascii	"sprintf\000"
+ 3490      6E746600 
+ 3491              	.LASF0:
+ 3492 02c6 7369676E 		.ascii	"signed char\000"
+ 3492      65642063 
+ 3492      68617200 
+ 3493              	.LASF7:
+ 3494 02d2 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 3494      206C6F6E 
+ 3494      6720756E 
+ 3494      7369676E 
+ 3494      65642069 
+ 3495              	.LASF8:
+ 3496 02e9 756E7369 		.ascii	"unsigned int\000"
+ 3496      676E6564 
+ 3496      20696E74 
+ 3496      00
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 74
+
+
+ 3497              	.LASF66:
+ 3498 02f6 6C65645F 		.ascii	"led_reg_on\000"
+ 3498      7265675F 
+ 3498      6F6E00
+ 3499              	.LASF29:
+ 3500 0301 636F6D6D 		.ascii	"comm_error\000"
+ 3500      5F657272 
+ 3500      6F7200
+ 3501              	.LASF24:
+ 3502 030c 696E6469 		.ascii	"indicator_power_level\000"
+ 3502      6361746F 
+ 3502      725F706F 
+ 3502      7765725F 
+ 3502      6C657665 
+ 3503              	.LASF21:
+ 3504 0322 696E7465 		.ascii	"integration_time\000"
+ 3504      67726174 
+ 3504      696F6E5F 
+ 3504      74696D65 
+ 3504      00
+ 3505              	.LASF40:
+ 3506 0333 4932435F 		.ascii	"I2C_AS7262_Read\000"
+ 3506      41533732 
+ 3506      36325F52 
+ 3506      65616400 
+ 3507              	.LASF25:
+ 3508 0343 696E6469 		.ascii	"indicator_on\000"
+ 3508      6361746F 
+ 3508      725F6F6E 
+ 3508      00
+ 3509              	.LASF62:
+ 3510 0350 76616C75 		.ascii	"value_to_write\000"
+ 3510      655F746F 
+ 3510      5F777269 
+ 3510      746500
+ 3511              	.LASF19:
+ 3512 035f 6761696E 		.ascii	"gain\000"
+ 3512      00
+ 3513              	.LASF32:
+ 3514 0364 41533732 		.ascii	"AS7262_settings\000"
+ 3514      36325F73 
+ 3514      65747469 
+ 3514      6E677300 
+ 3515              	.LASF3:
+ 3516 0374 73686F72 		.ascii	"short unsigned int\000"
+ 3516      7420756E 
+ 3516      7369676E 
+ 3516      65642069 
+ 3516      6E7400
+ 3517              	.LASF39:
+ 3518 0387 73746174 		.ascii	"status\000"
+ 3518      757300
+ 3519              	.LASF14:
+ 3520 038e 63686172 		.ascii	"char\000"
+ 3520      00
+ 3521              	.LASF36:
+ 3522 0393 4932435F 		.ascii	"I2C_AS7262_WriteRegister\000"
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 75
+
+
+ 3522      41533732 
+ 3522      36325F57 
+ 3522      72697465 
+ 3522      52656769 
+ 3523              	.LASF18:
+ 3524 03ac 6D656173 		.ascii	"measurement_mode\000"
+ 3524      7572656D 
+ 3524      656E745F 
+ 3524      6D6F6465 
+ 3524      00
+ 3525              	.LASF41:
+ 3526 03bd 64617461 		.ascii	"data\000"
+ 3526      00
+ 3527              	.LASF10:
+ 3528 03c2 75696E74 		.ascii	"uint16\000"
+ 3528      313600
+ 3529              	.LASF59:
+ 3530 03c9 62756666 		.ascii	"buffer\000"
+ 3530      657200
+ 3531              	.LASF58:
+ 3532 03d0 41533732 		.ascii	"AS7262_Commands\000"
+ 3532      36325F43 
+ 3532      6F6D6D61 
+ 3532      6E647300 
+ 3533              	.LASF22:
+ 3534 03e0 4C45445F 		.ascii	"LED_power_level\000"
+ 3534      706F7765 
+ 3534      725F6C65 
+ 3534      76656C00 
+ 3535              	.LASF45:
+ 3536 03f0 636F6E74 		.ascii	"control_reg\000"
+ 3536      726F6C5F 
+ 3536      72656700 
+ 3537              	.LASF5:
+ 3538 03fc 6C6F6E67 		.ascii	"long unsigned int\000"
+ 3538      20756E73 
+ 3538      69676E65 
+ 3538      6420696E 
+ 3538      7400
+ 3539              	.LASF52:
+ 3540 040e 6661696C 		.ascii	"failed_tries\000"
+ 3540      65645F74 
+ 3540      72696573 
+ 3540      00
+ 3541              	.LASF56:
+ 3542 041b 61727261 		.ascii	"array\000"
+ 3542      7900
+ 3543              	.LASF49:
+ 3544 0421 41533732 		.ascii	"AS7262_ReadAllData\000"
+ 3544      36325F52 
+ 3544      65616441 
+ 3544      6C6C4461 
+ 3544      746100
+ 3545              	.LASF64:
+ 3546 0434 7265675F 		.ascii	"reg_value\000"
+ 3546      76616C75 
+ 3546      6500
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 76
+
+
+ 3547              	.LASF57:
+ 3548 043e 436F6E76 		.ascii	"ConvertDecimal\000"
+ 3548      65727444 
+ 3548      6563696D 
+ 3548      616C00
+ 3549              	.LASF60:
+ 3550 044d 6E65775F 		.ascii	"new_integration_time\000"
+ 3550      696E7465 
+ 3550      67726174 
+ 3550      696F6E5F 
+ 3550      74696D65 
+ 3551              	.LASF74:
+ 3552 0462 636F6C6F 		.ascii	"color_data\000"
+ 3552      725F6461 
+ 3552      746100
+ 3553              	.LASF13:
+ 3554 046d 646F7562 		.ascii	"double\000"
+ 3554      6C6500
+ 3555              	.LASF42:
+ 3556 0474 4932435F 		.ascii	"I2C_AS7262_Write\000"
+ 3556      41533732 
+ 3556      36325F57 
+ 3556      72697465 
+ 3556      00
+ 3557              	.LASF35:
+ 3558 0485 4932435F 		.ascii	"I2C_AS7262_ReadRegister\000"
+ 3558      41533732 
+ 3558      36325F52 
+ 3558      65616452 
+ 3558      65676973 
+ 3559              	.LASF77:
+ 3560 049d 43794465 		.ascii	"CyDelay\000"
+ 3560      6C617900 
+ 3561              	.LASF33:
+ 3562 04a5 64617461 		.ascii	"data_bytes\000"
+ 3562      5F627974 
+ 3562      657300
+ 3563              	.LASF46:
+ 3564 04b0 75706461 		.ascii	"update_LED_reg_value\000"
+ 3564      74655F4C 
+ 3564      45445F72 
+ 3564      65675F76 
+ 3564      616C7565 
+ 3565              	.LASF27:
+ 3566 04c5 68775F76 		.ascii	"hw_version\000"
+ 3566      65727369 
+ 3566      6F6E00
+ 3567              	.LASF30:
+ 3568 04d0 636F6E74 		.ascii	"control_reg_value\000"
+ 3568      726F6C5F 
+ 3568      7265675F 
+ 3568      76616C75 
+ 3568      6500
+ 3569              	.LASF43:
+ 3570 04e2 75706461 		.ascii	"update_control_reg_value\000"
+ 3570      74655F63 
+ 3570      6F6E7472 
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccoGrmoH.s 			page 77
+
+
+ 3570      6F6C5F72 
+ 3570      65675F76 
+ 3571              	.LASF70:
+ 3572 04fb 72656164 		.ascii	"read_buffer\000"
+ 3572      5F627566 
+ 3572      66657200 
+ 3573              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

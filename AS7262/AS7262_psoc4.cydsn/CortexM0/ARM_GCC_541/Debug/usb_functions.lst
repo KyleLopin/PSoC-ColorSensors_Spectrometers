@@ -1,0 +1,58 @@
+ARM GAS  C:\Users\Kyle\AppData\Local\Temp\ccyONDkU.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"usb_functions.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              	.Letext0:
+  20              		.section	.debug_line,"",%progbits
+  21              	.Ldebug_line0:
+  22              		.section	.debug_str,"MS",%progbits,1
+  23              	.LASF0:
+  24 0000 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+  24      43313120 
+  24      352E342E 
+  24      31203230 
+  24      31363036 
+  25 0033 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m0 -mthumb -g -O"
+  25      20726576 
+  25      6973696F 
+  25      6E203233 
+  25      37373135 
+  26 0066 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+  26      66756E63 
+  26      74696F6E 
+  26      2D736563 
+  26      74696F6E 
+  27              	.LASF1:
+  28 008e 7573625F 		.ascii	"usb_functions.c\000"
+  28      66756E63 
+  28      74696F6E 
+  28      732E6300 
+  29              	.LASF2:
+  30 009e 433A5C55 		.ascii	"C:\\Users\\Kyle\\Documents\\PSoC Creator\\Spectrome"
+  30      73657273 
+  30      5C4B796C 
+  30      655C446F 
+  30      63756D65 
+  31 00cc 74657273 		.ascii	"ters\\AS7262\\AS7262_psoc4.cydsn\000"
+  31      5C415337 
+  31      3236325C 
+  31      41533732 
+  31      36325F70 
+  32              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran
