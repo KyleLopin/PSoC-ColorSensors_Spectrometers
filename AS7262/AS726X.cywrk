@@ -2,18 +2,31 @@
 <CyXmlSerializer>
 <!--This file is machine generated and read. It is not intended to be edited by hand.-->
 <!--Due to this, there is no schema for this file.-->
+<<<<<<< HEAD:AS7262/AS7262.cywrk
 <CyGuid_2867d519-54d2-4c01-9830-c51cb08bc3dd type_name="CyDesigner.Common.ProjMgmt.Model.CyPrjMgmtWorkspaceSerialize" version="5" xml_contents_version="3" name="AS7262" persistent="AS7262.cywrk" platform="NOT_USED">
 <current_project name="..\C12880MA.cydsn\C12880MA.cyprj" />
+||||||| merged common ancestors
+<CyGuid_2867d519-54d2-4c01-9830-c51cb08bc3dd type_name="CyDesigner.Common.ProjMgmt.Model.CyPrjMgmtWorkspaceSerialize" version="5" xml_contents_version="3" name="AS7262" persistent="AS7262.cywrk" platform="NOT_USED">
+<current_project name=".\AS7262.cydsn\AS7262.cyprj" />
+=======
+<CyGuid_2867d519-54d2-4c01-9830-c51cb08bc3dd type_name="CyDesigner.Common.ProjMgmt.Model.CyPrjMgmtWorkspaceSerialize" version="5" xml_contents_version="3" name="AS726X" persistent="AS726X.cywrk" platform="NOT_USED">
+<current_project name="..\AS726X.cydsn\AS726X.cyprj" />
+>>>>>>> 4f096a9d70926aed69b158646e789360b084b993:AS7262/AS726X.cywrk
 <wrkspc_folders />
 <files />
 <projects>
 <v>.\AS7262.cydsn\AS7262.cyprj</v>
+<<<<<<< HEAD:AS7262/AS7262.cywrk
 <v>.\AS7262_psoc4.cydsn\AS7262_psoc4.cyprj</v>
 <v>..\C12880MA.cydsn\C12880MA.cyprj</v>
+||||||| merged common ancestors
+=======
+<v>..\AS726X.cydsn\AS726X.cyprj</v>
+>>>>>>> 4f096a9d70926aed69b158646e789360b084b993:AS7262/AS726X.cywrk
 </projects>
 <workspace_id v="a899e26d-1525-4f9e-a494-14151cc0ae67" />
-<WriteAppVersionLastSavedWith v="4.1.0.3210" />
-<WriteAppMarketingVersionLastSavedWith v="4.1 Update 1" />
+<WriteAppVersionLastSavedWith v="4.2.0.641" />
+<WriteAppMarketingVersionLastSavedWith v="4.2" />
 <CyGuid_dcbd9771-0334-43dc-9cc3-fe99dc3c5316 type_name="CyDesigner.Common.ProjMgmt.Model.CyPrjMgmtWorkspaceSerialize+CyPrjDependencyList" version="4">
 <wrkspc_dependencies />
 </CyGuid_dcbd9771-0334-43dc-9cc3-fe99dc3c5316>
