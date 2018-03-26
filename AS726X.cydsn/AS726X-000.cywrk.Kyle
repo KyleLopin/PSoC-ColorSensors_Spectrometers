@@ -18,7 +18,7 @@
 <v>Output</v>
 </TreeKeys>
 <TreeStates>
-<CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="AS726X-000\AS726X\TopDesign">
+<CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="AS726X-000\AS726X">
 <ExpandedNodeIds>
 <v>AS726X-000</v>
 <v>AS726X-000\AS7262</v>
@@ -41,7 +41,6 @@
 <v>AS726X-000\AS7262\Source Files</v>
 <v>AS726X-000\AS7262\Source Files\AS7262.c</v>
 <v>AS726X-000\AS7262\Source Files\i2c_functions.c</v>
-<v>AS726X-000\AS7262\Source Files\Keil8051Assembly01.a51</v>
 <v>AS726X-000\AS7262\Source Files\main.c</v>
 <v>AS726X-000\AS7262\Source Files\usb_functions.c</v>
 <v>AS726X-000\AS7262\Generated_Source\PSoC5</v>
@@ -58,14 +57,17 @@
 <v>AS726X-000\AS726X\AS726X.cydwr\Flash Security</v>
 <v>AS726X-000\AS726X\AS726X.cydwr\EEPROM</v>
 <v>AS726X-000\AS726X\Header Files</v>
+<v>AS726X-000\AS726X\Header Files\AS726X.h</v>
 <v>AS726X-000\AS726X\Header Files\cyapicallbacks.h</v>
+<v>AS726X-000\AS726X\Header Files\helper_functions.h</v>
 <v>AS726X-000\AS726X\Source Files</v>
+<v>AS726X-000\AS726X\Source Files\AS726X.c</v>
+<v>AS726X-000\AS726X\Source Files\helper_functions.c</v>
 <v>AS726X-000\AS726X\Source Files\main.c</v>
+<v>AS726X-000\AS726X\Generated_Source</v>
+<v>AS726X-000\AS726X\Generated_Source\PSoC5</v>
 </ExpandedNodeIds>
 <VisibleNodeIds>
-<v>AS726X-000</v>
-<v>AS726X-000\AS7262</v>
-<v>AS726X-000\AS7262\TopDesign</v>
 <v>AS726X-000\AS7262\AS7262.cydwr</v>
 <v>AS726X-000\AS7262\AS7262.cydwr\Pins</v>
 <v>AS726X-000\AS7262\AS7262.cydwr\Analog</v>
@@ -84,7 +86,6 @@
 <v>AS726X-000\AS7262\Source Files</v>
 <v>AS726X-000\AS7262\Source Files\AS7262.c</v>
 <v>AS726X-000\AS7262\Source Files\i2c_functions.c</v>
-<v>AS726X-000\AS7262\Source Files\Keil8051Assembly01.a51</v>
 <v>AS726X-000\AS7262\Source Files\main.c</v>
 <v>AS726X-000\AS7262\Source Files\usb_functions.c</v>
 <v>AS726X-000\AS7262\Generated_Source</v>
@@ -101,9 +102,10 @@
 <v>AS726X-000\AS726X\AS726X.cydwr\Flash Security</v>
 <v>AS726X-000\AS726X\AS726X.cydwr\EEPROM</v>
 <v>AS726X-000\AS726X\Header Files</v>
+<v>AS726X-000\AS726X\Header Files\AS726X.h</v>
 <v>AS726X-000\AS726X\Header Files\cyapicallbacks.h</v>
+<v>AS726X-000\AS726X\Header Files\helper_functions.h</v>
 <v>AS726X-000\AS726X\Source Files</v>
-<v>AS726X-000\AS726X\Source Files\main.c</v>
 </VisibleNodeIds>
 </CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
 <CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="">
@@ -191,6 +193,51 @@
 <v>AS726X-000\AS7262\AS7262.rpt</v>
 <v>AS726X-000\AS7262\AS7262_timing.html</v>
 <v>AS726X-000\AS726X</v>
+<v>AS726X-000\AS726X\CortexM3</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\AS726X.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\Cm3Start.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\cy_em_eeprom.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\CyBootAsmGnu.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\CyDmac.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\cyfitter_cfg.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\CyFlash.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\CyLib.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\cymetadata.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\cyPm.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\CySpc.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\cyutils.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\helper_functions.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\I2C.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\I2C_BOOT.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\I2C_INT.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\I2C_MASTER.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\I2C_PM.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\I2C_SLAVE.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\main.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\SCL.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\SDA.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_audio.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_boot.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_cdc.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_cls.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_descr.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_Dm.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_Dp.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_drv.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_episr.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_hid.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_midi.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_msc.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_pm.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_std.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_vnd.lst</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\AS726X.elf</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\AS726X.hex</v>
+<v>AS726X-000\AS726X\CortexM3\ARM_GCC_541\Debug\AS726X.map</v>
 <v>AS726X-000\AS726X\AS726X.gpdsc</v>
 <v>AS726X-000\AS726X\AS726X.rpt</v>
 <v>AS726X-000\AS726X\AS726X_timing.html</v>
@@ -198,49 +245,6 @@
 <VisibleNodeIds>
 <v>AS726X-000</v>
 <v>AS726X-000\AS7262</v>
-<v>AS726X-000\AS7262\CortexM3</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\AS7262.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\AS7262_INT.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\Cm3Start.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\CyBootAsmGnu.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\CyDmac.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\cyfitter_cfg.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\CyFlash.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\CyLib.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\cymetadata.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\cyPm.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\CySpc.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\cyutils.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\I2C.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\I2C_BOOT.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\i2c_functions.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\I2C_INT.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\I2C_MASTER.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\I2C_PM.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\I2C_SLAVE.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\isr_as7262_int.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\isr_as7262_pin.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\isr_as7262_timer.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\LCD.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\LCD_LCDPort.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\LCD_PM.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\LED_3.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\LED_4.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\main.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\SCL.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\SDA.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\Timer_1.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\Timer_1_PM.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\timer_clock.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\usb_functions.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_audio.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_boot.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_cdc.lst</v>
-<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_cls.lst</v>
 </VisibleNodeIds>
 </CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
 </TreeStates>
@@ -271,6 +275,10 @@
 <v>AS726X-000\AS726X\CY8C58LP Family Datasheet</v>
 <v>AS726X-000\AS726X\System Reference Guides</v>
 <v>AS726X-000\AS726X\System Reference Guides\cy_boot_v5_70</v>
+<v>AS726X-000\AS726X\cy_pins_v2_20</v>
+<v>AS726X-000\AS726X\cy_pins_v2_20\cy_pins_v2_20.pdf</v>
+<v>AS726X-000\AS726X\I2C_v3_50.pdf</v>
+<v>AS726X-000\AS726X\USBFS_v3_10.pdf</v>
 </ExpandedNodeIds>
 <VisibleNodeIds>
 <v>AS726X-000</v>
@@ -294,6 +302,10 @@
 <v>AS726X-000\AS726X\CY8C58LP Family Datasheet</v>
 <v>AS726X-000\AS726X\System Reference Guides</v>
 <v>AS726X-000\AS726X\System Reference Guides\cy_boot_v5_70</v>
+<v>AS726X-000\AS726X\cy_pins_v2_20</v>
+<v>AS726X-000\AS726X\cy_pins_v2_20\cy_pins_v2_20.pdf</v>
+<v>AS726X-000\AS726X\I2C_v3_50.pdf</v>
+<v>AS726X-000\AS726X\USBFS_v3_10.pdf</v>
 </VisibleNodeIds>
 </CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
 </TreeStatesV2>

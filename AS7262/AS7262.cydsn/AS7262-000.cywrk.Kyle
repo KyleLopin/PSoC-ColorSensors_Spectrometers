@@ -21,29 +21,26 @@
 <CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="">
 <ExpandedNodeIds>
 <v>AS7262-000</v>
-<v>AS7262-000\AS7262</v>
 </ExpandedNodeIds>
 <VisibleNodeIds>
 <v>AS7262-000</v>
-<v>AS7262-000\AS7262</v>
 </VisibleNodeIds>
 </CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
 <CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="">
 <ExpandedNodeIds>
 <v>AS7262-000</v>
-<v>AS7262-000\AS7262</v>
 </ExpandedNodeIds>
 <VisibleNodeIds>
 <v>AS7262-000</v>
-<v>AS7262-000\AS7262</v>
 </VisibleNodeIds>
 </CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
 <CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="">
 <ExpandedNodeIds>
 <v>AS7262-000</v>
-<v>AS7262-000\AS7262</v>
 </ExpandedNodeIds>
-<VisibleNodeIds />
+<VisibleNodeIds>
+<v>AS7262-000</v>
+</VisibleNodeIds>
 </CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
 </TreeStates>
 <TreeKeysV2>
@@ -63,9 +60,7 @@
 </dataGuid>
 </userData>
 </CyGuid_fdba8dfd-b15b-4469-9bbb-9e40c3e70997>
-<Unloaded>
-<project v=".\AS7262.cyprj" />
-</Unloaded>
+<Unloaded />
 <OpenDocs />
 <OpenDocsLayout><![CDATA[<?xml version="1.0"?><!--
 

@@ -1,14 +1,12 @@
-/* ========================================
- *
- * Copyright YOUR COMPANY, THE YEAR
- * All Rights Reserved
- * UNPUBLISHED, LICENSED SOFTWARE.
- *
- * CONFIDENTIAL AND PROPRIETARY INFORMATION
- * WHICH IS THE PROPERTY OF your company.
- *
- * ========================================
-*/
+/*******************************************************************************
+* File Name: user_selections.h
+*
+* Description:
+*  Structure, constants and function prototypes to use a AS7262 light sensor
+*
+**********************************************************************************
+ * Copyright Kyle Vitautas Lopin, Naresuan University, Phitsanulok Thailand
+*********************************************************************************/
 
 #if !defined(_AS7262_H)
 #define _AS7262_H
@@ -146,10 +144,6 @@ void AS7262_Start(void);
 
 void AS7262_Commands(uint8 buffer[]);
 void AS7262_SingleRead(void);
-
-
-
-
 
 
 #endif

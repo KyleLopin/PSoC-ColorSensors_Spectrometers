@@ -4,7 +4,7 @@
  *
  * Description:
  *  This file provides functions to control an AS7262 color sensor through the I2C.
- *  This file depends on i2c_functions to worik
+ *  This file depends on i2c_functions to work
  *
 *******************************************************************************
  * Copyright by Kyle Lopin, Naresuan University, 2017
@@ -23,11 +23,11 @@
 // local files
 #include "usb_functions.h"
 
-#define AS72XX_SLAVE_STATUS_REG 0x00
-#define AS72XX_SLAVE_WRITE_REG 0x01
-#define AS72XX_SLAVE_READ_REG 0x02
-#define AS72XX_SLAVE_TX_VALID   0x02
-#define AS72XX_SLAVE_RX_VALID   0x01
+#define AS72XX_SLAVE_STATUS_REG         0x00
+#define AS72XX_SLAVE_WRITE_REG          0x01
+#define AS72XX_SLAVE_READ_REG           0x02
+#define AS72XX_SLAVE_TX_VALID           0x02
+#define AS72XX_SLAVE_RX_VALID           0x01
 uint8 read_buffer[24];
 uint8 write_buffer[2];
 
@@ -110,7 +110,7 @@ CY_ISR( isr_handler_debug1 ) {
 *  true (1) if the AS7262 responds with the correct device type
 *
 * Global variables:
-*  as7262:  strucutre that stores a local copy of all the parameters it is set to
+*  AS7262_settings as7262:  strucutre that stores a local copy of all the parameters it is set to
 *
 *******************************************************************************/
 
@@ -148,7 +148,7 @@ uint8 AS7262_Init(void) {
 *  uint8 buffer: array of the chars the user inputted
 *
 * Global variables:
-*  as7262:  strucutre that stores a local copy of all the parameters it is set to
+*  AS7262_settings as7262:  strucutre that stores a local copy of all the parameters it is set to
 *
 *******************************************************************************/
 
@@ -249,6 +249,23 @@ void AS7262_Commands(uint8 buffer[]) {
     }
 }
 
+/******************************************************************************
+* Function Name: update_control_reg_value
+*******************************************************************************
+*
+* Summary:
+*  Update the control register of a AS7262, save a copy of its state to the
+*  settings that are passed in and return a local copy of what the 
+*  register state is.
+*
+* Parameters:
+*  AS7262_settings* as7262_ptr: pointer to the settings of the light sensor (AS7262)
+*
+* Return:
+*  uint8:  state the control register was set to
+*
+*******************************************************************************/
+
 uint8 update_control_reg_value(AS7262_settings* as7262_ptr) {
     uint8 control_reg = (as7262_ptr->interrupt_on << 6) | 
                         (as7262_ptr->gain << 4) | 
@@ -257,6 +274,24 @@ uint8 update_control_reg_value(AS7262_settings* as7262_ptr) {
     as7262_ptr->control_reg_value = control_reg;
     return control_reg;
 }
+
+/******************************************************************************
+* Function Name: update_LED_reg_value
+*******************************************************************************
+*
+* Summary:
+*  Update the register of a AS7262 that controls the LED, save a copy of its 
+*  state to the settings that are passed in and return a local copy of what the 
+*  register state is.  The LED register sets the amount of current the AS7262
+*  should sink.
+*
+* Parameters:
+*  AS7262_settings* as7262_ptr: pointer to the settings of the light sensor (AS7262)
+*
+* Return:
+*  uint8:  state the LED register was set to
+*
+*******************************************************************************/
 
 uint8 update_LED_reg_value(AS7262_settings* as7262_ptr) {
     uint8 led_control_reg = (as7262_ptr->LED_power_level << 4) | 
@@ -268,6 +303,24 @@ uint8 update_LED_reg_value(AS7262_settings* as7262_ptr) {
     return led_control_reg;
 }
 
+/******************************************************************************
+* Function Name: AS7262_SingleRead
+*******************************************************************************
+*
+* Summary:
+*  Read all 6 calibrated data points from a AS7262 device.  This function writes
+*  to the control register so the device will start reading, waits for  
+*  the integration time needed for the mode the device is set in, then reads 
+*  the device and exports the data.
+*
+* Parameters:
+*  
+*
+* Global variables:
+*  AS7262_settings as7262:  strucutre that stores a local copy of all 
+*  the parameters it is set to
+*
+*******************************************************************************/
 
 void AS7262_SingleRead(void) {
     // send command to run a single shot read
@@ -281,7 +334,14 @@ void AS7262_SingleRead(void) {
     LCD_Position(0, 0);
     sprintf(LCD_str, "pre data: 0x%02x ", pre_data);
     LCD_PrintString(LCD_str);
-    CyDelay( (5.8 * as7262.integration_time) );
+    float integ_time;
+    if ( as7262.measurement_mode == BANK_MODE_0 || as7262.measurement_mode == BANK_MODE_1) {
+        integ_time = 2.8;  // milliseconds
+    }
+    else {
+        integ_time = 5.8;  // milliseconds
+    }
+    CyDelay( (integ_time * as7262.integration_time) );
     uint8 data;
     uint8 failed_tries=0;
     do {
@@ -307,6 +367,24 @@ void AS7262_SingleRead(void) {
     LCD_PrintString("SingleRead4  ");
 }
 
+/******************************************************************************
+* Function Name: AS7262_ReadAllData
+*******************************************************************************
+*
+* Summary:
+*  Read all 6 calibrated data points from a AS7262 device.  This function should
+*  only be called if the device has already been started and the data is ready for
+*  export.
+*
+* Parameters:
+*  
+*
+* Global variables:
+*  AS7262_settings as7262:  strucutre that stores a local copy of all 
+*  the parameters it is set to
+*
+*******************************************************************************/
+
 void AS7262_ReadAllData(void) {
     for (uint8 i=0; i < 24; i++ ) {
         all_calibrated_data.data_bytes[i] = I2C_AS7262_Read(AS7262_DATA_START_ADDR + i);
@@ -317,6 +395,21 @@ void AS7262_ReadAllData(void) {
     
 }
 
+/******************************************************************************
+* Function Name: I2C_AS7262_Read
+*******************************************************************************
+*
+* Summary:
+*  Read a register from a AS7262 light sensor.  This function implements the
+*  virtual register I2C scheme used in the data sheet. 
+*
+* Parameters:
+*  uint8 reg_addr:  register address to read
+*
+* Return:
+*  uint8:  data that was stored in the register requested
+*
+*******************************************************************************/
 
 uint8 I2C_AS7262_Read(uint8 reg_addr) {
     uint8 status;
@@ -360,6 +453,27 @@ uint8 I2C_AS7262_Read(uint8 reg_addr) {
     return I2C_AS7262_ReadRegister(AS72XX_SLAVE_READ_REG);
 }
 
+/******************************************************************************
+* Function Name: I2C_AS7262_ReadRegister
+*******************************************************************************
+*
+* Summary:
+*  Read an actual register from a AS7262 light sensor, not a virtual register.  
+*  Should only be used for STATUS or READ register.  Uses the sensor_read8 
+*  function of the i2c_functions.c to work.
+*
+* Parameters:
+*  uint8 reg_addr:  register address to read, should be STATUS (0x00)
+*                   or READ (0x02)
+*
+* Global variables:
+*  uint8[] read_buffer:  array used by the i2c_functions to store the data.
+* 
+* Return:
+*  uint8:  data that was stored in the register requested
+*
+*******************************************************************************/
+
 uint8 I2C_AS7262_ReadRegister(uint8 reg_addr) {
     uint8 status;
 //    LCD_Position(0, 0); 
@@ -369,6 +483,23 @@ uint8 I2C_AS7262_ReadRegister(uint8 reg_addr) {
 //    LCD_PrintString("read01   ");
     return read_buffer[0];
 }
+
+/******************************************************************************
+* Function Name: I2C_AS7262_Write
+*******************************************************************************
+*
+* Summary:
+*  Write a register from a AS7262 light sensor.  This function implements the
+*  virtual register I2C scheme used in the data sheet. 
+*
+* Parameters:
+*  uint8 reg_addr:  register address to write
+*
+* Return:
+*  uint8:  status of the write request, see error messages of PSoC
+*          I2C_MasterSendStart in I2C datasheet for details
+*
+*******************************************************************************/
 
 uint8 I2C_AS7262_Write(uint8 reg_addr, uint8 value) {
     uint8 status;
@@ -392,6 +523,26 @@ uint8 I2C_AS7262_Write(uint8 reg_addr, uint8 value) {
     return I2C_AS7262_WriteRegister(AS72XX_SLAVE_WRITE_REG, value);
 }
 
+/******************************************************************************
+* Function Name: I2C_AS7262_ReadRegister
+*******************************************************************************
+*
+* Summary:
+*  Read an actual register from a AS7262 light sensor, not a virtual register.  
+*  Should only be used for WRITE register.  Uses the sensor_write8 
+*  function of the i2c_functions.c to work.
+*
+* Parameters:
+*  uint8 reg_addr:  register address to read, should be WRITE (0x01)
+*
+* Global variables:
+*  uint8[] write_buffer:  array used by the i2c_functions to store data.
+* 
+* Return:
+*  uint8:  status of the write request, see error messages of PSoC
+*          I2C_MasterSendStart in I2C datasheet for details
+*
+*******************************************************************************/
 
 uint8 I2C_AS7262_WriteRegister(uint8 reg_addr, uint8 value) {
     uint8 status;
@@ -400,6 +551,23 @@ uint8 I2C_AS7262_WriteRegister(uint8 reg_addr, uint8 value) {
     return sensor_write8(AS7262_ADDRESS, write_buffer);
 }
 
+/******************************************************************************
+* Function Name: convert_hex_string
+*******************************************************************************
+*
+* Summary:
+*  Convert a string that represents a hexidecimal number into its 
+*  corresponding value.
+*
+* Parameters:
+*  uint8[] array:  array that should have 2 bytes with chars of 
+*                  valid hex values
+*
+* Return:
+*  uint8:  value the hex string represented
+*
+*******************************************************************************/
+
 uint8 convert_hex_string(uint8 array[]) {
     uint8 num = hex_value_from_char(array[0]) << 4;
     num |= hex_value_from_char(array[1]);
@@ -407,18 +575,50 @@ uint8 convert_hex_string(uint8 array[]) {
     
 }
 
+/******************************************************************************
+* Function Name: hex_value_from_char
+*******************************************************************************
+*
+* Summary:
+*  Convert a char that represents a hexidecimal number into its 
+*  corresponding value.
+*
+* Parameters:
+*  uint8 char:  char of a valid hexidecimal charater to convert to its decimal value
+*
+* Return:
+*  uint8:  value the hex char represented
+*
+*******************************************************************************/
+
 uint8 hex_value_from_char(uint8 _char) {
     if ( ('0' <= _char) && (_char <= '9') ) {  // char is between 0-9
         return (_char - '0');
     }
     else if ( ('A' <= _char) && (_char <= 'F') ) {  // char is between A-F
-        return (10 + _char - 'A');
+        return (_char - ('A' + 10));
     }
     else if ( ('a' <= _char) && (_char <= 'f') ) {  // char is between a-f
-        return (10 + _char - 'a');
+        return (_char - ('a' + 10));
     }
     return 0;
 }
+
+/******************************************************************************
+* Function Name: ConvertDecimal
+*******************************************************************************
+*
+* Summary:
+*  Convert an array of char/uint8 of decimal values into the corresponding 
+*  value.
+*
+* Parameters:
+*  uint8[] array:  array that should be valid decimal nubers
+*
+* Return:
+*  uint16:  value the string represented
+*
+*******************************************************************************/
 
 uint16 ConvertDecimal(uint8 array[], uint8 len) {
     uint16 num = 0;
