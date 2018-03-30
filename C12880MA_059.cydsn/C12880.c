@@ -121,6 +121,9 @@ void C12880_Export_Data(void) {
     }
 }
 
+
+
+
 uint16 Convert2Dec(uint8 array[], uint8 len){
     uint16 num = 0;
     for (int i = 0; i < len; i++){

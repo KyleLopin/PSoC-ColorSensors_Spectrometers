@@ -68,6 +68,9 @@
 <v>AS726X-000\AS726X\Generated_Source\PSoC5</v>
 </ExpandedNodeIds>
 <VisibleNodeIds>
+<v>AS726X-000</v>
+<v>AS726X-000\AS7262</v>
+<v>AS726X-000\AS7262\TopDesign</v>
 <v>AS726X-000\AS7262\AS7262.cydwr</v>
 <v>AS726X-000\AS7262\AS7262.cydwr\Pins</v>
 <v>AS726X-000\AS7262\AS7262.cydwr\Analog</v>
@@ -103,9 +106,6 @@
 <v>AS726X-000\AS726X\AS726X.cydwr\EEPROM</v>
 <v>AS726X-000\AS726X\Header Files</v>
 <v>AS726X-000\AS726X\Header Files\AS726X.h</v>
-<v>AS726X-000\AS726X\Header Files\cyapicallbacks.h</v>
-<v>AS726X-000\AS726X\Header Files\helper_functions.h</v>
-<v>AS726X-000\AS726X\Source Files</v>
 </VisibleNodeIds>
 </CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
 <CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="">
@@ -245,6 +245,42 @@
 <VisibleNodeIds>
 <v>AS726X-000</v>
 <v>AS726X-000\AS7262</v>
+<v>AS726X-000\AS7262\CortexM3</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\AS7262.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\AS7262_INT.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\Cm3Start.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\CyBootAsmGnu.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\CyDmac.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\cyfitter_cfg.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\CyFlash.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\CyLib.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\cymetadata.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\cyPm.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\CySpc.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\cyutils.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\I2C.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\I2C_BOOT.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\i2c_functions.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\I2C_INT.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\I2C_MASTER.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\I2C_PM.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\I2C_SLAVE.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\isr_as7262_int.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\isr_as7262_pin.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\isr_as7262_timer.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\LCD.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\LCD_LCDPort.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\LCD_PM.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\LED_3.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\LED_4.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\main.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\SCL.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\SDA.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\Timer_1.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\Timer_1_PM.lst</v>
 </VisibleNodeIds>
 </CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
 </TreeStates>
@@ -318,6 +354,15 @@
 <name v="..\AS7262\AS7262.cydsn\AS7262.cydwr" />
 <name v=".\TopDesign\TopDesign.cysch" />
 <name v="..\AS7262\AS7262.cydsn\TopDesign\TopDesign.cysch" />
+<name v=".\main.c" />
+<name v="..\AS7262\AS7262.cydsn\main.c" />
+<name v=".\AS726X.c" />
+<name v=".\AS726X.h" />
+<name v="..\AS7262\AS7262.cydsn\AS7262.h" />
+<name v="..\AS7262\AS7262.cydsn\AS7262.c" />
+<name v=".\helper_functions.h" />
+<name v=".\helper_functions.c" />
+<name v="..\AS7262\AS7262.cydsn\i2c_functions.c" />
 </OpenDocs>
 <OpenDocsLayout><![CDATA[<?xml version="1.0"?><!--
 
@@ -325,7 +370,7 @@
   Copyright (c) 2001-2016 Actipro Software LLC.  All rights reserved.
   http://www.actiprosoftware.com
 
---><DocumentLayout Version="1.0"><LayoutData><TabbedMdiRootContainer Orientation="Vertical"><TabbedMdiContainer Size="943, 521" SelectedTabbedMdiWindow="35b57c49-e8a0-4816-bf6b-8871a7ea68e3"><ToolWindow Key="Start Page:bd4649ab-da6b-4d04-a663-c722b8bf99db:Start Page" Guid="f3a4f118-5c92-4dba-9165-9276749dbab5" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS7262\AS7262.cydsn\AS7262.cydwr" Guid="63cb82b5-3139-4485-b7a0-335c4731beac" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS726X.cydsn\TopDesign\TopDesign.cysch" Guid="35b57c49-e8a0-4816-bf6b-8871a7ea68e3" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS7262\AS7262.cydsn\TopDesign\TopDesign.cysch" Guid="d4545f4a-70ed-4cfe-9692-7fbef426e44c" /></TabbedMdiContainer></TabbedMdiRootContainer><FloatingContainers /></LayoutData></DocumentLayout>]]></OpenDocsLayout>
+--><DocumentLayout Version="1.0"><LayoutData><TabbedMdiRootContainer Orientation="Vertical"><TabbedMdiContainer Size="913, 504" SelectedTabbedMdiWindow="b107d111-8765-415c-849d-b1468455e225"><ToolWindow Key="Start Page:bd4649ab-da6b-4d04-a663-c722b8bf99db:Start Page" Guid="f3a4f118-5c92-4dba-9165-9276749dbab5" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS7262\AS7262.cydsn\AS7262.cydwr" Guid="63cb82b5-3139-4485-b7a0-335c4731beac" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS726X.cydsn\TopDesign\TopDesign.cysch" Guid="35b57c49-e8a0-4816-bf6b-8871a7ea68e3" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS7262\AS7262.cydsn\TopDesign\TopDesign.cysch" Guid="d4545f4a-70ed-4cfe-9692-7fbef426e44c" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS726X.cydsn\main.c" Guid="c1b0cc68-fbc3-4805-ba1b-b74f04fa9f47" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS7262\AS7262.cydsn\main.c" Guid="f7087a8c-a5be-4970-bfd7-22fdb55bd0e1" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS726X.cydsn\AS726X.c" Guid="eed8b32e-e182-40d1-8bac-1b60da687335" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS726X.cydsn\AS726X.h" Guid="7f8d9e7c-aca3-4000-b263-c473a9f98bac" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS7262\AS7262.cydsn\AS7262.h" Guid="6c1e8d47-ce0d-4fde-ad4c-f3308e052af0" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS7262\AS7262.cydsn\AS7262.c" Guid="b107d111-8765-415c-849d-b1468455e225" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS726X.cydsn\helper_functions.h" Guid="0c06d2a4-f6c3-4777-881f-1c0793339777" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS726X.cydsn\helper_functions.c" Guid="f6e1f1e0-0672-492c-9cc1-287f69394a34" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\AS7262\AS7262.cydsn\i2c_functions.c" Guid="0d53e2f2-d18b-492f-9abf-7c62da206d1d" /></TabbedMdiContainer></TabbedMdiRootContainer><FloatingContainers /></LayoutData></DocumentLayout>]]></OpenDocsLayout>
 <config v="" />
 <AutoUpdate v="true" />
 </CyGuid_843a90a4-0c4b-4e44-991d-05e7fb117a21>
