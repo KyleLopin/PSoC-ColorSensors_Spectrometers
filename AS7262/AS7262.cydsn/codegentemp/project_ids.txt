@@ -1,0 +1,6 @@
+D:\PSoC_Projects\Spectrometers\PSoC-ColorSensors_Spectrometers\AS7262\AS7262.cydsn\AS7262.cyprj|f9c650b5-4442-4f0e-ba29-4ef671fdd09e
+C:\Program Files (x86)\Cypress\PSoC Creator\4.2\PSoC Creator\psoc\content\default\CyAnnotationLibrary\CyAnnotationLibrary.cylib\CyAnnotationLibrary.cyprj|5a1f4645-5051-4299-9606-713f86dd00c4
+C:\Users\kvl6\Documents\PSoC Creator\4.2\Downloads ( 4.2).cylib\Downloads ( 4.2).cyprj|b80dd6cd-da48-4aed-9507-469095075456
+C:\Program Files (x86)\Cypress\PSoC Creator\4.2\PSoC Creator\psoc\content\cycomponentlibraryupdates\CyComponentLibraryUpdates.cylib\CyComponentLibraryUpdates.cyprj|1638adf8-c069-4ab0-95c3-ac1a7678f597
+C:\Program Files (x86)\Cypress\PSoC Creator\4.2\PSoC Creator\psoc\content\cycomponentlibrary\CyComponentLibrary.cylib\CyComponentLibrary.cyprj|2750f9a6-93be-4072-a068-9425e41684e2
+C:\Program Files (x86)\Cypress\PSoC Creator\4.2\PSoC Creator\psoc\content\cyprimitives\CyPrimitives.cylib\CyPrimitives.cyprj|1468768d-4338-4ef2-a09d-731fb84b3b6f

@@ -53,6 +53,25 @@ union C12880Data {
 union C12880Data c12880_data;
 
 /***************************************
+*    Data Structure and Union for Debug
+***************************************/
+
+typedef struct C12880_debugger {
+    uint16 TRG_value;
+    uint16 CLK_value;
+    uint16 ST_value;
+    uint16 ISR_PWM_value;
+    uint16 dma_transfer_count;
+    uint8 EoS_status;
+} C12880_Debug;
+
+union C12880DebugData {
+    uint8 data_bytes[24];
+    C12880_Debug data_debug;
+};
+union C12880DebugData c12880_debug_data;
+
+/***************************************
 *        External Flags
 ***************************************/
 
@@ -78,6 +97,7 @@ void C12880_Commands(uint8 buffer[]);
 void C12880_Start(void);
 void C12880_Read(uint8 use_led, uint8 use_laser);
 void C12880_Export_Data(void);
+void Export_C12880_State(void);
 
 #endif
 

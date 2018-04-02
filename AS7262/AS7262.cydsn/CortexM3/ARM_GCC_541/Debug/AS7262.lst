@@ -1,0 +1,5052 @@
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"AS7262.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.isr_handler_basic_read,"ax",%progbits
+  20              		.align	2
+  21              		.global	isr_handler_basic_read
+  22              		.thumb
+  23              		.thumb_func
+  24              		.type	isr_handler_basic_read, %function
+  25              	isr_handler_basic_read:
+  26              	.LFB64:
+  27              		.file 1 "AS7262.c"
+   1:AS7262.c      **** /*******************************************************************************
+   2:AS7262.c      ****  * File Name: AS7262.c
+   3:AS7262.c      ****  * Version 0.20
+   4:AS7262.c      ****  *
+   5:AS7262.c      ****  * Description:
+   6:AS7262.c      ****  *  This file provides functions to control an AS7262 color sensor through the I2C.
+   7:AS7262.c      ****  *  This file depends on i2c_functions to worik
+   8:AS7262.c      ****  *
+   9:AS7262.c      **** *******************************************************************************
+  10:AS7262.c      ****  * Copyright by Kyle Lopin, Naresuan University, 2017
+  11:AS7262.c      ****  * All Rights Reserved
+  12:AS7262.c      ****  * UNPUBLISHED, LICENSED SOFTWARE.
+  13:AS7262.c      ****  *
+  14:AS7262.c      ****  * CONFIDENTIAL AND PROPRIETARY INFORMATION
+  15:AS7262.c      ****  * WHICH IS THE PROPERTY OF Naresuan University.
+  16:AS7262.c      ****  *
+  17:AS7262.c      ****  * ========================================
+  18:AS7262.c      **** */
+  19:AS7262.c      **** 
+  20:AS7262.c      **** #include "AS7262.h"
+  21:AS7262.c      **** // standard libraries
+  22:AS7262.c      **** #include "stdio.h"
+  23:AS7262.c      **** // local files
+  24:AS7262.c      **** #include "usb_functions.h"
+  25:AS7262.c      **** 
+  26:AS7262.c      **** #define AS72XX_SLAVE_STATUS_REG 0x00
+  27:AS7262.c      **** #define AS72XX_SLAVE_WRITE_REG 0x01
+  28:AS7262.c      **** #define AS72XX_SLAVE_READ_REG 0x02
+  29:AS7262.c      **** #define AS72XX_SLAVE_TX_VALID   0x02
+  30:AS7262.c      **** #define AS72XX_SLAVE_RX_VALID   0x01
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 2
+
+
+  31:AS7262.c      **** uint8 read_buffer[24];
+  32:AS7262.c      **** uint8 write_buffer[2];
+  33:AS7262.c      **** 
+  34:AS7262.c      **** /***************************************
+  35:AS7262.c      **** *      Function Prototypes
+  36:AS7262.c      **** ***************************************/
+  37:AS7262.c      **** 
+  38:AS7262.c      **** uint8 update_control_reg_value(AS7262_settings* as7262_ptr);
+  39:AS7262.c      **** uint8 update_LED_reg_value(AS7262_settings* as7262_ptr);
+  40:AS7262.c      **** 
+  41:AS7262.c      **** uint8 virtual_reg_read(uint8 reg_addr);
+  42:AS7262.c      **** uint8 I2C_AS7262_Read(uint8 reg_addr);
+  43:AS7262.c      **** uint8 I2C_AS7262_ReadRegister(uint8 reg_addr);
+  44:AS7262.c      **** uint8 I2C_AS7262_Write(uint8 reg_addr, uint8 value);
+  45:AS7262.c      **** uint8 I2C_AS7262_WriteRegister(uint8 reg_addr, uint8 value);
+  46:AS7262.c      **** void AS7262_ReadAllData(void);
+  47:AS7262.c      **** uint8 convert_hex_string(uint8 array[]);
+  48:AS7262.c      **** uint8 hex_value_from_char(uint8 _char);
+  49:AS7262.c      **** uint16 ConvertDecimal(uint8 array[], uint8 len);
+  50:AS7262.c      **** 
+  51:AS7262.c      **** 
+  52:AS7262.c      **** /***************************************
+  53:AS7262.c      **** *      Initialize Structure to save 
+  54:AS7262.c      **** *      settings of AS7262
+  55:AS7262.c      **** ***************************************/
+  56:AS7262.c      **** 
+  57:AS7262.c      **** AS7262_settings as7262 = {
+  58:AS7262.c      ****     .measurement_mode = BANK_MODE_3,
+  59:AS7262.c      ****     .gain = GAIN_SETTING_1X,
+  60:AS7262.c      ****     .interrupt_on = True,
+  61:AS7262.c      ****     .integration_time = 255,
+  62:AS7262.c      ****     .LED_power_level = LED_POWER_12_5_mA,
+  63:AS7262.c      ****     .LED_on = False,
+  64:AS7262.c      ****     .indicator_power_level = INDICATOR_POWER_4_mA,
+  65:AS7262.c      ****     .indicator_on = False
+  66:AS7262.c      **** };
+  67:AS7262.c      **** 
+  68:AS7262.c      **** 
+  69:AS7262.c      **** 
+  70:AS7262.c      **** union CalibratedData {
+  71:AS7262.c      ****     uint8 data_bytes[24];
+  72:AS7262.c      ****     float32 calibrated_data[6];
+  73:AS7262.c      **** };
+  74:AS7262.c      **** 
+  75:AS7262.c      **** union CalibratedData all_calibrated_data;
+  76:AS7262.c      **** 
+  77:AS7262.c      **** float32 color_data[6];
+  78:AS7262.c      **** extern char LCD_str[40];
+  79:AS7262.c      **** 
+  80:AS7262.c      **** 
+  81:AS7262.c      **** CY_ISR( isr_handler_basic_read ) {
+  28              		.loc 1 81 0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32 0000 08B5     		push	{r3, lr}
+  33              		.cfi_def_cfa_offset 8
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 3
+
+
+  34              		.cfi_offset 3, -8
+  35              		.cfi_offset 14, -4
+  82:AS7262.c      ****     LED_4_Write( 0 );
+  36              		.loc 1 82 0
+  37 0002 0020     		movs	r0, #0
+  38 0004 FFF7FEFF 		bl	LED_4_Write
+  39              	.LVL0:
+  83:AS7262.c      ****     LCD_Position(1, 0);
+  40              		.loc 1 83 0
+  41 0008 0021     		movs	r1, #0
+  42 000a 0120     		movs	r0, #1
+  43 000c FFF7FEFF 		bl	LCD_Position
+  44              	.LVL1:
+  84:AS7262.c      ****     LCD_PrintString("SingleRead3a ");
+  45              		.loc 1 84 0
+  46 0010 0648     		ldr	r0, .L3
+  47 0012 FFF7FEFF 		bl	LCD_PrintString
+  48              	.LVL2:
+  85:AS7262.c      ****     // isr_as7262_int_Disable();
+  86:AS7262.c      ****     AS7262_INT_ClearInterrupt();
+  49              		.loc 1 86 0
+  50 0016 FFF7FEFF 		bl	AS7262_INT_ClearInterrupt
+  51              	.LVL3:
+  87:AS7262.c      ****     LCD_Position(1, 0);
+  52              		.loc 1 87 0
+  53 001a 0021     		movs	r1, #0
+  54 001c 0120     		movs	r0, #1
+  55 001e FFF7FEFF 		bl	LCD_Position
+  56              	.LVL4:
+  88:AS7262.c      ****     LCD_PrintString("SingleRead3b ");
+  57              		.loc 1 88 0
+  58 0022 0348     		ldr	r0, .L3+4
+  59 0024 FFF7FEFF 		bl	LCD_PrintString
+  60              	.LVL5:
+  61 0028 08BD     		pop	{r3, pc}
+  62              	.L4:
+  63 002a 00BF     		.align	2
+  64              	.L3:
+  65 002c 00000000 		.word	.LC0
+  66 0030 10000000 		.word	.LC1
+  67              		.cfi_endproc
+  68              	.LFE64:
+  69              		.size	isr_handler_basic_read, .-isr_handler_basic_read
+  70              		.section	.text.isr_handler_debug1,"ax",%progbits
+  71              		.align	2
+  72              		.global	isr_handler_debug1
+  73              		.thumb
+  74              		.thumb_func
+  75              		.type	isr_handler_debug1, %function
+  76              	isr_handler_debug1:
+  77              	.LFB65:
+  89:AS7262.c      **** //    AS7262_ReadAllData();
+  90:AS7262.c      **** //    LCD_Position(1, 0);
+  91:AS7262.c      **** //    LCD_PrintString("SingleRead4 ");
+  92:AS7262.c      **** //    USB_Export_Data(all_calibrated_data.data_bytes, 24);
+  93:AS7262.c      **** }
+  94:AS7262.c      **** 
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 4
+
+
+  95:AS7262.c      **** CY_ISR( isr_handler_debug1 ) {
+  78              		.loc 1 95 0
+  79              		.cfi_startproc
+  80              		@ args = 0, pretend = 0, frame = 0
+  81              		@ frame_needed = 0, uses_anonymous_args = 0
+  82 0000 08B5     		push	{r3, lr}
+  83              		.cfi_def_cfa_offset 8
+  84              		.cfi_offset 3, -8
+  85              		.cfi_offset 14, -4
+  96:AS7262.c      ****     LED_3_Write( 0 );
+  86              		.loc 1 96 0
+  87 0002 0020     		movs	r0, #0
+  88 0004 FFF7FEFF 		bl	LED_3_Write
+  89              	.LVL6:
+  97:AS7262.c      ****     LCD_Position(1, 0);
+  90              		.loc 1 97 0
+  91 0008 0021     		movs	r1, #0
+  92 000a 0120     		movs	r0, #1
+  93 000c FFF7FEFF 		bl	LCD_Position
+  94              	.LVL7:
+  98:AS7262.c      ****     LCD_PrintString("debug1 ");
+  95              		.loc 1 98 0
+  96 0010 0148     		ldr	r0, .L7
+  97 0012 FFF7FEFF 		bl	LCD_PrintString
+  98              	.LVL8:
+  99 0016 08BD     		pop	{r3, pc}
+ 100              	.L8:
+ 101              		.align	2
+ 102              	.L7:
+ 103 0018 20000000 		.word	.LC2
+ 104              		.cfi_endproc
+ 105              	.LFE65:
+ 106              		.size	isr_handler_debug1, .-isr_handler_debug1
+ 107              		.section	.text.I2C_AS7262_ReadRegister,"ax",%progbits
+ 108              		.align	2
+ 109              		.global	I2C_AS7262_ReadRegister
+ 110              		.thumb
+ 111              		.thumb_func
+ 112              		.type	I2C_AS7262_ReadRegister, %function
+ 113              	I2C_AS7262_ReadRegister:
+ 114              	.LFB73:
+  99:AS7262.c      ****     //AS7262_INT_ClearInterrupt();
+ 100:AS7262.c      **** }
+ 101:AS7262.c      **** 
+ 102:AS7262.c      **** /******************************************************************************
+ 103:AS7262.c      **** * Function Name: AS7262_Init
+ 104:AS7262.c      **** *******************************************************************************
+ 105:AS7262.c      **** *
+ 106:AS7262.c      **** * Summary:
+ 107:AS7262.c      **** *  Set up the AS7262 with the default configuration.
+ 108:AS7262.c      **** *
+ 109:AS7262.c      **** * Return:
+ 110:AS7262.c      **** *  true (1) if the AS7262 responds with the correct device type
+ 111:AS7262.c      **** *
+ 112:AS7262.c      **** * Global variables:
+ 113:AS7262.c      **** *  as7262:  strucutre that stores a local copy of all the parameters it is set to
+ 114:AS7262.c      **** *
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 5
+
+
+ 115:AS7262.c      **** *******************************************************************************/
+ 116:AS7262.c      **** 
+ 117:AS7262.c      **** uint8 AS7262_Init(void) {
+ 118:AS7262.c      ****     // get the hardware and firmware data and save it to the struct
+ 119:AS7262.c      ****     uint8 data = I2C_AS7262_Read(AS726x_REG_DEVICE_TYPE);
+ 120:AS7262.c      ****     as7262.device_type = data;
+ 121:AS7262.c      ****     data = I2C_AS7262_Read(AS726x_REG_HW_VERSION);
+ 122:AS7262.c      ****     as7262.hw_version = data;
+ 123:AS7262.c      ****     data = I2C_AS7262_Read(AS726x_REG_FW1_VERSION);
+ 124:AS7262.c      ****     as7262.fw_version = ( data << 8 );
+ 125:AS7262.c      ****     data = I2C_AS7262_Read(AS726x_REG_FW2_VERSION);
+ 126:AS7262.c      ****     as7262.fw_version += data;
+ 127:AS7262.c      ****     
+ 128:AS7262.c      ****     // update the control,led, and integration time registers to their default starting values
+ 129:AS7262.c      ****     update_control_reg_value( &as7262 );
+ 130:AS7262.c      ****     update_LED_reg_value( &as7262 );
+ 131:AS7262.c      ****     I2C_AS7262_Write(AS726x_REG_INT, as7262.integration_time);
+ 132:AS7262.c      ****     
+ 133:AS7262.c      ****     // if the device responeded with the correct device type return true to symbolize the device is
+ 134:AS7262.c      ****     if ( as7262.device_type == AS7262_DEVICE_TYPE ) {
+ 135:AS7262.c      ****         return true;
+ 136:AS7262.c      ****     }
+ 137:AS7262.c      ****     return false;
+ 138:AS7262.c      **** }
+ 139:AS7262.c      **** 
+ 140:AS7262.c      **** /******************************************************************************
+ 141:AS7262.c      **** * Function Name: AS7262_Commands
+ 142:AS7262.c      **** *******************************************************************************
+ 143:AS7262.c      **** *
+ 144:AS7262.c      **** * Summary:
+ 145:AS7262.c      **** *  Take in User inputs that deal with the AS7262 and peform the proper action.
+ 146:AS7262.c      **** *
+ 147:AS7262.c      **** * Parameters:
+ 148:AS7262.c      **** *  uint8 buffer: array of the chars the user inputted
+ 149:AS7262.c      **** *
+ 150:AS7262.c      **** * Global variables:
+ 151:AS7262.c      **** *  as7262:  strucutre that stores a local copy of all the parameters it is set to
+ 152:AS7262.c      **** *
+ 153:AS7262.c      **** *******************************************************************************/
+ 154:AS7262.c      **** 
+ 155:AS7262.c      **** void AS7262_Commands(uint8 buffer[]) {
+ 156:AS7262.c      ****     switch ( buffer[7] ) {
+ 157:AS7262.c      ****         case READ_COMMANDS: ;  // a command to read 'READ' data is given, or register commands 'REG
+ 158:AS7262.c      ****             if ( buffer[9] == 'G' ) {  // Register read or write
+ 159:AS7262.c      ****                 if ( buffer[11] == 'W' ) {  // Write a register value
+ 160:AS7262.c      ****                     uint8 reg_to_write = convert_hex_string(&buffer[19]);
+ 161:AS7262.c      ****                     uint8 value_to_write = convert_hex_string(&buffer[24]);
+ 162:AS7262.c      ****                     I2C_AS7262_Write(reg_to_write, value_to_write);
+ 163:AS7262.c      ****                     LCD_Position(0, 0); 
+ 164:AS7262.c      ****                     sprintf(LCD_str, "R:0x%02x|v:0x%02x  ", reg_to_write, value_to_write);
+ 165:AS7262.c      ****                     LCD_PrintString(LCD_str);
+ 166:AS7262.c      ****                     LCD_Position(1, 0); 
+ 167:AS7262.c      ****                     sprintf(LCD_str, "B:%c|v:%c  ", buffer[24], buffer[25]);
+ 168:AS7262.c      ****                     LCD_PrintString(LCD_str);
+ 169:AS7262.c      ****                     
+ 170:AS7262.c      ****                 }
+ 171:AS7262.c      ****                 else if ( buffer[11] == 'R' ) {  // Read a value from a register
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 6
+
+
+ 172:AS7262.c      ****                     uint8 reg_to_read = convert_hex_string(&buffer[18]);
+ 173:AS7262.c      ****                     uint8 reg_value = I2C_AS7262_Read(reg_to_read);
+ 174:AS7262.c      ****                     sprintf(USB_str, "REG_VALUE|0x%02X", reg_value);
+ 175:AS7262.c      ****                     LCD_Position(0, 0); 
+ 176:AS7262.c      ****                     sprintf(LCD_str, "RegR:0x%02x|v:0x%02x  ", reg_to_read, reg_value);
+ 177:AS7262.c      ****                     // sprintf(LCD_str, "RegR:0x%d|v:0x%d  ", buffer[18], buffer[19]);
+ 178:AS7262.c      ****                     LCD_PrintString(LCD_str);
+ 179:AS7262.c      ****                     USB_Export_Data((uint8*)USB_str, 14);
+ 180:AS7262.c      ****                 }
+ 181:AS7262.c      ****             }
+ 182:AS7262.c      ****             if ( buffer[12] == 'S' ) {  // get a single data point
+ 183:AS7262.c      ****                 LCD_Position(0, 0);
+ 184:AS7262.c      ****                 LCD_PrintString("Single Read");
+ 185:AS7262.c      ****                 AS7262_SingleRead();
+ 186:AS7262.c      ****             }
+ 187:AS7262.c      ****             break;
+ 188:AS7262.c      ****         case SET_INTEGRATION_TIME: ; // the command to set the integration time
+ 189:AS7262.c      ****             uint8 new_integration_time = ConvertDecimal(&buffer[22],3);
+ 190:AS7262.c      ****             as7262.integration_time = new_integration_time;
+ 191:AS7262.c      ****             I2C_AS7262_Write( AS726x_REG_INT, as7262.integration_time );
+ 192:AS7262.c      ****             break;
+ 193:AS7262.c      ****             
+ 194:AS7262.c      ****         case SET_GAIN: ; // change the gain setting of the device
+ 195:AS7262.c      ****             as7262.gain = ( ConvertDecimal(&buffer[12], 1) & 0x03 );  // only allow values from 0x0
+ 196:AS7262.c      ****             update_control_reg_value( &as7262 );
+ 197:AS7262.c      ****             break;
+ 198:AS7262.c      ****         case SET_LED_POWER: ; // set the current through the main light source
+ 199:AS7262.c      ****             as7262.LED_power_level = ( ConvertDecimal(&buffer[19], 1) & 0x03 );  // only allow valu
+ 200:AS7262.c      ****             update_LED_reg_value( &as7262 );
+ 201:AS7262.c      ****             break;
+ 202:AS7262.c      ****         case LED_ON_OFF: ;  //  set if the LED should be on or off
+ 203:AS7262.c      ****             if ( (buffer[17] == 'N') || (buffer[17] == 'n') ) {
+ 204:AS7262.c      ****                 as7262.LED_on = True;
+ 205:AS7262.c      ****             }
+ 206:AS7262.c      ****             else if ( (buffer[17] == 'F') || (buffer[17] == 'f') ) {
+ 207:AS7262.c      ****                 as7262.LED_on = False;
+ 208:AS7262.c      ****             }
+ 209:AS7262.c      ****             update_LED_reg_value( &as7262 );
+ 210:AS7262.c      ****             break;
+ 211:AS7262.c      ****     }
+ 212:AS7262.c      **** }
+ 213:AS7262.c      **** 
+ 214:AS7262.c      **** uint8 update_control_reg_value(AS7262_settings* as7262_ptr) {
+ 215:AS7262.c      ****     uint8 control_reg = (as7262_ptr->interrupt_on << 6) | 
+ 216:AS7262.c      ****                         (as7262_ptr->gain << 4) | 
+ 217:AS7262.c      ****                         (as7262_ptr->measurement_mode << 2);
+ 218:AS7262.c      ****     I2C_AS7262_Write( AS726x_REG_CONTROL, control_reg );
+ 219:AS7262.c      ****     as7262_ptr->control_reg_value = control_reg;
+ 220:AS7262.c      ****     return control_reg;
+ 221:AS7262.c      **** }
+ 222:AS7262.c      **** 
+ 223:AS7262.c      **** uint8 update_LED_reg_value(AS7262_settings* as7262_ptr) {
+ 224:AS7262.c      ****     uint8 led_control_reg = (as7262_ptr->LED_power_level << 4) | 
+ 225:AS7262.c      ****                             (as7262_ptr->LED_on << 3) | 
+ 226:AS7262.c      ****                             (as7262_ptr->indicator_power_level << 1) |
+ 227:AS7262.c      ****                             (as7262_ptr->indicator_on);
+ 228:AS7262.c      ****     I2C_AS7262_Write( AS726x_REG_LED, led_control_reg );
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 7
+
+
+ 229:AS7262.c      ****     as7262_ptr->LED_control_reg_value = led_control_reg;
+ 230:AS7262.c      ****     return led_control_reg;
+ 231:AS7262.c      **** }
+ 232:AS7262.c      **** 
+ 233:AS7262.c      **** 
+ 234:AS7262.c      **** void AS7262_SingleRead(void) {
+ 235:AS7262.c      ****     // send command to run a single shot read
+ 236:AS7262.c      ****     LCD_ClearDisplay();
+ 237:AS7262.c      ****     LCD_Position(0, 0);
+ 238:AS7262.c      ****     LCD_PrintString("SingleRead  ");
+ 239:AS7262.c      ****     I2C_AS7262_Write( AS726x_REG_CONTROL, as7262.control_reg_value );
+ 240:AS7262.c      ****     LCD_Position(0, 0);
+ 241:AS7262.c      ****     LCD_PrintString("SingleRead2  ");
+ 242:AS7262.c      ****     
+ 243:AS7262.c      ****     CyDelay( (5.8 * as7262.integration_time) );
+ 244:AS7262.c      ****     uint8 data;
+ 245:AS7262.c      ****     uint8 failed_tries=0;
+ 246:AS7262.c      ****     do {
+ 247:AS7262.c      ****         CyDelay(1);
+ 248:AS7262.c      ****         data = I2C_AS7262_Read( AS726x_REG_CONTROL );
+ 249:AS7262.c      ****         failed_tries++;
+ 250:AS7262.c      ****         if ( failed_tries > 200 ) {
+ 251:AS7262.c      ****             USB_Export_Data((uint8*)"FAILED", 6);
+ 252:AS7262.c      ****         }
+ 253:AS7262.c      ****     } while ( (data & 0x02) == 0x02 );
+ 254:AS7262.c      **** //    LCD_Position(1, 0); 
+ 255:AS7262.c      **** //    sprintf(LCD_str, "C2:0x%02x|0x%02x  ", data, as7262.control_reg_value);
+ 256:AS7262.c      **** //    LCD_PrintString(LCD_str);
+ 257:AS7262.c      **** //    isr_as7262_int_StartEx( isr_handler_basic_read );
+ 258:AS7262.c      **** //    isr_as7262_pin_StartEx( isr_handler_debug1 );
+ 259:AS7262.c      ****     //LED_3_Write( 1 );
+ 260:AS7262.c      ****     //CyDelay(1000);
+ 261:AS7262.c      ****     AS7262_ReadAllData();
+ 262:AS7262.c      ****     USB_Export_Data(all_calibrated_data.data_bytes, 24);
+ 263:AS7262.c      **** }
+ 264:AS7262.c      **** 
+ 265:AS7262.c      **** void AS7262_ReadAllData(void) {
+ 266:AS7262.c      ****     for (uint8 i=0; i < 24; i++ ) {
+ 267:AS7262.c      ****         all_calibrated_data.data_bytes[i] = I2C_AS7262_Read(AS7262_DATA_START_ADDR + i);
+ 268:AS7262.c      ****     }
+ 269:AS7262.c      **** //    LCD_Position(0, 0);
+ 270:AS7262.c      **** //    sprintf(LCD_str, "C:0x%02x|0x%02x  ", all_calibrated_data.data_bytes[0], all_calibrated_data.
+ 271:AS7262.c      **** //    LCD_PrintString(LCD_str);
+ 272:AS7262.c      ****     
+ 273:AS7262.c      **** }
+ 274:AS7262.c      **** 
+ 275:AS7262.c      **** 
+ 276:AS7262.c      **** uint8 I2C_AS7262_Read(uint8 reg_addr) {
+ 277:AS7262.c      ****     uint8 status;
+ 278:AS7262.c      **** //    LCD_Position(1, 0); 
+ 279:AS7262.c      **** //    LCD_PrintString("read0   ");
+ 280:AS7262.c      ****     status = I2C_AS7262_ReadRegister(AS72XX_SLAVE_STATUS_REG);
+ 281:AS7262.c      **** //    LCD_Position(1, 0); 
+ 282:AS7262.c      **** //    LCD_PrintString("read0b   ");
+ 283:AS7262.c      ****     if ( ( status & AS72XX_SLAVE_RX_VALID ) != 0 ) {  // data is trying ready to read, but it was n
+ 284:AS7262.c      ****         uint8 data = I2C_AS7262_ReadRegister(reg_addr);
+ 285:AS7262.c      ****     }
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 8
+
+
+ 286:AS7262.c      **** //    LCD_Position(1, 0); 
+ 287:AS7262.c      **** //    LCD_PrintString("read1   ");
+ 288:AS7262.c      **** //    
+ 289:AS7262.c      **** //    I2C_AS7262_WriteRegister(AS72XX_SLAVE_WRITE_REG, ( reg_addr | 0x80 ) );
+ 290:AS7262.c      ****     
+ 291:AS7262.c      ****     // Wait for the write flag to clear
+ 292:AS7262.c      ****     while(1) {
+ 293:AS7262.c      ****         status = I2C_AS7262_ReadRegister( AS72XX_SLAVE_STATUS_REG );
+ 294:AS7262.c      ****         if( ( status & AS72XX_SLAVE_TX_VALID ) == 0 ) {
+ 295:AS7262.c      ****             break;
+ 296:AS7262.c      ****         }
+ 297:AS7262.c      ****         CyDelay(1);
+ 298:AS7262.c      ****     }
+ 299:AS7262.c      ****     I2C_AS7262_WriteRegister( AS72XX_SLAVE_WRITE_REG, reg_addr );
+ 300:AS7262.c      **** //    LCD_Position(1, 0); 
+ 301:AS7262.c      **** //    LCD_PrintString("read2   ");
+ 302:AS7262.c      ****     // Wait for read flag to be set
+ 303:AS7262.c      ****     while(1) {
+ 304:AS7262.c      ****         status = I2C_AS7262_ReadRegister(AS72XX_SLAVE_STATUS_REG);
+ 305:AS7262.c      ****         // Check if the status register has the data read bit set
+ 306:AS7262.c      ****         if ( ( status & AS72XX_SLAVE_RX_VALID ) != 0 ) {  
+ 307:AS7262.c      ****             break;
+ 308:AS7262.c      ****         }
+ 309:AS7262.c      ****         CyDelay(1);
+ 310:AS7262.c      **** //        LCD_Position(0, 0); 
+ 311:AS7262.c      **** //        sprintf(LCD_str, "Code9: %d", status);
+ 312:AS7262.c      **** //        LCD_PrintString(LCD_str);
+ 313:AS7262.c      ****     }
+ 314:AS7262.c      **** 
+ 315:AS7262.c      ****     return I2C_AS7262_ReadRegister(AS72XX_SLAVE_READ_REG);
+ 316:AS7262.c      **** }
+ 317:AS7262.c      **** 
+ 318:AS7262.c      **** uint8 I2C_AS7262_ReadRegister(uint8 reg_addr) {
+ 115              		.loc 1 318 0
+ 116              		.cfi_startproc
+ 117              		@ args = 0, pretend = 0, frame = 0
+ 118              		@ frame_needed = 0, uses_anonymous_args = 0
+ 119              	.LVL9:
+ 120 0000 10B5     		push	{r4, lr}
+ 121              		.cfi_def_cfa_offset 8
+ 122              		.cfi_offset 4, -8
+ 123              		.cfi_offset 14, -4
+ 319:AS7262.c      ****     uint8 status;
+ 320:AS7262.c      **** //    LCD_Position(0, 0); 
+ 321:AS7262.c      **** //    LCD_PrintString("read00   ");
+ 322:AS7262.c      ****     status = sensor_read8(AS7262_ADDRESS, read_buffer, reg_addr, &as7262.comm_error);
+ 124              		.loc 1 322 0
+ 125 0002 044C     		ldr	r4, .L11
+ 126 0004 044B     		ldr	r3, .L11+4
+ 127 0006 0246     		mov	r2, r0
+ 128 0008 2146     		mov	r1, r4
+ 129 000a 4920     		movs	r0, #73
+ 130              	.LVL10:
+ 131 000c FFF7FEFF 		bl	sensor_read8
+ 132              	.LVL11:
+ 323:AS7262.c      **** //    LCD_Position(0, 0); 
+ 324:AS7262.c      **** //    LCD_PrintString("read01   ");
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 9
+
+
+ 325:AS7262.c      ****     return read_buffer[0];
+ 326:AS7262.c      **** }
+ 133              		.loc 1 326 0
+ 134 0010 2078     		ldrb	r0, [r4]	@ zero_extendqisi2
+ 135 0012 10BD     		pop	{r4, pc}
+ 136              	.L12:
+ 137              		.align	2
+ 138              	.L11:
+ 139 0014 00000000 		.word	read_buffer
+ 140 0018 0C000000 		.word	.LANCHOR0+12
+ 141              		.cfi_endproc
+ 142              	.LFE73:
+ 143              		.size	I2C_AS7262_ReadRegister, .-I2C_AS7262_ReadRegister
+ 144              		.section	.text.I2C_AS7262_WriteRegister,"ax",%progbits
+ 145              		.align	2
+ 146              		.global	I2C_AS7262_WriteRegister
+ 147              		.thumb
+ 148              		.thumb_func
+ 149              		.type	I2C_AS7262_WriteRegister, %function
+ 150              	I2C_AS7262_WriteRegister:
+ 151              	.LFB75:
+ 327:AS7262.c      **** 
+ 328:AS7262.c      **** uint8 I2C_AS7262_Write(uint8 reg_addr, uint8 value) {
+ 329:AS7262.c      ****     uint8 status;
+ 330:AS7262.c      ****     // Check to see if write buffer is ready
+ 331:AS7262.c      ****     while(1) {
+ 332:AS7262.c      ****         status = I2C_AS7262_ReadRegister( AS72XX_SLAVE_STATUS_REG );
+ 333:AS7262.c      ****         if( ( status & AS72XX_SLAVE_TX_VALID ) == 0 ) {
+ 334:AS7262.c      ****             break;  // no data inbound so it can be written to
+ 335:AS7262.c      ****         }
+ 336:AS7262.c      ****     }
+ 337:AS7262.c      ****     // Send the virtual register address and set bit 7 to indicate a pending write
+ 338:AS7262.c      ****     I2C_AS7262_WriteRegister( AS72XX_SLAVE_WRITE_REG, ( reg_addr | AS726x_WRITE_REG_MASK ) );
+ 339:AS7262.c      ****     // Wait for the write flag to clear
+ 340:AS7262.c      ****     while(1) {
+ 341:AS7262.c      ****         status = I2C_AS7262_ReadRegister( AS72XX_SLAVE_STATUS_REG );
+ 342:AS7262.c      ****         if( ( status & AS72XX_SLAVE_TX_VALID ) == 0 ) {
+ 343:AS7262.c      ****             break;  // no data inbound so it can be written to
+ 344:AS7262.c      ****         }
+ 345:AS7262.c      ****     }
+ 346:AS7262.c      ****     
+ 347:AS7262.c      ****     return I2C_AS7262_WriteRegister(AS72XX_SLAVE_WRITE_REG, value);
+ 348:AS7262.c      **** }
+ 349:AS7262.c      **** 
+ 350:AS7262.c      **** 
+ 351:AS7262.c      **** uint8 I2C_AS7262_WriteRegister(uint8 reg_addr, uint8 value) {
+ 152              		.loc 1 351 0
+ 153              		.cfi_startproc
+ 154              		@ args = 0, pretend = 0, frame = 0
+ 155              		@ frame_needed = 0, uses_anonymous_args = 0
+ 156              	.LVL12:
+ 157 0000 08B5     		push	{r3, lr}
+ 158              		.cfi_def_cfa_offset 8
+ 159              		.cfi_offset 3, -8
+ 160              		.cfi_offset 14, -4
+ 352:AS7262.c      ****     uint8 status;
+ 353:AS7262.c      ****     write_buffer[0] = reg_addr;
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 10
+
+
+ 161              		.loc 1 353 0
+ 162 0002 044B     		ldr	r3, .L15
+ 163 0004 1870     		strb	r0, [r3]
+ 354:AS7262.c      ****     write_buffer[1] = value;
+ 164              		.loc 1 354 0
+ 165 0006 5970     		strb	r1, [r3, #1]
+ 355:AS7262.c      ****     return sensor_write8(AS7262_ADDRESS, write_buffer);
+ 166              		.loc 1 355 0
+ 167 0008 1946     		mov	r1, r3
+ 168              	.LVL13:
+ 169 000a 4920     		movs	r0, #73
+ 170              	.LVL14:
+ 171 000c FFF7FEFF 		bl	sensor_write8
+ 172              	.LVL15:
+ 356:AS7262.c      **** }
+ 173              		.loc 1 356 0
+ 174 0010 08BD     		pop	{r3, pc}
+ 175              	.L16:
+ 176 0012 00BF     		.align	2
+ 177              	.L15:
+ 178 0014 00000000 		.word	write_buffer
+ 179              		.cfi_endproc
+ 180              	.LFE75:
+ 181              		.size	I2C_AS7262_WriteRegister, .-I2C_AS7262_WriteRegister
+ 182              		.section	.text.I2C_AS7262_Read,"ax",%progbits
+ 183              		.align	2
+ 184              		.global	I2C_AS7262_Read
+ 185              		.thumb
+ 186              		.thumb_func
+ 187              		.type	I2C_AS7262_Read, %function
+ 188              	I2C_AS7262_Read:
+ 189              	.LFB72:
+ 276:AS7262.c      ****     uint8 status;
+ 190              		.loc 1 276 0
+ 191              		.cfi_startproc
+ 192              		@ args = 0, pretend = 0, frame = 0
+ 193              		@ frame_needed = 0, uses_anonymous_args = 0
+ 194              	.LVL16:
+ 195 0000 10B5     		push	{r4, lr}
+ 196              		.cfi_def_cfa_offset 8
+ 197              		.cfi_offset 4, -8
+ 198              		.cfi_offset 14, -4
+ 199 0002 0446     		mov	r4, r0
+ 280:AS7262.c      **** //    LCD_Position(1, 0); 
+ 200              		.loc 1 280 0
+ 201 0004 0020     		movs	r0, #0
+ 202              	.LVL17:
+ 203 0006 FFF7FEFF 		bl	I2C_AS7262_ReadRegister
+ 204              	.LVL18:
+ 283:AS7262.c      ****         uint8 data = I2C_AS7262_ReadRegister(reg_addr);
+ 205              		.loc 1 283 0
+ 206 000a 10F0010F 		tst	r0, #1
+ 207 000e 02D0     		beq	.L20
+ 208              	.LBB2:
+ 284:AS7262.c      ****     }
+ 209              		.loc 1 284 0
+ 210 0010 2046     		mov	r0, r4
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 11
+
+
+ 211              	.LVL19:
+ 212 0012 FFF7FEFF 		bl	I2C_AS7262_ReadRegister
+ 213              	.LVL20:
+ 214              	.L20:
+ 215              	.LBE2:
+ 293:AS7262.c      ****         if( ( status & AS72XX_SLAVE_TX_VALID ) == 0 ) {
+ 216              		.loc 1 293 0
+ 217 0016 0020     		movs	r0, #0
+ 218 0018 FFF7FEFF 		bl	I2C_AS7262_ReadRegister
+ 219              	.LVL21:
+ 294:AS7262.c      ****             break;
+ 220              		.loc 1 294 0
+ 221 001c 10F0020F 		tst	r0, #2
+ 222 0020 03D0     		beq	.L19
+ 297:AS7262.c      ****     }
+ 223              		.loc 1 297 0
+ 224 0022 0120     		movs	r0, #1
+ 225              	.LVL22:
+ 226 0024 FFF7FEFF 		bl	CyDelay
+ 227              	.LVL23:
+ 298:AS7262.c      ****     I2C_AS7262_WriteRegister( AS72XX_SLAVE_WRITE_REG, reg_addr );
+ 228              		.loc 1 298 0
+ 229 0028 F5E7     		b	.L20
+ 230              	.LVL24:
+ 231              	.L19:
+ 299:AS7262.c      **** //    LCD_Position(1, 0); 
+ 232              		.loc 1 299 0
+ 233 002a 2146     		mov	r1, r4
+ 234 002c 0120     		movs	r0, #1
+ 235              	.LVL25:
+ 236 002e FFF7FEFF 		bl	I2C_AS7262_WriteRegister
+ 237              	.LVL26:
+ 238              	.L22:
+ 304:AS7262.c      ****         // Check if the status register has the data read bit set
+ 239              		.loc 1 304 0
+ 240 0032 0020     		movs	r0, #0
+ 241 0034 FFF7FEFF 		bl	I2C_AS7262_ReadRegister
+ 242              	.LVL27:
+ 306:AS7262.c      ****             break;
+ 243              		.loc 1 306 0
+ 244 0038 10F0010F 		tst	r0, #1
+ 245 003c 03D1     		bne	.L21
+ 309:AS7262.c      **** //        LCD_Position(0, 0); 
+ 246              		.loc 1 309 0
+ 247 003e 0120     		movs	r0, #1
+ 248              	.LVL28:
+ 249 0040 FFF7FEFF 		bl	CyDelay
+ 250              	.LVL29:
+ 313:AS7262.c      **** 
+ 251              		.loc 1 313 0
+ 252 0044 F5E7     		b	.L22
+ 253              	.LVL30:
+ 254              	.L21:
+ 315:AS7262.c      **** }
+ 255              		.loc 1 315 0
+ 256 0046 0220     		movs	r0, #2
+ 257              	.LVL31:
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 12
+
+
+ 258 0048 FFF7FEFF 		bl	I2C_AS7262_ReadRegister
+ 259              	.LVL32:
+ 316:AS7262.c      **** 
+ 260              		.loc 1 316 0
+ 261 004c 10BD     		pop	{r4, pc}
+ 262              		.cfi_endproc
+ 263              	.LFE72:
+ 264              		.size	I2C_AS7262_Read, .-I2C_AS7262_Read
+ 265 004e 00BF     		.section	.text.AS7262_ReadAllData,"ax",%progbits
+ 266              		.align	2
+ 267              		.global	AS7262_ReadAllData
+ 268              		.thumb
+ 269              		.thumb_func
+ 270              		.type	AS7262_ReadAllData, %function
+ 271              	AS7262_ReadAllData:
+ 272              	.LFB71:
+ 265:AS7262.c      ****     for (uint8 i=0; i < 24; i++ ) {
+ 273              		.loc 1 265 0
+ 274              		.cfi_startproc
+ 275              		@ args = 0, pretend = 0, frame = 0
+ 276              		@ frame_needed = 0, uses_anonymous_args = 0
+ 277 0000 10B5     		push	{r4, lr}
+ 278              		.cfi_def_cfa_offset 8
+ 279              		.cfi_offset 4, -8
+ 280              		.cfi_offset 14, -4
+ 281              	.LVL33:
+ 282              	.LBB3:
+ 266:AS7262.c      ****         all_calibrated_data.data_bytes[i] = I2C_AS7262_Read(AS7262_DATA_START_ADDR + i);
+ 283              		.loc 1 266 0
+ 284 0002 0024     		movs	r4, #0
+ 285 0004 08E0     		b	.L25
+ 286              	.LVL34:
+ 287              	.L26:
+ 267:AS7262.c      ****     }
+ 288              		.loc 1 267 0 discriminator 3
+ 289 0006 04F11400 		add	r0, r4, #20
+ 290 000a C0B2     		uxtb	r0, r0
+ 291 000c FFF7FEFF 		bl	I2C_AS7262_Read
+ 292              	.LVL35:
+ 293 0010 034B     		ldr	r3, .L28
+ 294 0012 1855     		strb	r0, [r3, r4]
+ 266:AS7262.c      ****         all_calibrated_data.data_bytes[i] = I2C_AS7262_Read(AS7262_DATA_START_ADDR + i);
+ 295              		.loc 1 266 0 discriminator 3
+ 296 0014 0134     		adds	r4, r4, #1
+ 297              	.LVL36:
+ 298 0016 E4B2     		uxtb	r4, r4
+ 299              	.LVL37:
+ 300              	.L25:
+ 266:AS7262.c      ****         all_calibrated_data.data_bytes[i] = I2C_AS7262_Read(AS7262_DATA_START_ADDR + i);
+ 301              		.loc 1 266 0 is_stmt 0 discriminator 1
+ 302 0018 172C     		cmp	r4, #23
+ 303 001a F4D9     		bls	.L26
+ 304              	.LBE3:
+ 273:AS7262.c      **** 
+ 305              		.loc 1 273 0 is_stmt 1
+ 306 001c 10BD     		pop	{r4, pc}
+ 307              	.LVL38:
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 13
+
+
+ 308              	.L29:
+ 309 001e 00BF     		.align	2
+ 310              	.L28:
+ 311 0020 00000000 		.word	all_calibrated_data
+ 312              		.cfi_endproc
+ 313              	.LFE71:
+ 314              		.size	AS7262_ReadAllData, .-AS7262_ReadAllData
+ 315              		.section	.text.I2C_AS7262_Write,"ax",%progbits
+ 316              		.align	2
+ 317              		.global	I2C_AS7262_Write
+ 318              		.thumb
+ 319              		.thumb_func
+ 320              		.type	I2C_AS7262_Write, %function
+ 321              	I2C_AS7262_Write:
+ 322              	.LFB74:
+ 328:AS7262.c      ****     uint8 status;
+ 323              		.loc 1 328 0
+ 324              		.cfi_startproc
+ 325              		@ args = 0, pretend = 0, frame = 0
+ 326              		@ frame_needed = 0, uses_anonymous_args = 0
+ 327              	.LVL39:
+ 328 0000 38B5     		push	{r3, r4, r5, lr}
+ 329              		.cfi_def_cfa_offset 16
+ 330              		.cfi_offset 3, -16
+ 331              		.cfi_offset 4, -12
+ 332              		.cfi_offset 5, -8
+ 333              		.cfi_offset 14, -4
+ 334 0002 0546     		mov	r5, r0
+ 335 0004 0C46     		mov	r4, r1
+ 336              	.LVL40:
+ 337              	.L31:
+ 332:AS7262.c      ****         if( ( status & AS72XX_SLAVE_TX_VALID ) == 0 ) {
+ 338              		.loc 1 332 0
+ 339 0006 0020     		movs	r0, #0
+ 340 0008 FFF7FEFF 		bl	I2C_AS7262_ReadRegister
+ 341              	.LVL41:
+ 333:AS7262.c      ****             break;  // no data inbound so it can be written to
+ 342              		.loc 1 333 0
+ 343 000c 10F0020F 		tst	r0, #2
+ 344 0010 F9D1     		bne	.L31
+ 338:AS7262.c      ****     // Wait for the write flag to clear
+ 345              		.loc 1 338 0
+ 346 0012 45F08001 		orr	r1, r5, #128
+ 347 0016 0120     		movs	r0, #1
+ 348              	.LVL42:
+ 349 0018 FFF7FEFF 		bl	I2C_AS7262_WriteRegister
+ 350              	.LVL43:
+ 351              	.L32:
+ 341:AS7262.c      ****         if( ( status & AS72XX_SLAVE_TX_VALID ) == 0 ) {
+ 352              		.loc 1 341 0
+ 353 001c 0020     		movs	r0, #0
+ 354 001e FFF7FEFF 		bl	I2C_AS7262_ReadRegister
+ 355              	.LVL44:
+ 342:AS7262.c      ****             break;  // no data inbound so it can be written to
+ 356              		.loc 1 342 0
+ 357 0022 10F0020F 		tst	r0, #2
+ 358 0026 F9D1     		bne	.L32
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 14
+
+
+ 347:AS7262.c      **** }
+ 359              		.loc 1 347 0
+ 360 0028 2146     		mov	r1, r4
+ 361 002a 0120     		movs	r0, #1
+ 362              	.LVL45:
+ 363 002c FFF7FEFF 		bl	I2C_AS7262_WriteRegister
+ 364              	.LVL46:
+ 348:AS7262.c      **** 
+ 365              		.loc 1 348 0
+ 366 0030 38BD     		pop	{r3, r4, r5, pc}
+ 367              		.cfi_endproc
+ 368              	.LFE74:
+ 369              		.size	I2C_AS7262_Write, .-I2C_AS7262_Write
+ 370 0032 00BF     		.section	.text.update_control_reg_value,"ax",%progbits
+ 371              		.align	2
+ 372              		.global	update_control_reg_value
+ 373              		.thumb
+ 374              		.thumb_func
+ 375              		.type	update_control_reg_value, %function
+ 376              	update_control_reg_value:
+ 377              	.LFB68:
+ 214:AS7262.c      ****     uint8 control_reg = (as7262_ptr->interrupt_on << 6) | 
+ 378              		.loc 1 214 0
+ 379              		.cfi_startproc
+ 380              		@ args = 0, pretend = 0, frame = 0
+ 381              		@ frame_needed = 0, uses_anonymous_args = 0
+ 382              	.LVL47:
+ 383 0000 38B5     		push	{r3, r4, r5, lr}
+ 384              		.cfi_def_cfa_offset 16
+ 385              		.cfi_offset 3, -16
+ 386              		.cfi_offset 4, -12
+ 387              		.cfi_offset 5, -8
+ 388              		.cfi_offset 14, -4
+ 389 0002 0546     		mov	r5, r0
+ 215:AS7262.c      ****                         (as7262_ptr->gain << 4) | 
+ 390              		.loc 1 215 0
+ 391 0004 8478     		ldrb	r4, [r0, #2]	@ zero_extendqisi2
+ 216:AS7262.c      ****                         (as7262_ptr->measurement_mode << 2);
+ 392              		.loc 1 216 0
+ 393 0006 4378     		ldrb	r3, [r0, #1]	@ zero_extendqisi2
+ 394 0008 1B01     		lsls	r3, r3, #4
+ 217:AS7262.c      ****     I2C_AS7262_Write( AS726x_REG_CONTROL, control_reg );
+ 395              		.loc 1 217 0
+ 396 000a 0278     		ldrb	r2, [r0]	@ zero_extendqisi2
+ 215:AS7262.c      ****                         (as7262_ptr->gain << 4) | 
+ 397              		.loc 1 215 0
+ 398 000c 43EA8414 		orr	r4, r3, r4, lsl #6
+ 399 0010 44EA8204 		orr	r4, r4, r2, lsl #2
+ 400 0014 E4B2     		uxtb	r4, r4
+ 401              	.LVL48:
+ 218:AS7262.c      ****     as7262_ptr->control_reg_value = control_reg;
+ 402              		.loc 1 218 0
+ 403 0016 2146     		mov	r1, r4
+ 404 0018 0420     		movs	r0, #4
+ 405              	.LVL49:
+ 406 001a FFF7FEFF 		bl	I2C_AS7262_Write
+ 407              	.LVL50:
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 15
+
+
+ 219:AS7262.c      ****     return control_reg;
+ 408              		.loc 1 219 0
+ 409 001e 2C74     		strb	r4, [r5, #16]
+ 221:AS7262.c      **** 
+ 410              		.loc 1 221 0
+ 411 0020 2046     		mov	r0, r4
+ 412 0022 38BD     		pop	{r3, r4, r5, pc}
+ 413              		.cfi_endproc
+ 414              	.LFE68:
+ 415              		.size	update_control_reg_value, .-update_control_reg_value
+ 416              		.section	.text.update_LED_reg_value,"ax",%progbits
+ 417              		.align	2
+ 418              		.global	update_LED_reg_value
+ 419              		.thumb
+ 420              		.thumb_func
+ 421              		.type	update_LED_reg_value, %function
+ 422              	update_LED_reg_value:
+ 423              	.LFB69:
+ 223:AS7262.c      ****     uint8 led_control_reg = (as7262_ptr->LED_power_level << 4) | 
+ 424              		.loc 1 223 0
+ 425              		.cfi_startproc
+ 426              		@ args = 0, pretend = 0, frame = 0
+ 427              		@ frame_needed = 0, uses_anonymous_args = 0
+ 428              	.LVL51:
+ 429 0000 38B5     		push	{r3, r4, r5, lr}
+ 430              		.cfi_def_cfa_offset 16
+ 431              		.cfi_offset 3, -16
+ 432              		.cfi_offset 4, -12
+ 433              		.cfi_offset 5, -8
+ 434              		.cfi_offset 14, -4
+ 435 0002 0546     		mov	r5, r0
+ 224:AS7262.c      ****                             (as7262_ptr->LED_on << 3) | 
+ 436              		.loc 1 224 0
+ 437 0004 0479     		ldrb	r4, [r0, #4]	@ zero_extendqisi2
+ 225:AS7262.c      ****                             (as7262_ptr->indicator_power_level << 1) |
+ 438              		.loc 1 225 0
+ 439 0006 4279     		ldrb	r2, [r0, #5]	@ zero_extendqisi2
+ 440 0008 D200     		lsls	r2, r2, #3
+ 226:AS7262.c      ****                             (as7262_ptr->indicator_on);
+ 441              		.loc 1 226 0
+ 442 000a 8179     		ldrb	r1, [r0, #6]	@ zero_extendqisi2
+ 227:AS7262.c      ****     I2C_AS7262_Write( AS726x_REG_LED, led_control_reg );
+ 443              		.loc 1 227 0
+ 444 000c C379     		ldrb	r3, [r0, #7]	@ zero_extendqisi2
+ 224:AS7262.c      ****                             (as7262_ptr->LED_on << 3) | 
+ 445              		.loc 1 224 0
+ 446 000e 42EA0414 		orr	r4, r2, r4, lsl #4
+ 447 0012 44EA4104 		orr	r4, r4, r1, lsl #1
+ 448 0016 1C43     		orrs	r4, r4, r3
+ 449 0018 E4B2     		uxtb	r4, r4
+ 450              	.LVL52:
+ 228:AS7262.c      ****     as7262_ptr->LED_control_reg_value = led_control_reg;
+ 451              		.loc 1 228 0
+ 452 001a 2146     		mov	r1, r4
+ 453 001c 0720     		movs	r0, #7
+ 454              	.LVL53:
+ 455 001e FFF7FEFF 		bl	I2C_AS7262_Write
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 16
+
+
+ 456              	.LVL54:
+ 229:AS7262.c      ****     return led_control_reg;
+ 457              		.loc 1 229 0
+ 458 0022 6C74     		strb	r4, [r5, #17]
+ 231:AS7262.c      **** 
+ 459              		.loc 1 231 0
+ 460 0024 2046     		mov	r0, r4
+ 461 0026 38BD     		pop	{r3, r4, r5, pc}
+ 462              		.cfi_endproc
+ 463              	.LFE69:
+ 464              		.size	update_LED_reg_value, .-update_LED_reg_value
+ 465              		.section	.text.AS7262_Init,"ax",%progbits
+ 466              		.align	2
+ 467              		.global	AS7262_Init
+ 468              		.thumb
+ 469              		.thumb_func
+ 470              		.type	AS7262_Init, %function
+ 471              	AS7262_Init:
+ 472              	.LFB66:
+ 117:AS7262.c      ****     // get the hardware and firmware data and save it to the struct
+ 473              		.loc 1 117 0
+ 474              		.cfi_startproc
+ 475              		@ args = 0, pretend = 0, frame = 0
+ 476              		@ frame_needed = 0, uses_anonymous_args = 0
+ 477 0000 10B5     		push	{r4, lr}
+ 478              		.cfi_def_cfa_offset 8
+ 479              		.cfi_offset 4, -8
+ 480              		.cfi_offset 14, -4
+ 119:AS7262.c      ****     as7262.device_type = data;
+ 481              		.loc 1 119 0
+ 482 0002 0020     		movs	r0, #0
+ 483 0004 FFF7FEFF 		bl	I2C_AS7262_Read
+ 484              	.LVL55:
+ 120:AS7262.c      ****     data = I2C_AS7262_Read(AS726x_REG_HW_VERSION);
+ 485              		.loc 1 120 0
+ 486 0008 104C     		ldr	r4, .L42
+ 487 000a 2072     		strb	r0, [r4, #8]
+ 121:AS7262.c      ****     as7262.hw_version = data;
+ 488              		.loc 1 121 0
+ 489 000c 0120     		movs	r0, #1
+ 490              	.LVL56:
+ 491 000e FFF7FEFF 		bl	I2C_AS7262_Read
+ 492              	.LVL57:
+ 122:AS7262.c      ****     data = I2C_AS7262_Read(AS726x_REG_FW1_VERSION);
+ 493              		.loc 1 122 0
+ 494 0012 6072     		strb	r0, [r4, #9]
+ 123:AS7262.c      ****     as7262.fw_version = ( data << 8 );
+ 495              		.loc 1 123 0
+ 496 0014 0220     		movs	r0, #2
+ 497              	.LVL58:
+ 498 0016 FFF7FEFF 		bl	I2C_AS7262_Read
+ 499              	.LVL59:
+ 124:AS7262.c      ****     data = I2C_AS7262_Read(AS726x_REG_FW2_VERSION);
+ 500              		.loc 1 124 0
+ 501 001a 0002     		lsls	r0, r0, #8
+ 502              	.LVL60:
+ 503 001c 6081     		strh	r0, [r4, #10]	@ movhi
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 17
+
+
+ 125:AS7262.c      ****     as7262.fw_version += data;
+ 504              		.loc 1 125 0
+ 505 001e 0320     		movs	r0, #3
+ 506 0020 FFF7FEFF 		bl	I2C_AS7262_Read
+ 507              	.LVL61:
+ 126:AS7262.c      ****     
+ 508              		.loc 1 126 0
+ 509 0024 6389     		ldrh	r3, [r4, #10]
+ 510 0026 1844     		add	r0, r0, r3
+ 511              	.LVL62:
+ 512 0028 6081     		strh	r0, [r4, #10]	@ movhi
+ 129:AS7262.c      ****     update_LED_reg_value( &as7262 );
+ 513              		.loc 1 129 0
+ 514 002a 2046     		mov	r0, r4
+ 515 002c FFF7FEFF 		bl	update_control_reg_value
+ 516              	.LVL63:
+ 130:AS7262.c      ****     I2C_AS7262_Write(AS726x_REG_INT, as7262.integration_time);
+ 517              		.loc 1 130 0
+ 518 0030 2046     		mov	r0, r4
+ 519 0032 FFF7FEFF 		bl	update_LED_reg_value
+ 520              	.LVL64:
+ 131:AS7262.c      ****     
+ 521              		.loc 1 131 0
+ 522 0036 E178     		ldrb	r1, [r4, #3]	@ zero_extendqisi2
+ 523 0038 0520     		movs	r0, #5
+ 524 003a FFF7FEFF 		bl	I2C_AS7262_Write
+ 525              	.LVL65:
+ 134:AS7262.c      ****         return true;
+ 526              		.loc 1 134 0
+ 527 003e 237A     		ldrb	r3, [r4, #8]	@ zero_extendqisi2
+ 528 0040 402B     		cmp	r3, #64
+ 529 0042 01D1     		bne	.L40
+ 135:AS7262.c      ****     }
+ 530              		.loc 1 135 0
+ 531 0044 0120     		movs	r0, #1
+ 532 0046 10BD     		pop	{r4, pc}
+ 533              	.L40:
+ 137:AS7262.c      **** }
+ 534              		.loc 1 137 0
+ 535 0048 0020     		movs	r0, #0
+ 138:AS7262.c      **** 
+ 536              		.loc 1 138 0
+ 537 004a 10BD     		pop	{r4, pc}
+ 538              	.L43:
+ 539              		.align	2
+ 540              	.L42:
+ 541 004c 00000000 		.word	.LANCHOR0
+ 542              		.cfi_endproc
+ 543              	.LFE66:
+ 544              		.size	AS7262_Init, .-AS7262_Init
+ 545              		.global	__aeabi_i2d
+ 546              		.global	__aeabi_dmul
+ 547              		.global	__aeabi_d2uiz
+ 548              		.section	.text.AS7262_SingleRead,"ax",%progbits
+ 549              		.align	2
+ 550              		.global	AS7262_SingleRead
+ 551              		.thumb
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 18
+
+
+ 552              		.thumb_func
+ 553              		.type	AS7262_SingleRead, %function
+ 554              	AS7262_SingleRead:
+ 555              	.LFB70:
+ 234:AS7262.c      ****     // send command to run a single shot read
+ 556              		.loc 1 234 0
+ 557              		.cfi_startproc
+ 558              		@ args = 0, pretend = 0, frame = 0
+ 559              		@ frame_needed = 0, uses_anonymous_args = 0
+ 560 0000 38B5     		push	{r3, r4, r5, lr}
+ 561              		.cfi_def_cfa_offset 16
+ 562              		.cfi_offset 3, -16
+ 563              		.cfi_offset 4, -12
+ 564              		.cfi_offset 5, -8
+ 565              		.cfi_offset 14, -4
+ 236:AS7262.c      ****     LCD_Position(0, 0);
+ 566              		.loc 1 236 0
+ 567 0002 0120     		movs	r0, #1
+ 568 0004 FFF7FEFF 		bl	LCD_WriteControl
+ 569              	.LVL66:
+ 237:AS7262.c      ****     LCD_PrintString("SingleRead  ");
+ 570              		.loc 1 237 0
+ 571 0008 0021     		movs	r1, #0
+ 572 000a 0846     		mov	r0, r1
+ 573 000c FFF7FEFF 		bl	LCD_Position
+ 574              	.LVL67:
+ 238:AS7262.c      ****     I2C_AS7262_Write( AS726x_REG_CONTROL, as7262.control_reg_value );
+ 575              		.loc 1 238 0
+ 576 0010 1D48     		ldr	r0, .L48+8
+ 577 0012 FFF7FEFF 		bl	LCD_PrintString
+ 578              	.LVL68:
+ 239:AS7262.c      ****     LCD_Position(0, 0);
+ 579              		.loc 1 239 0
+ 580 0016 1D4C     		ldr	r4, .L48+12
+ 581 0018 217C     		ldrb	r1, [r4, #16]	@ zero_extendqisi2
+ 582 001a 0420     		movs	r0, #4
+ 583 001c FFF7FEFF 		bl	I2C_AS7262_Write
+ 584              	.LVL69:
+ 240:AS7262.c      ****     LCD_PrintString("SingleRead2  ");
+ 585              		.loc 1 240 0
+ 586 0020 0021     		movs	r1, #0
+ 587 0022 0846     		mov	r0, r1
+ 588 0024 FFF7FEFF 		bl	LCD_Position
+ 589              	.LVL70:
+ 241:AS7262.c      ****     
+ 590              		.loc 1 241 0
+ 591 0028 1948     		ldr	r0, .L48+16
+ 592 002a FFF7FEFF 		bl	LCD_PrintString
+ 593              	.LVL71:
+ 243:AS7262.c      ****     uint8 data;
+ 594              		.loc 1 243 0
+ 595 002e E078     		ldrb	r0, [r4, #3]	@ zero_extendqisi2
+ 596 0030 FFF7FEFF 		bl	__aeabi_i2d
+ 597              	.LVL72:
+ 598 0034 12A3     		adr	r3, .L48
+ 599 0036 D3E90023 		ldrd	r2, [r3]
+ 600 003a FFF7FEFF 		bl	__aeabi_dmul
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 19
+
+
+ 601              	.LVL73:
+ 602 003e FFF7FEFF 		bl	__aeabi_d2uiz
+ 603              	.LVL74:
+ 604 0042 FFF7FEFF 		bl	CyDelay
+ 605              	.LVL75:
+ 245:AS7262.c      ****     do {
+ 606              		.loc 1 245 0
+ 607 0046 0024     		movs	r4, #0
+ 608              	.LVL76:
+ 609              	.L46:
+ 247:AS7262.c      ****         data = I2C_AS7262_Read( AS726x_REG_CONTROL );
+ 610              		.loc 1 247 0
+ 611 0048 0120     		movs	r0, #1
+ 612 004a FFF7FEFF 		bl	CyDelay
+ 613              	.LVL77:
+ 248:AS7262.c      ****         failed_tries++;
+ 614              		.loc 1 248 0
+ 615 004e 0420     		movs	r0, #4
+ 616 0050 FFF7FEFF 		bl	I2C_AS7262_Read
+ 617              	.LVL78:
+ 618 0054 0546     		mov	r5, r0
+ 619              	.LVL79:
+ 249:AS7262.c      ****         if ( failed_tries > 200 ) {
+ 620              		.loc 1 249 0
+ 621 0056 0134     		adds	r4, r4, #1
+ 622              	.LVL80:
+ 623 0058 E4B2     		uxtb	r4, r4
+ 624              	.LVL81:
+ 250:AS7262.c      ****             USB_Export_Data((uint8*)"FAILED", 6);
+ 625              		.loc 1 250 0
+ 626 005a C82C     		cmp	r4, #200
+ 627 005c 03D9     		bls	.L45
+ 251:AS7262.c      ****         }
+ 628              		.loc 1 251 0
+ 629 005e 0621     		movs	r1, #6
+ 630 0060 0C48     		ldr	r0, .L48+20
+ 631 0062 FFF7FEFF 		bl	USB_Export_Data
+ 632              	.LVL82:
+ 633              	.L45:
+ 253:AS7262.c      **** //    LCD_Position(1, 0); 
+ 634              		.loc 1 253 0
+ 635 0066 15F0020F 		tst	r5, #2
+ 636 006a EDD1     		bne	.L46
+ 261:AS7262.c      ****     USB_Export_Data(all_calibrated_data.data_bytes, 24);
+ 637              		.loc 1 261 0
+ 638 006c FFF7FEFF 		bl	AS7262_ReadAllData
+ 639              	.LVL83:
+ 262:AS7262.c      **** }
+ 640              		.loc 1 262 0
+ 641 0070 1821     		movs	r1, #24
+ 642 0072 0948     		ldr	r0, .L48+24
+ 643 0074 FFF7FEFF 		bl	USB_Export_Data
+ 644              	.LVL84:
+ 645 0078 38BD     		pop	{r3, r4, r5, pc}
+ 646              	.LVL85:
+ 647              	.L49:
+ 648 007a 00BFAFF3 		.align	3
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 20
+
+
+ 648      0080
+ 649              	.L48:
+ 650 0080 33333333 		.word	858993459
+ 651 0084 33331740 		.word	1075262259
+ 652 0088 28000000 		.word	.LC3
+ 653 008c 00000000 		.word	.LANCHOR0
+ 654 0090 38000000 		.word	.LC4
+ 655 0094 48000000 		.word	.LC5
+ 656 0098 00000000 		.word	all_calibrated_data
+ 657              		.cfi_endproc
+ 658              	.LFE70:
+ 659              		.size	AS7262_SingleRead, .-AS7262_SingleRead
+ 660              		.section	.text.hex_value_from_char,"ax",%progbits
+ 661              		.align	2
+ 662              		.global	hex_value_from_char
+ 663              		.thumb
+ 664              		.thumb_func
+ 665              		.type	hex_value_from_char, %function
+ 666              	hex_value_from_char:
+ 667              	.LFB77:
+ 357:AS7262.c      **** 
+ 358:AS7262.c      **** uint8 convert_hex_string(uint8 array[]) {
+ 359:AS7262.c      ****     uint8 num = hex_value_from_char(array[0]) << 4;
+ 360:AS7262.c      ****     num |= hex_value_from_char(array[1]);
+ 361:AS7262.c      ****     return num;
+ 362:AS7262.c      ****     
+ 363:AS7262.c      **** }
+ 364:AS7262.c      **** 
+ 365:AS7262.c      **** uint8 hex_value_from_char(uint8 _char) {
+ 668              		.loc 1 365 0
+ 669              		.cfi_startproc
+ 670              		@ args = 0, pretend = 0, frame = 0
+ 671              		@ frame_needed = 0, uses_anonymous_args = 0
+ 672              		@ link register save eliminated.
+ 673              	.LVL86:
+ 674 0000 0246     		mov	r2, r0
+ 366:AS7262.c      ****     if ( ('0' <= _char) && (_char <= '9') ) {  // char is between 0-9
+ 675              		.loc 1 366 0
+ 676 0002 A0F13003 		sub	r3, r0, #48
+ 677 0006 D8B2     		uxtb	r0, r3
+ 678              	.LVL87:
+ 679 0008 0928     		cmp	r0, #9
+ 680 000a 12D9     		bls	.L51
+ 367:AS7262.c      ****         return (_char - '0');
+ 368:AS7262.c      ****     }
+ 369:AS7262.c      ****     else if ( ('A' <= _char) && (_char <= 'F') ) {  // char is between A-F
+ 681              		.loc 1 369 0
+ 682 000c A2F14103 		sub	r3, r2, #65
+ 683 0010 DBB2     		uxtb	r3, r3
+ 684 0012 052B     		cmp	r3, #5
+ 685 0014 03D8     		bhi	.L52
+ 370:AS7262.c      ****         return (10 + _char - 'A');
+ 686              		.loc 1 370 0
+ 687 0016 A2F13700 		sub	r0, r2, #55
+ 688 001a C0B2     		uxtb	r0, r0
+ 689 001c 7047     		bx	lr
+ 690              	.L52:
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 21
+
+
+ 371:AS7262.c      ****     }
+ 372:AS7262.c      ****     else if ( ('a' <= _char) && (_char <= 'f') ) {  // char is between a-f
+ 691              		.loc 1 372 0
+ 692 001e A2F16103 		sub	r3, r2, #97
+ 693 0022 DBB2     		uxtb	r3, r3
+ 694 0024 052B     		cmp	r3, #5
+ 695 0026 03D8     		bhi	.L53
+ 373:AS7262.c      ****         return (10 + _char - 'a');
+ 696              		.loc 1 373 0
+ 697 0028 A2F15700 		sub	r0, r2, #87
+ 698 002c C0B2     		uxtb	r0, r0
+ 699 002e 7047     		bx	lr
+ 700              	.L53:
+ 374:AS7262.c      ****     }
+ 375:AS7262.c      ****     return 0;
+ 701              		.loc 1 375 0
+ 702 0030 0020     		movs	r0, #0
+ 703              	.L51:
+ 376:AS7262.c      **** }
+ 704              		.loc 1 376 0
+ 705 0032 7047     		bx	lr
+ 706              		.cfi_endproc
+ 707              	.LFE77:
+ 708              		.size	hex_value_from_char, .-hex_value_from_char
+ 709              		.section	.text.convert_hex_string,"ax",%progbits
+ 710              		.align	2
+ 711              		.global	convert_hex_string
+ 712              		.thumb
+ 713              		.thumb_func
+ 714              		.type	convert_hex_string, %function
+ 715              	convert_hex_string:
+ 716              	.LFB76:
+ 358:AS7262.c      ****     uint8 num = hex_value_from_char(array[0]) << 4;
+ 717              		.loc 1 358 0
+ 718              		.cfi_startproc
+ 719              		@ args = 0, pretend = 0, frame = 0
+ 720              		@ frame_needed = 0, uses_anonymous_args = 0
+ 721              	.LVL88:
+ 722 0000 38B5     		push	{r3, r4, r5, lr}
+ 723              		.cfi_def_cfa_offset 16
+ 724              		.cfi_offset 3, -16
+ 725              		.cfi_offset 4, -12
+ 726              		.cfi_offset 5, -8
+ 727              		.cfi_offset 14, -4
+ 728 0002 0546     		mov	r5, r0
+ 359:AS7262.c      ****     num |= hex_value_from_char(array[1]);
+ 729              		.loc 1 359 0
+ 730 0004 0078     		ldrb	r0, [r0]	@ zero_extendqisi2
+ 731              	.LVL89:
+ 732 0006 FFF7FEFF 		bl	hex_value_from_char
+ 733              	.LVL90:
+ 734 000a 0001     		lsls	r0, r0, #4
+ 735 000c C4B2     		uxtb	r4, r0
+ 736              	.LVL91:
+ 360:AS7262.c      ****     return num;
+ 737              		.loc 1 360 0
+ 738 000e 6878     		ldrb	r0, [r5, #1]	@ zero_extendqisi2
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 22
+
+
+ 739 0010 FFF7FEFF 		bl	hex_value_from_char
+ 740              	.LVL92:
+ 741 0014 2043     		orrs	r0, r0, r4
+ 742              	.LVL93:
+ 363:AS7262.c      **** 
+ 743              		.loc 1 363 0
+ 744 0016 C0B2     		uxtb	r0, r0
+ 745 0018 38BD     		pop	{r3, r4, r5, pc}
+ 746              		.cfi_endproc
+ 747              	.LFE76:
+ 748              		.size	convert_hex_string, .-convert_hex_string
+ 749 001a 00BF     		.section	.text.ConvertDecimal,"ax",%progbits
+ 750              		.align	2
+ 751              		.global	ConvertDecimal
+ 752              		.thumb
+ 753              		.thumb_func
+ 754              		.type	ConvertDecimal, %function
+ 755              	ConvertDecimal:
+ 756              	.LFB78:
+ 377:AS7262.c      **** 
+ 378:AS7262.c      **** uint16 ConvertDecimal(uint8 array[], uint8 len) {
+ 757              		.loc 1 378 0
+ 758              		.cfi_startproc
+ 759              		@ args = 0, pretend = 0, frame = 0
+ 760              		@ frame_needed = 0, uses_anonymous_args = 0
+ 761              		@ link register save eliminated.
+ 762              	.LVL94:
+ 763 0000 30B4     		push	{r4, r5}
+ 764              		.cfi_def_cfa_offset 8
+ 765              		.cfi_offset 4, -8
+ 766              		.cfi_offset 5, -4
+ 767              	.LVL95:
+ 768              	.LBB4:
+ 379:AS7262.c      ****     uint16 num = 0;
+ 380:AS7262.c      ****     for (int i = 0; i < len; i++){
+ 769              		.loc 1 380 0
+ 770 0002 0024     		movs	r4, #0
+ 771              	.LBE4:
+ 379:AS7262.c      ****     uint16 num = 0;
+ 772              		.loc 1 379 0
+ 773 0004 2346     		mov	r3, r4
+ 774              	.LBB5:
+ 775              		.loc 1 380 0
+ 776 0006 08E0     		b	.L57
+ 777              	.LVL96:
+ 778              	.L58:
+ 381:AS7262.c      ****         num = num * 10 + (array[i] - '0');
+ 779              		.loc 1 381 0 discriminator 3
+ 780 0008 025D     		ldrb	r2, [r0, r4]	@ zero_extendqisi2
+ 781 000a 03EB8303 		add	r3, r3, r3, lsl #2
+ 782              	.LVL97:
+ 783 000e 5D00     		lsls	r5, r3, #1
+ 784 0010 AB18     		adds	r3, r5, r2
+ 785 0012 9BB2     		uxth	r3, r3
+ 786 0014 303B     		subs	r3, r3, #48
+ 787 0016 9BB2     		uxth	r3, r3
+ 788              	.LVL98:
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 23
+
+
+ 380:AS7262.c      ****         num = num * 10 + (array[i] - '0');
+ 789              		.loc 1 380 0 discriminator 3
+ 790 0018 0134     		adds	r4, r4, #1
+ 791              	.LVL99:
+ 792              	.L57:
+ 380:AS7262.c      ****         num = num * 10 + (array[i] - '0');
+ 793              		.loc 1 380 0 is_stmt 0 discriminator 1
+ 794 001a 8C42     		cmp	r4, r1
+ 795 001c F4DB     		blt	.L58
+ 796              	.LBE5:
+ 382:AS7262.c      ****     }
+ 383:AS7262.c      ****     return num;
+ 384:AS7262.c      **** }
+ 797              		.loc 1 384 0 is_stmt 1
+ 798 001e 1846     		mov	r0, r3
+ 799              	.LVL100:
+ 800 0020 30BC     		pop	{r4, r5}
+ 801              		.cfi_restore 5
+ 802              		.cfi_restore 4
+ 803              		.cfi_def_cfa_offset 0
+ 804              	.LVL101:
+ 805 0022 7047     		bx	lr
+ 806              		.cfi_endproc
+ 807              	.LFE78:
+ 808              		.size	ConvertDecimal, .-ConvertDecimal
+ 809              		.section	.text.AS7262_Commands,"ax",%progbits
+ 810              		.align	2
+ 811              		.global	AS7262_Commands
+ 812              		.thumb
+ 813              		.thumb_func
+ 814              		.type	AS7262_Commands, %function
+ 815              	AS7262_Commands:
+ 816              	.LFB67:
+ 155:AS7262.c      ****     switch ( buffer[7] ) {
+ 817              		.loc 1 155 0
+ 818              		.cfi_startproc
+ 819              		@ args = 0, pretend = 0, frame = 0
+ 820              		@ frame_needed = 0, uses_anonymous_args = 0
+ 821              	.LVL102:
+ 822 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+ 823              		.cfi_def_cfa_offset 24
+ 824              		.cfi_offset 4, -24
+ 825              		.cfi_offset 5, -20
+ 826              		.cfi_offset 6, -16
+ 827              		.cfi_offset 7, -12
+ 828              		.cfi_offset 8, -8
+ 829              		.cfi_offset 14, -4
+ 830 0004 0446     		mov	r4, r0
+ 156:AS7262.c      ****         case READ_COMMANDS: ;  // a command to read 'READ' data is given, or register commands 'REG
+ 831              		.loc 1 156 0
+ 832 0006 C379     		ldrb	r3, [r0, #7]	@ zero_extendqisi2
+ 833 0008 473B     		subs	r3, r3, #71
+ 834 000a 0B2B     		cmp	r3, #11
+ 835 000c 00F29F80 		bhi	.L60
+ 836 0010 DFE803F0 		tbb	[pc, r3]
+ 837              	.L63:
+ 838 0014 70       		.byte	(.L62-.L63)/2
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 24
+
+
+ 839 0015 9D       		.byte	(.L60-.L63)/2
+ 840 0016 64       		.byte	(.L64-.L63)/2
+ 841 0017 9D       		.byte	(.L60-.L63)/2
+ 842 0018 9D       		.byte	(.L60-.L63)/2
+ 843 0019 8A       		.byte	(.L65-.L63)/2
+ 844 001a 9D       		.byte	(.L60-.L63)/2
+ 845 001b 9D       		.byte	(.L60-.L63)/2
+ 846 001c 9D       		.byte	(.L60-.L63)/2
+ 847 001d 7D       		.byte	(.L66-.L63)/2
+ 848 001e 9D       		.byte	(.L60-.L63)/2
+ 849 001f 06       		.byte	(.L67-.L63)/2
+ 850              		.p2align 1
+ 851              	.L67:
+ 852              	.LBB6:
+ 158:AS7262.c      ****                 if ( buffer[11] == 'W' ) {  // Write a register value
+ 853              		.loc 1 158 0
+ 854 0020 437A     		ldrb	r3, [r0, #9]	@ zero_extendqisi2
+ 855 0022 472B     		cmp	r3, #71
+ 856 0024 4CD1     		bne	.L68
+ 159:AS7262.c      ****                     uint8 reg_to_write = convert_hex_string(&buffer[19]);
+ 857              		.loc 1 159 0
+ 858 0026 C37A     		ldrb	r3, [r0, #11]	@ zero_extendqisi2
+ 859 0028 572B     		cmp	r3, #87
+ 860 002a 28D1     		bne	.L69
+ 861              	.LBB7:
+ 160:AS7262.c      ****                     uint8 value_to_write = convert_hex_string(&buffer[24]);
+ 862              		.loc 1 160 0
+ 863 002c 1330     		adds	r0, r0, #19
+ 864              	.LVL103:
+ 865 002e FFF7FEFF 		bl	convert_hex_string
+ 866              	.LVL104:
+ 867 0032 0646     		mov	r6, r0
+ 868              	.LVL105:
+ 161:AS7262.c      ****                     I2C_AS7262_Write(reg_to_write, value_to_write);
+ 869              		.loc 1 161 0
+ 870 0034 04F11800 		add	r0, r4, #24
+ 871 0038 FFF7FEFF 		bl	convert_hex_string
+ 872              	.LVL106:
+ 873 003c 0746     		mov	r7, r0
+ 874              	.LVL107:
+ 162:AS7262.c      ****                     LCD_Position(0, 0); 
+ 875              		.loc 1 162 0
+ 876 003e 0146     		mov	r1, r0
+ 877 0040 3046     		mov	r0, r6
+ 878              	.LVL108:
+ 879 0042 FFF7FEFF 		bl	I2C_AS7262_Write
+ 880              	.LVL109:
+ 163:AS7262.c      ****                     sprintf(LCD_str, "R:0x%02x|v:0x%02x  ", reg_to_write, value_to_write);
+ 881              		.loc 1 163 0
+ 882 0046 0021     		movs	r1, #0
+ 883 0048 0846     		mov	r0, r1
+ 884 004a FFF7FEFF 		bl	LCD_Position
+ 885              	.LVL110:
+ 164:AS7262.c      ****                     LCD_PrintString(LCD_str);
+ 886              		.loc 1 164 0
+ 887 004e 414D     		ldr	r5, .L75
+ 888 0050 3B46     		mov	r3, r7
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 25
+
+
+ 889 0052 3246     		mov	r2, r6
+ 890 0054 4049     		ldr	r1, .L75+4
+ 891 0056 2846     		mov	r0, r5
+ 892 0058 FFF7FEFF 		bl	sprintf
+ 893              	.LVL111:
+ 165:AS7262.c      ****                     LCD_Position(1, 0); 
+ 894              		.loc 1 165 0
+ 895 005c 2846     		mov	r0, r5
+ 896 005e FFF7FEFF 		bl	LCD_PrintString
+ 897              	.LVL112:
+ 166:AS7262.c      ****                     sprintf(LCD_str, "B:%c|v:%c  ", buffer[24], buffer[25]);
+ 898              		.loc 1 166 0
+ 899 0062 0021     		movs	r1, #0
+ 900 0064 0120     		movs	r0, #1
+ 901 0066 FFF7FEFF 		bl	LCD_Position
+ 902              	.LVL113:
+ 167:AS7262.c      ****                     LCD_PrintString(LCD_str);
+ 903              		.loc 1 167 0
+ 904 006a 637E     		ldrb	r3, [r4, #25]	@ zero_extendqisi2
+ 905 006c 227E     		ldrb	r2, [r4, #24]	@ zero_extendqisi2
+ 906 006e 3B49     		ldr	r1, .L75+8
+ 907 0070 2846     		mov	r0, r5
+ 908 0072 FFF7FEFF 		bl	sprintf
+ 909              	.LVL114:
+ 168:AS7262.c      ****                     
+ 910              		.loc 1 168 0
+ 911 0076 2846     		mov	r0, r5
+ 912 0078 FFF7FEFF 		bl	LCD_PrintString
+ 913              	.LVL115:
+ 914              	.LBE7:
+ 915 007c 20E0     		b	.L68
+ 916              	.LVL116:
+ 917              	.L69:
+ 171:AS7262.c      ****                     uint8 reg_to_read = convert_hex_string(&buffer[18]);
+ 918              		.loc 1 171 0
+ 919 007e 522B     		cmp	r3, #82
+ 920 0080 1ED1     		bne	.L68
+ 921              	.LBB8:
+ 172:AS7262.c      ****                     uint8 reg_value = I2C_AS7262_Read(reg_to_read);
+ 922              		.loc 1 172 0
+ 923 0082 1230     		adds	r0, r0, #18
+ 924              	.LVL117:
+ 925 0084 FFF7FEFF 		bl	convert_hex_string
+ 926              	.LVL118:
+ 927 0088 8046     		mov	r8, r0
+ 928              	.LVL119:
+ 173:AS7262.c      ****                     sprintf(USB_str, "REG_VALUE|0x%02X", reg_value);
+ 929              		.loc 1 173 0
+ 930 008a FFF7FEFF 		bl	I2C_AS7262_Read
+ 931              	.LVL120:
+ 932 008e 0746     		mov	r7, r0
+ 933              	.LVL121:
+ 174:AS7262.c      ****                     LCD_Position(0, 0); 
+ 934              		.loc 1 174 0
+ 935 0090 334D     		ldr	r5, .L75+12
+ 936 0092 0246     		mov	r2, r0
+ 937 0094 3349     		ldr	r1, .L75+16
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 26
+
+
+ 938 0096 2846     		mov	r0, r5
+ 939              	.LVL122:
+ 940 0098 FFF7FEFF 		bl	sprintf
+ 941              	.LVL123:
+ 175:AS7262.c      ****                     sprintf(LCD_str, "RegR:0x%02x|v:0x%02x  ", reg_to_read, reg_value);
+ 942              		.loc 1 175 0
+ 943 009c 0021     		movs	r1, #0
+ 944 009e 0846     		mov	r0, r1
+ 945 00a0 FFF7FEFF 		bl	LCD_Position
+ 946              	.LVL124:
+ 176:AS7262.c      ****                     // sprintf(LCD_str, "RegR:0x%d|v:0x%d  ", buffer[18], buffer[19]);
+ 947              		.loc 1 176 0
+ 948 00a4 2B4E     		ldr	r6, .L75
+ 949 00a6 3B46     		mov	r3, r7
+ 950 00a8 4246     		mov	r2, r8
+ 951 00aa 2F49     		ldr	r1, .L75+20
+ 952 00ac 3046     		mov	r0, r6
+ 953 00ae FFF7FEFF 		bl	sprintf
+ 954              	.LVL125:
+ 178:AS7262.c      ****                     USB_Export_Data((uint8*)USB_str, 14);
+ 955              		.loc 1 178 0
+ 956 00b2 3046     		mov	r0, r6
+ 957 00b4 FFF7FEFF 		bl	LCD_PrintString
+ 958              	.LVL126:
+ 179:AS7262.c      ****                 }
+ 959              		.loc 1 179 0
+ 960 00b8 0E21     		movs	r1, #14
+ 961 00ba 2846     		mov	r0, r5
+ 962 00bc FFF7FEFF 		bl	USB_Export_Data
+ 963              	.LVL127:
+ 964              	.L68:
+ 965              	.LBE8:
+ 182:AS7262.c      ****                 LCD_Position(0, 0);
+ 966              		.loc 1 182 0
+ 967 00c0 237B     		ldrb	r3, [r4, #12]	@ zero_extendqisi2
+ 968 00c2 532B     		cmp	r3, #83
+ 969 00c4 43D1     		bne	.L60
+ 183:AS7262.c      ****                 LCD_PrintString("Single Read");
+ 970              		.loc 1 183 0
+ 971 00c6 0021     		movs	r1, #0
+ 972 00c8 0846     		mov	r0, r1
+ 973 00ca FFF7FEFF 		bl	LCD_Position
+ 974              	.LVL128:
+ 184:AS7262.c      ****                 AS7262_SingleRead();
+ 975              		.loc 1 184 0
+ 976 00ce 2748     		ldr	r0, .L75+24
+ 977 00d0 FFF7FEFF 		bl	LCD_PrintString
+ 978              	.LVL129:
+ 185:AS7262.c      ****             }
+ 979              		.loc 1 185 0
+ 980 00d4 FFF7FEFF 		bl	AS7262_SingleRead
+ 981              	.LVL130:
+ 982 00d8 BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 983              	.LVL131:
+ 984              	.L64:
+ 189:AS7262.c      ****             as7262.integration_time = new_integration_time;
+ 985              		.loc 1 189 0
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 27
+
+
+ 986 00dc 0321     		movs	r1, #3
+ 987 00de 1630     		adds	r0, r0, #22
+ 988              	.LVL132:
+ 989 00e0 FFF7FEFF 		bl	ConvertDecimal
+ 990              	.LVL133:
+ 991 00e4 C1B2     		uxtb	r1, r0
+ 992              	.LVL134:
+ 190:AS7262.c      ****             I2C_AS7262_Write( AS726x_REG_INT, as7262.integration_time );
+ 993              		.loc 1 190 0
+ 994 00e6 224B     		ldr	r3, .L75+28
+ 995 00e8 D970     		strb	r1, [r3, #3]
+ 191:AS7262.c      ****             break;
+ 996              		.loc 1 191 0
+ 997 00ea 0520     		movs	r0, #5
+ 998 00ec FFF7FEFF 		bl	I2C_AS7262_Write
+ 999              	.LVL135:
+ 192:AS7262.c      ****             
+ 1000              		.loc 1 192 0
+ 1001 00f0 BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 1002              	.LVL136:
+ 1003              	.L62:
+ 195:AS7262.c      ****             update_control_reg_value( &as7262 );
+ 1004              		.loc 1 195 0
+ 1005 00f4 0121     		movs	r1, #1
+ 1006 00f6 0C30     		adds	r0, r0, #12
+ 1007              	.LVL137:
+ 1008 00f8 FFF7FEFF 		bl	ConvertDecimal
+ 1009              	.LVL138:
+ 1010 00fc 1C4B     		ldr	r3, .L75+28
+ 1011 00fe 00F00300 		and	r0, r0, #3
+ 1012 0102 5870     		strb	r0, [r3, #1]
+ 196:AS7262.c      ****             break;
+ 1013              		.loc 1 196 0
+ 1014 0104 1846     		mov	r0, r3
+ 1015 0106 FFF7FEFF 		bl	update_control_reg_value
+ 1016              	.LVL139:
+ 197:AS7262.c      ****         case SET_LED_POWER: ; // set the current through the main light source
+ 1017              		.loc 1 197 0
+ 1018 010a BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 1019              	.LVL140:
+ 1020              	.L66:
+ 199:AS7262.c      ****             update_LED_reg_value( &as7262 );
+ 1021              		.loc 1 199 0
+ 1022 010e 0121     		movs	r1, #1
+ 1023 0110 1330     		adds	r0, r0, #19
+ 1024              	.LVL141:
+ 1025 0112 FFF7FEFF 		bl	ConvertDecimal
+ 1026              	.LVL142:
+ 1027 0116 164B     		ldr	r3, .L75+28
+ 1028 0118 00F00300 		and	r0, r0, #3
+ 1029 011c 1871     		strb	r0, [r3, #4]
+ 200:AS7262.c      ****             break;
+ 1030              		.loc 1 200 0
+ 1031 011e 1846     		mov	r0, r3
+ 1032 0120 FFF7FEFF 		bl	update_LED_reg_value
+ 1033              	.LVL143:
+ 201:AS7262.c      ****         case LED_ON_OFF: ;  //  set if the LED should be on or off
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 28
+
+
+ 1034              		.loc 1 201 0
+ 1035 0124 BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 1036              	.LVL144:
+ 1037              	.L65:
+ 203:AS7262.c      ****                 as7262.LED_on = True;
+ 1038              		.loc 1 203 0
+ 1039 0128 437C     		ldrb	r3, [r0, #17]	@ zero_extendqisi2
+ 1040 012a 4E2B     		cmp	r3, #78
+ 1041 012c 01D0     		beq	.L70
+ 203:AS7262.c      ****                 as7262.LED_on = True;
+ 1042              		.loc 1 203 0 is_stmt 0 discriminator 1
+ 1043 012e 6E2B     		cmp	r3, #110
+ 1044 0130 03D1     		bne	.L71
+ 1045              	.L70:
+ 204:AS7262.c      ****             }
+ 1046              		.loc 1 204 0 is_stmt 1
+ 1047 0132 0122     		movs	r2, #1
+ 1048 0134 0E4B     		ldr	r3, .L75+28
+ 1049 0136 5A71     		strb	r2, [r3, #5]
+ 1050 0138 06E0     		b	.L72
+ 1051              	.L71:
+ 206:AS7262.c      ****                 as7262.LED_on = False;
+ 1052              		.loc 1 206 0
+ 1053 013a 462B     		cmp	r3, #70
+ 1054 013c 01D0     		beq	.L73
+ 206:AS7262.c      ****                 as7262.LED_on = False;
+ 1055              		.loc 1 206 0 is_stmt 0 discriminator 1
+ 1056 013e 662B     		cmp	r3, #102
+ 1057 0140 02D1     		bne	.L72
+ 1058              	.L73:
+ 207:AS7262.c      ****             }
+ 1059              		.loc 1 207 0 is_stmt 1
+ 1060 0142 0022     		movs	r2, #0
+ 1061 0144 0A4B     		ldr	r3, .L75+28
+ 1062 0146 5A71     		strb	r2, [r3, #5]
+ 1063              	.L72:
+ 209:AS7262.c      ****             break;
+ 1064              		.loc 1 209 0
+ 1065 0148 0948     		ldr	r0, .L75+28
+ 1066              	.LVL145:
+ 1067 014a FFF7FEFF 		bl	update_LED_reg_value
+ 1068              	.LVL146:
+ 1069              	.L60:
+ 1070 014e BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 1071              	.LVL147:
+ 1072              	.L76:
+ 1073 0152 00BF     		.align	2
+ 1074              	.L75:
+ 1075 0154 00000000 		.word	LCD_str
+ 1076 0158 50000000 		.word	.LC6
+ 1077 015c 64000000 		.word	.LC7
+ 1078 0160 00000000 		.word	USB_str
+ 1079 0164 70000000 		.word	.LC8
+ 1080 0168 84000000 		.word	.LC9
+ 1081 016c 9C000000 		.word	.LC10
+ 1082 0170 00000000 		.word	.LANCHOR0
+ 1083              	.LBE6:
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 29
+
+
+ 1084              		.cfi_endproc
+ 1085              	.LFE67:
+ 1086              		.size	AS7262_Commands, .-AS7262_Commands
+ 1087              		.comm	color_data,24,4
+ 1088              		.comm	all_calibrated_data,24,4
+ 1089              		.global	as7262
+ 1090              		.comm	write_buffer,2,4
+ 1091              		.comm	read_buffer,24,4
+ 1092              		.comm	USB_str,40,4
+ 1093              		.comm	OUT_Data_Buffer,40,4
+ 1094              		.data
+ 1095              		.align	2
+ 1096              		.set	.LANCHOR0,. + 0
+ 1097              		.type	as7262, %object
+ 1098              		.size	as7262, 20
+ 1099              	as7262:
+ 1100 0000 03       		.byte	3
+ 1101 0001 00       		.byte	0
+ 1102 0002 01       		.byte	1
+ 1103 0003 FF       		.byte	-1
+ 1104 0004 00       		.byte	0
+ 1105 0005 00       		.byte	0
+ 1106 0006 02       		.byte	2
+ 1107 0007 00       		.byte	0
+ 1108 0008 00000000 		.space	12
+ 1108      00000000 
+ 1108      00000000 
+ 1109              		.section	.rodata.str1.4,"aMS",%progbits,1
+ 1110              		.align	2
+ 1111              	.LC0:
+ 1112 0000 53696E67 		.ascii	"SingleRead3a \000"
+ 1112      6C655265 
+ 1112      61643361 
+ 1112      2000
+ 1113 000e 0000     		.space	2
+ 1114              	.LC1:
+ 1115 0010 53696E67 		.ascii	"SingleRead3b \000"
+ 1115      6C655265 
+ 1115      61643362 
+ 1115      2000
+ 1116 001e 0000     		.space	2
+ 1117              	.LC2:
+ 1118 0020 64656275 		.ascii	"debug1 \000"
+ 1118      67312000 
+ 1119              	.LC3:
+ 1120 0028 53696E67 		.ascii	"SingleRead  \000"
+ 1120      6C655265 
+ 1120      61642020 
+ 1120      00
+ 1121 0035 000000   		.space	3
+ 1122              	.LC4:
+ 1123 0038 53696E67 		.ascii	"SingleRead2  \000"
+ 1123      6C655265 
+ 1123      61643220 
+ 1123      2000
+ 1124 0046 0000     		.space	2
+ 1125              	.LC5:
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 30
+
+
+ 1126 0048 4641494C 		.ascii	"FAILED\000"
+ 1126      454400
+ 1127 004f 00       		.space	1
+ 1128              	.LC6:
+ 1129 0050 523A3078 		.ascii	"R:0x%02x|v:0x%02x  \000"
+ 1129      25303278 
+ 1129      7C763A30 
+ 1129      78253032 
+ 1129      78202000 
+ 1130              	.LC7:
+ 1131 0064 423A2563 		.ascii	"B:%c|v:%c  \000"
+ 1131      7C763A25 
+ 1131      63202000 
+ 1132              	.LC8:
+ 1133 0070 5245475F 		.ascii	"REG_VALUE|0x%02X\000"
+ 1133      56414C55 
+ 1133      457C3078 
+ 1133      25303258 
+ 1133      00
+ 1134 0081 000000   		.space	3
+ 1135              	.LC9:
+ 1136 0084 52656752 		.ascii	"RegR:0x%02x|v:0x%02x  \000"
+ 1136      3A307825 
+ 1136      3032787C 
+ 1136      763A3078 
+ 1136      25303278 
+ 1137 009b 00       		.space	1
+ 1138              	.LC10:
+ 1139 009c 53696E67 		.ascii	"Single Read\000"
+ 1139      6C652052 
+ 1139      65616400 
+ 1140              		.text
+ 1141              	.Letext0:
+ 1142              		.file 2 "c:\\program files (x86)\\cypress\\psoc creator\\4.2\\psoc creator\\import\\gnu\\arm\\5.4.
+ 1143              		.file 3 "c:\\program files (x86)\\cypress\\psoc creator\\4.2\\psoc creator\\import\\gnu\\arm\\5.4.
+ 1144              		.file 4 "Generated_Source\\PSoC5/cytypes.h"
+ 1145              		.file 5 "AS7262.h"
+ 1146              		.file 6 "Generated_Source\\PSoC5/core_cm3.h"
+ 1147              		.file 7 "usb_functions.h"
+ 1148              		.file 8 "Generated_Source\\PSoC5/LED_4.h"
+ 1149              		.file 9 "Generated_Source\\PSoC5/LCD.h"
+ 1150              		.file 10 "Generated_Source\\PSoC5/AS7262_INT.h"
+ 1151              		.file 11 "Generated_Source\\PSoC5/LED_3.h"
+ 1152              		.file 12 "i2c_functions.h"
+ 1153              		.file 13 "Generated_Source\\PSoC5/CyLib.h"
+ 1154              		.file 14 "c:\\program files (x86)\\cypress\\psoc creator\\4.2\\psoc creator\\import\\gnu\\arm\\5.4
+ 1155              		.section	.debug_info,"",%progbits
+ 1156              	.Ldebug_info0:
+ 1157 0000 A80C0000 		.4byte	0xca8
+ 1158 0004 0400     		.2byte	0x4
+ 1159 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 1160 000a 04       		.byte	0x4
+ 1161 000b 01       		.uleb128 0x1
+ 1162 000c 93040000 		.4byte	.LASF87
+ 1163 0010 0C       		.byte	0xc
+ 1164 0011 2B000000 		.4byte	.LASF88
+ 1165 0015 98010000 		.4byte	.LASF89
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 31
+
+
+ 1166 0019 18000000 		.4byte	.Ldebug_ranges0+0x18
+ 1167 001d 00000000 		.4byte	0
+ 1168 0021 00000000 		.4byte	.Ldebug_line0
+ 1169 0025 02       		.uleb128 0x2
+ 1170 0026 01       		.byte	0x1
+ 1171 0027 06       		.byte	0x6
+ 1172 0028 60020000 		.4byte	.LASF0
+ 1173 002c 02       		.uleb128 0x2
+ 1174 002d 01       		.byte	0x1
+ 1175 002e 08       		.byte	0x8
+ 1176 002f 38020000 		.4byte	.LASF1
+ 1177 0033 02       		.uleb128 0x2
+ 1178 0034 02       		.byte	0x2
+ 1179 0035 05       		.byte	0x5
+ 1180 0036 1C010000 		.4byte	.LASF2
+ 1181 003a 02       		.uleb128 0x2
+ 1182 003b 02       		.byte	0x2
+ 1183 003c 07       		.byte	0x7
+ 1184 003d F2020000 		.4byte	.LASF3
+ 1185 0041 03       		.uleb128 0x3
+ 1186 0042 E9030000 		.4byte	.LASF9
+ 1187 0046 02       		.byte	0x2
+ 1188 0047 3F       		.byte	0x3f
+ 1189 0048 4C000000 		.4byte	0x4c
+ 1190 004c 02       		.uleb128 0x2
+ 1191 004d 04       		.byte	0x4
+ 1192 004e 05       		.byte	0x5
+ 1193 004f 83010000 		.4byte	.LASF4
+ 1194 0053 02       		.uleb128 0x2
+ 1195 0054 04       		.byte	0x4
+ 1196 0055 07       		.byte	0x7
+ 1197 0056 86030000 		.4byte	.LASF5
+ 1198 005a 02       		.uleb128 0x2
+ 1199 005b 08       		.byte	0x8
+ 1200 005c 05       		.byte	0x5
+ 1201 005d 3E010000 		.4byte	.LASF6
+ 1202 0061 02       		.uleb128 0x2
+ 1203 0062 08       		.byte	0x8
+ 1204 0063 07       		.byte	0x7
+ 1205 0064 6C020000 		.4byte	.LASF7
+ 1206 0068 04       		.uleb128 0x4
+ 1207 0069 04       		.byte	0x4
+ 1208 006a 05       		.byte	0x5
+ 1209 006b 696E7400 		.ascii	"int\000"
+ 1210 006f 02       		.uleb128 0x2
+ 1211 0070 04       		.byte	0x4
+ 1212 0071 07       		.byte	0x7
+ 1213 0072 83020000 		.4byte	.LASF8
+ 1214 0076 03       		.uleb128 0x3
+ 1215 0077 1C030000 		.4byte	.LASF10
+ 1216 007b 03       		.byte	0x3
+ 1217 007c 2C       		.byte	0x2c
+ 1218 007d 41000000 		.4byte	0x41
+ 1219 0081 05       		.uleb128 0x5
+ 1220 0082 FB000000 		.4byte	.LASF11
+ 1221 0086 04       		.byte	0x4
+ 1222 0087 9201     		.2byte	0x192
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 32
+
+
+ 1223 0089 2C000000 		.4byte	0x2c
+ 1224 008d 05       		.uleb128 0x5
+ 1225 008e DE000000 		.4byte	.LASF12
+ 1226 0092 04       		.byte	0x4
+ 1227 0093 9301     		.2byte	0x193
+ 1228 0095 3A000000 		.4byte	0x3a
+ 1229 0099 05       		.uleb128 0x5
+ 1230 009a 17000000 		.4byte	.LASF13
+ 1231 009e 04       		.byte	0x4
+ 1232 009f 9801     		.2byte	0x198
+ 1233 00a1 A5000000 		.4byte	0xa5
+ 1234 00a5 02       		.uleb128 0x2
+ 1235 00a6 04       		.byte	0x4
+ 1236 00a7 04       		.byte	0x4
+ 1237 00a8 26010000 		.4byte	.LASF14
+ 1238 00ac 02       		.uleb128 0x2
+ 1239 00ad 08       		.byte	0x8
+ 1240 00ae 04       		.byte	0x4
+ 1241 00af 56040000 		.4byte	.LASF15
+ 1242 00b3 02       		.uleb128 0x2
+ 1243 00b4 01       		.byte	0x1
+ 1244 00b5 08       		.byte	0x8
+ 1245 00b6 7E010000 		.4byte	.LASF16
+ 1246 00ba 02       		.uleb128 0x2
+ 1247 00bb 08       		.byte	0x8
+ 1248 00bc 04       		.byte	0x4
+ 1249 00bd 23020000 		.4byte	.LASF17
+ 1250 00c1 02       		.uleb128 0x2
+ 1251 00c2 04       		.byte	0x4
+ 1252 00c3 07       		.byte	0x7
+ 1253 00c4 5D000000 		.4byte	.LASF18
+ 1254 00c8 06       		.uleb128 0x6
+ 1255 00c9 14       		.byte	0x14
+ 1256 00ca 05       		.byte	0x5
+ 1257 00cb 1A       		.byte	0x1a
+ 1258 00cc 79010000 		.4byte	0x179
+ 1259 00d0 07       		.uleb128 0x7
+ 1260 00d1 3D030000 		.4byte	.LASF19
+ 1261 00d5 05       		.byte	0x5
+ 1262 00d6 1B       		.byte	0x1b
+ 1263 00d7 81000000 		.4byte	0x81
+ 1264 00db 00       		.byte	0
+ 1265 00dc 07       		.uleb128 0x7
+ 1266 00dd DD020000 		.4byte	.LASF20
+ 1267 00e1 05       		.byte	0x5
+ 1268 00e2 1C       		.byte	0x1c
+ 1269 00e3 81000000 		.4byte	0x81
+ 1270 00e7 01       		.byte	0x1
+ 1271 00e8 07       		.uleb128 0x7
+ 1272 00e9 50000000 		.4byte	.LASF21
+ 1273 00ed 05       		.byte	0x5
+ 1274 00ee 1D       		.byte	0x1d
+ 1275 00ef 81000000 		.4byte	0x81
+ 1276 00f3 02       		.byte	0x2
+ 1277 00f4 07       		.uleb128 0x7
+ 1278 00f5 59010000 		.4byte	.LASF22
+ 1279 00f9 05       		.byte	0x5
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 33
+
+
+ 1280 00fa 1E       		.byte	0x1e
+ 1281 00fb 81000000 		.4byte	0x81
+ 1282 00ff 03       		.byte	0x3
+ 1283 0100 07       		.uleb128 0x7
+ 1284 0101 6A030000 		.4byte	.LASF23
+ 1285 0105 05       		.byte	0x5
+ 1286 0106 1F       		.byte	0x1f
+ 1287 0107 81000000 		.4byte	0x81
+ 1288 010b 04       		.byte	0x4
+ 1289 010c 07       		.uleb128 0x7
+ 1290 010d D1000000 		.4byte	.LASF24
+ 1291 0111 05       		.byte	0x5
+ 1292 0112 20       		.byte	0x20
+ 1293 0113 81000000 		.4byte	0x81
+ 1294 0117 05       		.byte	0x5
+ 1295 0118 07       		.uleb128 0x7
+ 1296 0119 90020000 		.4byte	.LASF25
+ 1297 011d 05       		.byte	0x5
+ 1298 011e 21       		.byte	0x21
+ 1299 011f 81000000 		.4byte	0x81
+ 1300 0123 06       		.byte	0x6
+ 1301 0124 07       		.uleb128 0x7
+ 1302 0125 C1020000 		.4byte	.LASF26
+ 1303 0129 05       		.byte	0x5
+ 1304 012a 22       		.byte	0x22
+ 1305 012b 81000000 		.4byte	0x81
+ 1306 012f 07       		.byte	0x7
+ 1307 0130 07       		.uleb128 0x7
+ 1308 0131 1F000000 		.4byte	.LASF27
+ 1309 0135 05       		.byte	0x5
+ 1310 0136 23       		.byte	0x23
+ 1311 0137 81000000 		.4byte	0x81
+ 1312 013b 08       		.byte	0x8
+ 1313 013c 07       		.uleb128 0x7
+ 1314 013d A6020000 		.4byte	.LASF28
+ 1315 0141 05       		.byte	0x5
+ 1316 0142 24       		.byte	0x24
+ 1317 0143 81000000 		.4byte	0x81
+ 1318 0147 09       		.byte	0x9
+ 1319 0148 07       		.uleb128 0x7
+ 1320 0149 82000000 		.4byte	.LASF29
+ 1321 014d 05       		.byte	0x5
+ 1322 014e 25       		.byte	0x25
+ 1323 014f 8D000000 		.4byte	0x8d
+ 1324 0153 0A       		.byte	0xa
+ 1325 0154 07       		.uleb128 0x7
+ 1326 0155 11010000 		.4byte	.LASF30
+ 1327 0159 05       		.byte	0x5
+ 1328 015a 26       		.byte	0x26
+ 1329 015b 79010000 		.4byte	0x179
+ 1330 015f 0C       		.byte	0xc
+ 1331 0160 07       		.uleb128 0x7
+ 1332 0161 53050000 		.4byte	.LASF31
+ 1333 0165 05       		.byte	0x5
+ 1334 0166 27       		.byte	0x27
+ 1335 0167 81000000 		.4byte	0x81
+ 1336 016b 10       		.byte	0x10
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 34
+
+
+ 1337 016c 07       		.uleb128 0x7
+ 1338 016d E5000000 		.4byte	.LASF32
+ 1339 0171 05       		.byte	0x5
+ 1340 0172 28       		.byte	0x28
+ 1341 0173 81000000 		.4byte	0x81
+ 1342 0177 11       		.byte	0x11
+ 1343 0178 00       		.byte	0
+ 1344 0179 08       		.uleb128 0x8
+ 1345 017a 04       		.byte	0x4
+ 1346 017b 81000000 		.4byte	0x81
+ 1347 017f 03       		.uleb128 0x3
+ 1348 0180 E2020000 		.4byte	.LASF33
+ 1349 0184 05       		.byte	0x5
+ 1350 0185 29       		.byte	0x29
+ 1351 0186 C8000000 		.4byte	0xc8
+ 1352 018a 09       		.uleb128 0x9
+ 1353 018b 66000000 		.4byte	.LASF90
+ 1354 018f 18       		.byte	0x18
+ 1355 0190 01       		.byte	0x1
+ 1356 0191 46       		.byte	0x46
+ 1357 0192 AD010000 		.4byte	0x1ad
+ 1358 0196 0A       		.uleb128 0xa
+ 1359 0197 29050000 		.4byte	.LASF34
+ 1360 019b 01       		.byte	0x1
+ 1361 019c 47       		.byte	0x47
+ 1362 019d AD010000 		.4byte	0x1ad
+ 1363 01a1 0A       		.uleb128 0xa
+ 1364 01a2 06020000 		.4byte	.LASF35
+ 1365 01a6 01       		.byte	0x1
+ 1366 01a7 48       		.byte	0x48
+ 1367 01a8 BD010000 		.4byte	0x1bd
+ 1368 01ac 00       		.byte	0
+ 1369 01ad 0B       		.uleb128 0xb
+ 1370 01ae 81000000 		.4byte	0x81
+ 1371 01b2 BD010000 		.4byte	0x1bd
+ 1372 01b6 0C       		.uleb128 0xc
+ 1373 01b7 C1000000 		.4byte	0xc1
+ 1374 01bb 17       		.byte	0x17
+ 1375 01bc 00       		.byte	0
+ 1376 01bd 0B       		.uleb128 0xb
+ 1377 01be 99000000 		.4byte	0x99
+ 1378 01c2 CD010000 		.4byte	0x1cd
+ 1379 01c6 0C       		.uleb128 0xc
+ 1380 01c7 C1000000 		.4byte	0xc1
+ 1381 01cb 05       		.byte	0x5
+ 1382 01cc 00       		.byte	0
+ 1383 01cd 0D       		.uleb128 0xd
+ 1384 01ce BE030000 		.4byte	.LASF36
+ 1385 01d2 01       		.byte	0x1
+ 1386 01d3 51       		.byte	0x51
+ 1387 01d4 00000000 		.4byte	.LFB64
+ 1388 01d8 34000000 		.4byte	.LFE64-.LFB64
+ 1389 01dc 01       		.uleb128 0x1
+ 1390 01dd 9C       		.byte	0x9c
+ 1391 01de 59020000 		.4byte	0x259
+ 1392 01e2 0E       		.uleb128 0xe
+ 1393 01e3 08000000 		.4byte	.LVL0
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 35
+
+
+ 1394 01e7 320C0000 		.4byte	0xc32
+ 1395 01eb F5010000 		.4byte	0x1f5
+ 1396 01ef 0F       		.uleb128 0xf
+ 1397 01f0 01       		.uleb128 0x1
+ 1398 01f1 50       		.byte	0x50
+ 1399 01f2 01       		.uleb128 0x1
+ 1400 01f3 30       		.byte	0x30
+ 1401 01f4 00       		.byte	0
+ 1402 01f5 0E       		.uleb128 0xe
+ 1403 01f6 10000000 		.4byte	.LVL1
+ 1404 01fa 3D0C0000 		.4byte	0xc3d
+ 1405 01fe 0D020000 		.4byte	0x20d
+ 1406 0202 0F       		.uleb128 0xf
+ 1407 0203 01       		.uleb128 0x1
+ 1408 0204 50       		.byte	0x50
+ 1409 0205 01       		.uleb128 0x1
+ 1410 0206 31       		.byte	0x31
+ 1411 0207 0F       		.uleb128 0xf
+ 1412 0208 01       		.uleb128 0x1
+ 1413 0209 51       		.byte	0x51
+ 1414 020a 01       		.uleb128 0x1
+ 1415 020b 30       		.byte	0x30
+ 1416 020c 00       		.byte	0
+ 1417 020d 0E       		.uleb128 0xe
+ 1418 020e 16000000 		.4byte	.LVL2
+ 1419 0212 480C0000 		.4byte	0xc48
+ 1420 0216 24020000 		.4byte	0x224
+ 1421 021a 0F       		.uleb128 0xf
+ 1422 021b 01       		.uleb128 0x1
+ 1423 021c 50       		.byte	0x50
+ 1424 021d 05       		.uleb128 0x5
+ 1425 021e 03       		.byte	0x3
+ 1426 021f 00000000 		.4byte	.LC0
+ 1427 0223 00       		.byte	0
+ 1428 0224 10       		.uleb128 0x10
+ 1429 0225 1A000000 		.4byte	.LVL3
+ 1430 0229 530C0000 		.4byte	0xc53
+ 1431 022d 0E       		.uleb128 0xe
+ 1432 022e 22000000 		.4byte	.LVL4
+ 1433 0232 3D0C0000 		.4byte	0xc3d
+ 1434 0236 45020000 		.4byte	0x245
+ 1435 023a 0F       		.uleb128 0xf
+ 1436 023b 01       		.uleb128 0x1
+ 1437 023c 50       		.byte	0x50
+ 1438 023d 01       		.uleb128 0x1
+ 1439 023e 31       		.byte	0x31
+ 1440 023f 0F       		.uleb128 0xf
+ 1441 0240 01       		.uleb128 0x1
+ 1442 0241 51       		.byte	0x51
+ 1443 0242 01       		.uleb128 0x1
+ 1444 0243 30       		.byte	0x30
+ 1445 0244 00       		.byte	0
+ 1446 0245 11       		.uleb128 0x11
+ 1447 0246 28000000 		.4byte	.LVL5
+ 1448 024a 480C0000 		.4byte	0xc48
+ 1449 024e 0F       		.uleb128 0xf
+ 1450 024f 01       		.uleb128 0x1
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 36
+
+
+ 1451 0250 50       		.byte	0x50
+ 1452 0251 05       		.uleb128 0x5
+ 1453 0252 03       		.byte	0x3
+ 1454 0253 10000000 		.4byte	.LC1
+ 1455 0257 00       		.byte	0
+ 1456 0258 00       		.byte	0
+ 1457 0259 0D       		.uleb128 0xd
+ 1458 025a 40050000 		.4byte	.LASF37
+ 1459 025e 01       		.byte	0x1
+ 1460 025f 5F       		.byte	0x5f
+ 1461 0260 00000000 		.4byte	.LFB65
+ 1462 0264 1C000000 		.4byte	.LFE65-.LFB65
+ 1463 0268 01       		.uleb128 0x1
+ 1464 0269 9C       		.byte	0x9c
+ 1465 026a AD020000 		.4byte	0x2ad
+ 1466 026e 0E       		.uleb128 0xe
+ 1467 026f 08000000 		.4byte	.LVL6
+ 1468 0273 5E0C0000 		.4byte	0xc5e
+ 1469 0277 81020000 		.4byte	0x281
+ 1470 027b 0F       		.uleb128 0xf
+ 1471 027c 01       		.uleb128 0x1
+ 1472 027d 50       		.byte	0x50
+ 1473 027e 01       		.uleb128 0x1
+ 1474 027f 30       		.byte	0x30
+ 1475 0280 00       		.byte	0
+ 1476 0281 0E       		.uleb128 0xe
+ 1477 0282 10000000 		.4byte	.LVL7
+ 1478 0286 3D0C0000 		.4byte	0xc3d
+ 1479 028a 99020000 		.4byte	0x299
+ 1480 028e 0F       		.uleb128 0xf
+ 1481 028f 01       		.uleb128 0x1
+ 1482 0290 50       		.byte	0x50
+ 1483 0291 01       		.uleb128 0x1
+ 1484 0292 31       		.byte	0x31
+ 1485 0293 0F       		.uleb128 0xf
+ 1486 0294 01       		.uleb128 0x1
+ 1487 0295 51       		.byte	0x51
+ 1488 0296 01       		.uleb128 0x1
+ 1489 0297 30       		.byte	0x30
+ 1490 0298 00       		.byte	0
+ 1491 0299 11       		.uleb128 0x11
+ 1492 029a 16000000 		.4byte	.LVL8
+ 1493 029e 480C0000 		.4byte	0xc48
+ 1494 02a2 0F       		.uleb128 0xf
+ 1495 02a3 01       		.uleb128 0x1
+ 1496 02a4 50       		.byte	0x50
+ 1497 02a5 05       		.uleb128 0x5
+ 1498 02a6 03       		.byte	0x3
+ 1499 02a7 20000000 		.4byte	.LC2
+ 1500 02ab 00       		.byte	0
+ 1501 02ac 00       		.byte	0
+ 1502 02ad 12       		.uleb128 0x12
+ 1503 02ae 6E040000 		.4byte	.LASF38
+ 1504 02b2 01       		.byte	0x1
+ 1505 02b3 3E01     		.2byte	0x13e
+ 1506 02b5 81000000 		.4byte	0x81
+ 1507 02b9 00000000 		.4byte	.LFB73
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 37
+
+
+ 1508 02bd 1C000000 		.4byte	.LFE73-.LFB73
+ 1509 02c1 01       		.uleb128 0x1
+ 1510 02c2 9C       		.byte	0x9c
+ 1511 02c3 03030000 		.4byte	0x303
+ 1512 02c7 13       		.uleb128 0x13
+ 1513 02c8 2F020000 		.4byte	.LASF40
+ 1514 02cc 01       		.byte	0x1
+ 1515 02cd 3E01     		.2byte	0x13e
+ 1516 02cf 81000000 		.4byte	0x81
+ 1517 02d3 00000000 		.4byte	.LLST0
+ 1518 02d7 14       		.uleb128 0x14
+ 1519 02d8 05030000 		.4byte	.LASF42
+ 1520 02dc 01       		.byte	0x1
+ 1521 02dd 3F01     		.2byte	0x13f
+ 1522 02df 81000000 		.4byte	0x81
+ 1523 02e3 11       		.uleb128 0x11
+ 1524 02e4 10000000 		.4byte	.LVL11
+ 1525 02e8 690C0000 		.4byte	0xc69
+ 1526 02ec 0F       		.uleb128 0xf
+ 1527 02ed 01       		.uleb128 0x1
+ 1528 02ee 50       		.byte	0x50
+ 1529 02ef 02       		.uleb128 0x2
+ 1530 02f0 08       		.byte	0x8
+ 1531 02f1 49       		.byte	0x49
+ 1532 02f2 0F       		.uleb128 0xf
+ 1533 02f3 01       		.uleb128 0x1
+ 1534 02f4 51       		.byte	0x51
+ 1535 02f5 02       		.uleb128 0x2
+ 1536 02f6 74       		.byte	0x74
+ 1537 02f7 00       		.sleb128 0
+ 1538 02f8 0F       		.uleb128 0xf
+ 1539 02f9 01       		.uleb128 0x1
+ 1540 02fa 53       		.byte	0x53
+ 1541 02fb 05       		.uleb128 0x5
+ 1542 02fc 03       		.byte	0x3
+ 1543 02fd 0C000000 		.4byte	.LANCHOR0+12
+ 1544 0301 00       		.byte	0
+ 1545 0302 00       		.byte	0
+ 1546 0303 12       		.uleb128 0x12
+ 1547 0304 24030000 		.4byte	.LASF39
+ 1548 0308 01       		.byte	0x1
+ 1549 0309 5F01     		.2byte	0x15f
+ 1550 030b 81000000 		.4byte	0x81
+ 1551 030f 00000000 		.4byte	.LFB75
+ 1552 0313 18000000 		.4byte	.LFE75-.LFB75
+ 1553 0317 01       		.uleb128 0x1
+ 1554 0318 9C       		.byte	0x9c
+ 1555 0319 63030000 		.4byte	0x363
+ 1556 031d 13       		.uleb128 0x13
+ 1557 031e 2F020000 		.4byte	.LASF40
+ 1558 0322 01       		.byte	0x1
+ 1559 0323 5F01     		.2byte	0x15f
+ 1560 0325 81000000 		.4byte	0x81
+ 1561 0329 21000000 		.4byte	.LLST1
+ 1562 032d 13       		.uleb128 0x13
+ 1563 032e D8000000 		.4byte	.LASF41
+ 1564 0332 01       		.byte	0x1
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 38
+
+
+ 1565 0333 5F01     		.2byte	0x15f
+ 1566 0335 81000000 		.4byte	0x81
+ 1567 0339 51000000 		.4byte	.LLST2
+ 1568 033d 14       		.uleb128 0x14
+ 1569 033e 05030000 		.4byte	.LASF42
+ 1570 0342 01       		.byte	0x1
+ 1571 0343 6001     		.2byte	0x160
+ 1572 0345 81000000 		.4byte	0x81
+ 1573 0349 11       		.uleb128 0x11
+ 1574 034a 10000000 		.4byte	.LVL15
+ 1575 034e 740C0000 		.4byte	0xc74
+ 1576 0352 0F       		.uleb128 0xf
+ 1577 0353 01       		.uleb128 0x1
+ 1578 0354 50       		.byte	0x50
+ 1579 0355 02       		.uleb128 0x2
+ 1580 0356 08       		.byte	0x8
+ 1581 0357 49       		.byte	0x49
+ 1582 0358 0F       		.uleb128 0xf
+ 1583 0359 01       		.uleb128 0x1
+ 1584 035a 51       		.byte	0x51
+ 1585 035b 05       		.uleb128 0x5
+ 1586 035c 03       		.byte	0x3
+ 1587 035d 00000000 		.4byte	write_buffer
+ 1588 0361 00       		.byte	0
+ 1589 0362 00       		.byte	0
+ 1590 0363 12       		.uleb128 0x12
+ 1591 0364 B1020000 		.4byte	.LASF43
+ 1592 0368 01       		.byte	0x1
+ 1593 0369 1401     		.2byte	0x114
+ 1594 036b 81000000 		.4byte	0x81
+ 1595 036f 00000000 		.4byte	.LFB72
+ 1596 0373 4E000000 		.4byte	.LFE72-.LFB72
+ 1597 0377 01       		.uleb128 0x1
+ 1598 0378 9C       		.byte	0x9c
+ 1599 0379 4F040000 		.4byte	0x44f
+ 1600 037d 13       		.uleb128 0x13
+ 1601 037e 2F020000 		.4byte	.LASF40
+ 1602 0382 01       		.byte	0x1
+ 1603 0383 1401     		.2byte	0x114
+ 1604 0385 81000000 		.4byte	0x81
+ 1605 0389 81000000 		.4byte	.LLST3
+ 1606 038d 15       		.uleb128 0x15
+ 1607 038e 05030000 		.4byte	.LASF42
+ 1608 0392 01       		.byte	0x1
+ 1609 0393 1501     		.2byte	0x115
+ 1610 0395 81000000 		.4byte	0x81
+ 1611 0399 A2000000 		.4byte	.LLST4
+ 1612 039d 16       		.uleb128 0x16
+ 1613 039e 10000000 		.4byte	.LBB2
+ 1614 03a2 06000000 		.4byte	.LBE2-.LBB2
+ 1615 03a6 C7030000 		.4byte	0x3c7
+ 1616 03aa 14       		.uleb128 0x14
+ 1617 03ab 4E030000 		.4byte	.LASF44
+ 1618 03af 01       		.byte	0x1
+ 1619 03b0 1C01     		.2byte	0x11c
+ 1620 03b2 81000000 		.4byte	0x81
+ 1621 03b6 11       		.uleb128 0x11
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 39
+
+
+ 1622 03b7 16000000 		.4byte	.LVL20
+ 1623 03bb AD020000 		.4byte	0x2ad
+ 1624 03bf 0F       		.uleb128 0xf
+ 1625 03c0 01       		.uleb128 0x1
+ 1626 03c1 50       		.byte	0x50
+ 1627 03c2 02       		.uleb128 0x2
+ 1628 03c3 74       		.byte	0x74
+ 1629 03c4 00       		.sleb128 0
+ 1630 03c5 00       		.byte	0
+ 1631 03c6 00       		.byte	0
+ 1632 03c7 0E       		.uleb128 0xe
+ 1633 03c8 0A000000 		.4byte	.LVL18
+ 1634 03cc AD020000 		.4byte	0x2ad
+ 1635 03d0 DA030000 		.4byte	0x3da
+ 1636 03d4 0F       		.uleb128 0xf
+ 1637 03d5 01       		.uleb128 0x1
+ 1638 03d6 50       		.byte	0x50
+ 1639 03d7 01       		.uleb128 0x1
+ 1640 03d8 30       		.byte	0x30
+ 1641 03d9 00       		.byte	0
+ 1642 03da 0E       		.uleb128 0xe
+ 1643 03db 1C000000 		.4byte	.LVL21
+ 1644 03df AD020000 		.4byte	0x2ad
+ 1645 03e3 ED030000 		.4byte	0x3ed
+ 1646 03e7 0F       		.uleb128 0xf
+ 1647 03e8 01       		.uleb128 0x1
+ 1648 03e9 50       		.byte	0x50
+ 1649 03ea 01       		.uleb128 0x1
+ 1650 03eb 30       		.byte	0x30
+ 1651 03ec 00       		.byte	0
+ 1652 03ed 0E       		.uleb128 0xe
+ 1653 03ee 28000000 		.4byte	.LVL23
+ 1654 03f2 7F0C0000 		.4byte	0xc7f
+ 1655 03f6 00040000 		.4byte	0x400
+ 1656 03fa 0F       		.uleb128 0xf
+ 1657 03fb 01       		.uleb128 0x1
+ 1658 03fc 50       		.byte	0x50
+ 1659 03fd 01       		.uleb128 0x1
+ 1660 03fe 31       		.byte	0x31
+ 1661 03ff 00       		.byte	0
+ 1662 0400 0E       		.uleb128 0xe
+ 1663 0401 32000000 		.4byte	.LVL26
+ 1664 0405 03030000 		.4byte	0x303
+ 1665 0409 19040000 		.4byte	0x419
+ 1666 040d 0F       		.uleb128 0xf
+ 1667 040e 01       		.uleb128 0x1
+ 1668 040f 50       		.byte	0x50
+ 1669 0410 01       		.uleb128 0x1
+ 1670 0411 31       		.byte	0x31
+ 1671 0412 0F       		.uleb128 0xf
+ 1672 0413 01       		.uleb128 0x1
+ 1673 0414 51       		.byte	0x51
+ 1674 0415 02       		.uleb128 0x2
+ 1675 0416 74       		.byte	0x74
+ 1676 0417 00       		.sleb128 0
+ 1677 0418 00       		.byte	0
+ 1678 0419 0E       		.uleb128 0xe
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 40
+
+
+ 1679 041a 38000000 		.4byte	.LVL27
+ 1680 041e AD020000 		.4byte	0x2ad
+ 1681 0422 2C040000 		.4byte	0x42c
+ 1682 0426 0F       		.uleb128 0xf
+ 1683 0427 01       		.uleb128 0x1
+ 1684 0428 50       		.byte	0x50
+ 1685 0429 01       		.uleb128 0x1
+ 1686 042a 30       		.byte	0x30
+ 1687 042b 00       		.byte	0
+ 1688 042c 0E       		.uleb128 0xe
+ 1689 042d 44000000 		.4byte	.LVL29
+ 1690 0431 7F0C0000 		.4byte	0xc7f
+ 1691 0435 3F040000 		.4byte	0x43f
+ 1692 0439 0F       		.uleb128 0xf
+ 1693 043a 01       		.uleb128 0x1
+ 1694 043b 50       		.byte	0x50
+ 1695 043c 01       		.uleb128 0x1
+ 1696 043d 31       		.byte	0x31
+ 1697 043e 00       		.byte	0
+ 1698 043f 11       		.uleb128 0x11
+ 1699 0440 4C000000 		.4byte	.LVL32
+ 1700 0444 AD020000 		.4byte	0x2ad
+ 1701 0448 0F       		.uleb128 0xf
+ 1702 0449 01       		.uleb128 0x1
+ 1703 044a 50       		.byte	0x50
+ 1704 044b 01       		.uleb128 0x1
+ 1705 044c 32       		.byte	0x32
+ 1706 044d 00       		.byte	0
+ 1707 044e 00       		.byte	0
+ 1708 044f 17       		.uleb128 0x17
+ 1709 0450 AB030000 		.4byte	.LASF45
+ 1710 0454 01       		.byte	0x1
+ 1711 0455 0901     		.2byte	0x109
+ 1712 0457 00000000 		.4byte	.LFB71
+ 1713 045b 24000000 		.4byte	.LFE71-.LFB71
+ 1714 045f 01       		.uleb128 0x1
+ 1715 0460 9C       		.byte	0x9c
+ 1716 0461 8E040000 		.4byte	0x48e
+ 1717 0465 18       		.uleb128 0x18
+ 1718 0466 02000000 		.4byte	.LBB3
+ 1719 046a 1A000000 		.4byte	.LBE3-.LBB3
+ 1720 046e 19       		.uleb128 0x19
+ 1721 046f 6900     		.ascii	"i\000"
+ 1722 0471 01       		.byte	0x1
+ 1723 0472 0A01     		.2byte	0x10a
+ 1724 0474 81000000 		.4byte	0x81
+ 1725 0478 E1000000 		.4byte	.LLST5
+ 1726 047c 11       		.uleb128 0x11
+ 1727 047d 10000000 		.4byte	.LVL35
+ 1728 0481 63030000 		.4byte	0x363
+ 1729 0485 0F       		.uleb128 0xf
+ 1730 0486 01       		.uleb128 0x1
+ 1731 0487 50       		.byte	0x50
+ 1732 0488 02       		.uleb128 0x2
+ 1733 0489 74       		.byte	0x74
+ 1734 048a 14       		.sleb128 20
+ 1735 048b 00       		.byte	0
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 41
+
+
+ 1736 048c 00       		.byte	0
+ 1737 048d 00       		.byte	0
+ 1738 048e 12       		.uleb128 0x12
+ 1739 048f 5D040000 		.4byte	.LASF46
+ 1740 0493 01       		.byte	0x1
+ 1741 0494 4801     		.2byte	0x148
+ 1742 0496 81000000 		.4byte	0x81
+ 1743 049a 00000000 		.4byte	.LFB74
+ 1744 049e 32000000 		.4byte	.LFE74-.LFB74
+ 1745 04a2 01       		.uleb128 0x1
+ 1746 04a3 9C       		.byte	0x9c
+ 1747 04a4 30050000 		.4byte	0x530
+ 1748 04a8 13       		.uleb128 0x13
+ 1749 04a9 2F020000 		.4byte	.LASF40
+ 1750 04ad 01       		.byte	0x1
+ 1751 04ae 4801     		.2byte	0x148
+ 1752 04b0 81000000 		.4byte	0x81
+ 1753 04b4 0B010000 		.4byte	.LLST6
+ 1754 04b8 13       		.uleb128 0x13
+ 1755 04b9 D8000000 		.4byte	.LASF41
+ 1756 04bd 01       		.byte	0x1
+ 1757 04be 4801     		.2byte	0x148
+ 1758 04c0 81000000 		.4byte	0x81
+ 1759 04c4 2C010000 		.4byte	.LLST7
+ 1760 04c8 15       		.uleb128 0x15
+ 1761 04c9 05030000 		.4byte	.LASF42
+ 1762 04cd 01       		.byte	0x1
+ 1763 04ce 4901     		.2byte	0x149
+ 1764 04d0 81000000 		.4byte	0x81
+ 1765 04d4 4D010000 		.4byte	.LLST8
+ 1766 04d8 0E       		.uleb128 0xe
+ 1767 04d9 0C000000 		.4byte	.LVL41
+ 1768 04dd AD020000 		.4byte	0x2ad
+ 1769 04e1 EB040000 		.4byte	0x4eb
+ 1770 04e5 0F       		.uleb128 0xf
+ 1771 04e6 01       		.uleb128 0x1
+ 1772 04e7 50       		.byte	0x50
+ 1773 04e8 01       		.uleb128 0x1
+ 1774 04e9 30       		.byte	0x30
+ 1775 04ea 00       		.byte	0
+ 1776 04eb 0E       		.uleb128 0xe
+ 1777 04ec 1C000000 		.4byte	.LVL43
+ 1778 04f0 03030000 		.4byte	0x303
+ 1779 04f4 07050000 		.4byte	0x507
+ 1780 04f8 0F       		.uleb128 0xf
+ 1781 04f9 01       		.uleb128 0x1
+ 1782 04fa 50       		.byte	0x50
+ 1783 04fb 01       		.uleb128 0x1
+ 1784 04fc 31       		.byte	0x31
+ 1785 04fd 0F       		.uleb128 0xf
+ 1786 04fe 01       		.uleb128 0x1
+ 1787 04ff 51       		.byte	0x51
+ 1788 0500 05       		.uleb128 0x5
+ 1789 0501 75       		.byte	0x75
+ 1790 0502 00       		.sleb128 0
+ 1791 0503 08       		.byte	0x8
+ 1792 0504 80       		.byte	0x80
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 42
+
+
+ 1793 0505 21       		.byte	0x21
+ 1794 0506 00       		.byte	0
+ 1795 0507 0E       		.uleb128 0xe
+ 1796 0508 22000000 		.4byte	.LVL44
+ 1797 050c AD020000 		.4byte	0x2ad
+ 1798 0510 1A050000 		.4byte	0x51a
+ 1799 0514 0F       		.uleb128 0xf
+ 1800 0515 01       		.uleb128 0x1
+ 1801 0516 50       		.byte	0x50
+ 1802 0517 01       		.uleb128 0x1
+ 1803 0518 30       		.byte	0x30
+ 1804 0519 00       		.byte	0
+ 1805 051a 11       		.uleb128 0x11
+ 1806 051b 30000000 		.4byte	.LVL46
+ 1807 051f 03030000 		.4byte	0x303
+ 1808 0523 0F       		.uleb128 0xf
+ 1809 0524 01       		.uleb128 0x1
+ 1810 0525 50       		.byte	0x50
+ 1811 0526 01       		.uleb128 0x1
+ 1812 0527 31       		.byte	0x31
+ 1813 0528 0F       		.uleb128 0xf
+ 1814 0529 01       		.uleb128 0x1
+ 1815 052a 51       		.byte	0x51
+ 1816 052b 02       		.uleb128 0x2
+ 1817 052c 74       		.byte	0x74
+ 1818 052d 00       		.sleb128 0
+ 1819 052e 00       		.byte	0
+ 1820 052f 00       		.byte	0
+ 1821 0530 1A       		.uleb128 0x1a
+ 1822 0531 65050000 		.4byte	.LASF47
+ 1823 0535 01       		.byte	0x1
+ 1824 0536 D6       		.byte	0xd6
+ 1825 0537 81000000 		.4byte	0x81
+ 1826 053b 00000000 		.4byte	.LFB68
+ 1827 053f 24000000 		.4byte	.LFE68-.LFB68
+ 1828 0543 01       		.uleb128 0x1
+ 1829 0544 9C       		.byte	0x9c
+ 1830 0545 7B050000 		.4byte	0x57b
+ 1831 0549 1B       		.uleb128 0x1b
+ 1832 054a 45000000 		.4byte	.LASF48
+ 1833 054e 01       		.byte	0x1
+ 1834 054f D6       		.byte	0xd6
+ 1835 0550 7B050000 		.4byte	0x57b
+ 1836 0554 6B010000 		.4byte	.LLST9
+ 1837 0558 1C       		.uleb128 0x1c
+ 1838 0559 7A030000 		.4byte	.LASF49
+ 1839 055d 01       		.byte	0x1
+ 1840 055e D7       		.byte	0xd7
+ 1841 055f 81000000 		.4byte	0x81
+ 1842 0563 01       		.uleb128 0x1
+ 1843 0564 54       		.byte	0x54
+ 1844 0565 11       		.uleb128 0x11
+ 1845 0566 1E000000 		.4byte	.LVL50
+ 1846 056a 8E040000 		.4byte	0x48e
+ 1847 056e 0F       		.uleb128 0xf
+ 1848 056f 01       		.uleb128 0x1
+ 1849 0570 50       		.byte	0x50
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 43
+
+
+ 1850 0571 01       		.uleb128 0x1
+ 1851 0572 34       		.byte	0x34
+ 1852 0573 0F       		.uleb128 0xf
+ 1853 0574 01       		.uleb128 0x1
+ 1854 0575 51       		.byte	0x51
+ 1855 0576 02       		.uleb128 0x2
+ 1856 0577 74       		.byte	0x74
+ 1857 0578 00       		.sleb128 0
+ 1858 0579 00       		.byte	0
+ 1859 057a 00       		.byte	0
+ 1860 057b 08       		.uleb128 0x8
+ 1861 057c 04       		.byte	0x4
+ 1862 057d 7F010000 		.4byte	0x17f
+ 1863 0581 1A       		.uleb128 0x1a
+ 1864 0582 36040000 		.4byte	.LASF50
+ 1865 0586 01       		.byte	0x1
+ 1866 0587 DF       		.byte	0xdf
+ 1867 0588 81000000 		.4byte	0x81
+ 1868 058c 00000000 		.4byte	.LFB69
+ 1869 0590 28000000 		.4byte	.LFE69-.LFB69
+ 1870 0594 01       		.uleb128 0x1
+ 1871 0595 9C       		.byte	0x9c
+ 1872 0596 CC050000 		.4byte	0x5cc
+ 1873 059a 1B       		.uleb128 0x1b
+ 1874 059b 45000000 		.4byte	.LASF48
+ 1875 059f 01       		.byte	0x1
+ 1876 05a0 DF       		.byte	0xdf
+ 1877 05a1 7B050000 		.4byte	0x57b
+ 1878 05a5 89010000 		.4byte	.LLST10
+ 1879 05a9 1C       		.uleb128 0x1c
+ 1880 05aa 8D000000 		.4byte	.LASF51
+ 1881 05ae 01       		.byte	0x1
+ 1882 05af E0       		.byte	0xe0
+ 1883 05b0 81000000 		.4byte	0x81
+ 1884 05b4 01       		.uleb128 0x1
+ 1885 05b5 54       		.byte	0x54
+ 1886 05b6 11       		.uleb128 0x11
+ 1887 05b7 22000000 		.4byte	.LVL54
+ 1888 05bb 8E040000 		.4byte	0x48e
+ 1889 05bf 0F       		.uleb128 0xf
+ 1890 05c0 01       		.uleb128 0x1
+ 1891 05c1 50       		.byte	0x50
+ 1892 05c2 01       		.uleb128 0x1
+ 1893 05c3 37       		.byte	0x37
+ 1894 05c4 0F       		.uleb128 0xf
+ 1895 05c5 01       		.uleb128 0x1
+ 1896 05c6 51       		.byte	0x51
+ 1897 05c7 02       		.uleb128 0x2
+ 1898 05c8 74       		.byte	0x74
+ 1899 05c9 00       		.sleb128 0
+ 1900 05ca 00       		.byte	0
+ 1901 05cb 00       		.byte	0
+ 1902 05cc 1A       		.uleb128 0x1a
+ 1903 05cd 2C010000 		.4byte	.LASF52
+ 1904 05d1 01       		.byte	0x1
+ 1905 05d2 75       		.byte	0x75
+ 1906 05d3 81000000 		.4byte	0x81
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 44
+
+
+ 1907 05d7 00000000 		.4byte	.LFB66
+ 1908 05db 50000000 		.4byte	.LFE66-.LFB66
+ 1909 05df 01       		.uleb128 0x1
+ 1910 05e0 9C       		.byte	0x9c
+ 1911 05e1 78060000 		.4byte	0x678
+ 1912 05e5 1D       		.uleb128 0x1d
+ 1913 05e6 4E030000 		.4byte	.LASF44
+ 1914 05ea 01       		.byte	0x1
+ 1915 05eb 77       		.byte	0x77
+ 1916 05ec 81000000 		.4byte	0x81
+ 1917 05f0 A7010000 		.4byte	.LLST11
+ 1918 05f4 0E       		.uleb128 0xe
+ 1919 05f5 08000000 		.4byte	.LVL55
+ 1920 05f9 63030000 		.4byte	0x363
+ 1921 05fd 07060000 		.4byte	0x607
+ 1922 0601 0F       		.uleb128 0xf
+ 1923 0602 01       		.uleb128 0x1
+ 1924 0603 50       		.byte	0x50
+ 1925 0604 01       		.uleb128 0x1
+ 1926 0605 30       		.byte	0x30
+ 1927 0606 00       		.byte	0
+ 1928 0607 0E       		.uleb128 0xe
+ 1929 0608 12000000 		.4byte	.LVL57
+ 1930 060c 63030000 		.4byte	0x363
+ 1931 0610 1A060000 		.4byte	0x61a
+ 1932 0614 0F       		.uleb128 0xf
+ 1933 0615 01       		.uleb128 0x1
+ 1934 0616 50       		.byte	0x50
+ 1935 0617 01       		.uleb128 0x1
+ 1936 0618 31       		.byte	0x31
+ 1937 0619 00       		.byte	0
+ 1938 061a 0E       		.uleb128 0xe
+ 1939 061b 1A000000 		.4byte	.LVL59
+ 1940 061f 63030000 		.4byte	0x363
+ 1941 0623 2D060000 		.4byte	0x62d
+ 1942 0627 0F       		.uleb128 0xf
+ 1943 0628 01       		.uleb128 0x1
+ 1944 0629 50       		.byte	0x50
+ 1945 062a 01       		.uleb128 0x1
+ 1946 062b 32       		.byte	0x32
+ 1947 062c 00       		.byte	0
+ 1948 062d 0E       		.uleb128 0xe
+ 1949 062e 24000000 		.4byte	.LVL61
+ 1950 0632 63030000 		.4byte	0x363
+ 1951 0636 40060000 		.4byte	0x640
+ 1952 063a 0F       		.uleb128 0xf
+ 1953 063b 01       		.uleb128 0x1
+ 1954 063c 50       		.byte	0x50
+ 1955 063d 01       		.uleb128 0x1
+ 1956 063e 33       		.byte	0x33
+ 1957 063f 00       		.byte	0
+ 1958 0640 0E       		.uleb128 0xe
+ 1959 0641 30000000 		.4byte	.LVL63
+ 1960 0645 30050000 		.4byte	0x530
+ 1961 0649 54060000 		.4byte	0x654
+ 1962 064d 0F       		.uleb128 0xf
+ 1963 064e 01       		.uleb128 0x1
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 45
+
+
+ 1964 064f 50       		.byte	0x50
+ 1965 0650 02       		.uleb128 0x2
+ 1966 0651 74       		.byte	0x74
+ 1967 0652 00       		.sleb128 0
+ 1968 0653 00       		.byte	0
+ 1969 0654 0E       		.uleb128 0xe
+ 1970 0655 36000000 		.4byte	.LVL64
+ 1971 0659 81050000 		.4byte	0x581
+ 1972 065d 68060000 		.4byte	0x668
+ 1973 0661 0F       		.uleb128 0xf
+ 1974 0662 01       		.uleb128 0x1
+ 1975 0663 50       		.byte	0x50
+ 1976 0664 02       		.uleb128 0x2
+ 1977 0665 74       		.byte	0x74
+ 1978 0666 00       		.sleb128 0
+ 1979 0667 00       		.byte	0
+ 1980 0668 11       		.uleb128 0x11
+ 1981 0669 3E000000 		.4byte	.LVL65
+ 1982 066d 8E040000 		.4byte	0x48e
+ 1983 0671 0F       		.uleb128 0xf
+ 1984 0672 01       		.uleb128 0x1
+ 1985 0673 50       		.byte	0x50
+ 1986 0674 01       		.uleb128 0x1
+ 1987 0675 35       		.byte	0x35
+ 1988 0676 00       		.byte	0
+ 1989 0677 00       		.byte	0
+ 1990 0678 1E       		.uleb128 0x1e
+ 1991 0679 46020000 		.4byte	.LASF53
+ 1992 067d 01       		.byte	0x1
+ 1993 067e EA       		.byte	0xea
+ 1994 067f 00000000 		.4byte	.LFB70
+ 1995 0683 9C000000 		.4byte	.LFE70-.LFB70
+ 1996 0687 01       		.uleb128 0x1
+ 1997 0688 9C       		.byte	0x9c
+ 1998 0689 9C070000 		.4byte	0x79c
+ 1999 068d 1D       		.uleb128 0x1d
+ 2000 068e 4E030000 		.4byte	.LASF44
+ 2001 0692 01       		.byte	0x1
+ 2002 0693 F4       		.byte	0xf4
+ 2003 0694 81000000 		.4byte	0x81
+ 2004 0698 F9010000 		.4byte	.LLST12
+ 2005 069c 1D       		.uleb128 0x1d
+ 2006 069d 98030000 		.4byte	.LASF54
+ 2007 06a1 01       		.byte	0x1
+ 2008 06a2 F5       		.byte	0xf5
+ 2009 06a3 81000000 		.4byte	0x81
+ 2010 06a7 0C020000 		.4byte	.LLST13
+ 2011 06ab 0E       		.uleb128 0xe
+ 2012 06ac 08000000 		.4byte	.LVL66
+ 2013 06b0 8A0C0000 		.4byte	0xc8a
+ 2014 06b4 BE060000 		.4byte	0x6be
+ 2015 06b8 0F       		.uleb128 0xf
+ 2016 06b9 01       		.uleb128 0x1
+ 2017 06ba 50       		.byte	0x50
+ 2018 06bb 01       		.uleb128 0x1
+ 2019 06bc 31       		.byte	0x31
+ 2020 06bd 00       		.byte	0
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 46
+
+
+ 2021 06be 0E       		.uleb128 0xe
+ 2022 06bf 10000000 		.4byte	.LVL67
+ 2023 06c3 3D0C0000 		.4byte	0xc3d
+ 2024 06c7 D6060000 		.4byte	0x6d6
+ 2025 06cb 0F       		.uleb128 0xf
+ 2026 06cc 01       		.uleb128 0x1
+ 2027 06cd 50       		.byte	0x50
+ 2028 06ce 01       		.uleb128 0x1
+ 2029 06cf 30       		.byte	0x30
+ 2030 06d0 0F       		.uleb128 0xf
+ 2031 06d1 01       		.uleb128 0x1
+ 2032 06d2 51       		.byte	0x51
+ 2033 06d3 01       		.uleb128 0x1
+ 2034 06d4 30       		.byte	0x30
+ 2035 06d5 00       		.byte	0
+ 2036 06d6 0E       		.uleb128 0xe
+ 2037 06d7 16000000 		.4byte	.LVL68
+ 2038 06db 480C0000 		.4byte	0xc48
+ 2039 06df ED060000 		.4byte	0x6ed
+ 2040 06e3 0F       		.uleb128 0xf
+ 2041 06e4 01       		.uleb128 0x1
+ 2042 06e5 50       		.byte	0x50
+ 2043 06e6 05       		.uleb128 0x5
+ 2044 06e7 03       		.byte	0x3
+ 2045 06e8 28000000 		.4byte	.LC3
+ 2046 06ec 00       		.byte	0
+ 2047 06ed 0E       		.uleb128 0xe
+ 2048 06ee 20000000 		.4byte	.LVL69
+ 2049 06f2 8E040000 		.4byte	0x48e
+ 2050 06f6 00070000 		.4byte	0x700
+ 2051 06fa 0F       		.uleb128 0xf
+ 2052 06fb 01       		.uleb128 0x1
+ 2053 06fc 50       		.byte	0x50
+ 2054 06fd 01       		.uleb128 0x1
+ 2055 06fe 34       		.byte	0x34
+ 2056 06ff 00       		.byte	0
+ 2057 0700 0E       		.uleb128 0xe
+ 2058 0701 28000000 		.4byte	.LVL70
+ 2059 0705 3D0C0000 		.4byte	0xc3d
+ 2060 0709 18070000 		.4byte	0x718
+ 2061 070d 0F       		.uleb128 0xf
+ 2062 070e 01       		.uleb128 0x1
+ 2063 070f 50       		.byte	0x50
+ 2064 0710 01       		.uleb128 0x1
+ 2065 0711 30       		.byte	0x30
+ 2066 0712 0F       		.uleb128 0xf
+ 2067 0713 01       		.uleb128 0x1
+ 2068 0714 51       		.byte	0x51
+ 2069 0715 01       		.uleb128 0x1
+ 2070 0716 30       		.byte	0x30
+ 2071 0717 00       		.byte	0
+ 2072 0718 0E       		.uleb128 0xe
+ 2073 0719 2E000000 		.4byte	.LVL71
+ 2074 071d 480C0000 		.4byte	0xc48
+ 2075 0721 2F070000 		.4byte	0x72f
+ 2076 0725 0F       		.uleb128 0xf
+ 2077 0726 01       		.uleb128 0x1
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 47
+
+
+ 2078 0727 50       		.byte	0x50
+ 2079 0728 05       		.uleb128 0x5
+ 2080 0729 03       		.byte	0x3
+ 2081 072a 38000000 		.4byte	.LC4
+ 2082 072e 00       		.byte	0
+ 2083 072f 10       		.uleb128 0x10
+ 2084 0730 46000000 		.4byte	.LVL75
+ 2085 0734 7F0C0000 		.4byte	0xc7f
+ 2086 0738 0E       		.uleb128 0xe
+ 2087 0739 4E000000 		.4byte	.LVL77
+ 2088 073d 7F0C0000 		.4byte	0xc7f
+ 2089 0741 4B070000 		.4byte	0x74b
+ 2090 0745 0F       		.uleb128 0xf
+ 2091 0746 01       		.uleb128 0x1
+ 2092 0747 50       		.byte	0x50
+ 2093 0748 01       		.uleb128 0x1
+ 2094 0749 31       		.byte	0x31
+ 2095 074a 00       		.byte	0
+ 2096 074b 0E       		.uleb128 0xe
+ 2097 074c 54000000 		.4byte	.LVL78
+ 2098 0750 63030000 		.4byte	0x363
+ 2099 0754 5E070000 		.4byte	0x75e
+ 2100 0758 0F       		.uleb128 0xf
+ 2101 0759 01       		.uleb128 0x1
+ 2102 075a 50       		.byte	0x50
+ 2103 075b 01       		.uleb128 0x1
+ 2104 075c 34       		.byte	0x34
+ 2105 075d 00       		.byte	0
+ 2106 075e 0E       		.uleb128 0xe
+ 2107 075f 66000000 		.4byte	.LVL82
+ 2108 0763 950C0000 		.4byte	0xc95
+ 2109 0767 7A070000 		.4byte	0x77a
+ 2110 076b 0F       		.uleb128 0xf
+ 2111 076c 01       		.uleb128 0x1
+ 2112 076d 50       		.byte	0x50
+ 2113 076e 05       		.uleb128 0x5
+ 2114 076f 03       		.byte	0x3
+ 2115 0770 48000000 		.4byte	.LC5
+ 2116 0774 0F       		.uleb128 0xf
+ 2117 0775 01       		.uleb128 0x1
+ 2118 0776 51       		.byte	0x51
+ 2119 0777 01       		.uleb128 0x1
+ 2120 0778 36       		.byte	0x36
+ 2121 0779 00       		.byte	0
+ 2122 077a 10       		.uleb128 0x10
+ 2123 077b 70000000 		.4byte	.LVL83
+ 2124 077f 4F040000 		.4byte	0x44f
+ 2125 0783 11       		.uleb128 0x11
+ 2126 0784 78000000 		.4byte	.LVL84
+ 2127 0788 950C0000 		.4byte	0xc95
+ 2128 078c 0F       		.uleb128 0xf
+ 2129 078d 01       		.uleb128 0x1
+ 2130 078e 50       		.byte	0x50
+ 2131 078f 05       		.uleb128 0x5
+ 2132 0790 03       		.byte	0x3
+ 2133 0791 00000000 		.4byte	all_calibrated_data
+ 2134 0795 0F       		.uleb128 0xf
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 48
+
+
+ 2135 0796 01       		.uleb128 0x1
+ 2136 0797 51       		.byte	0x51
+ 2137 0798 01       		.uleb128 0x1
+ 2138 0799 48       		.byte	0x48
+ 2139 079a 00       		.byte	0
+ 2140 079b 00       		.byte	0
+ 2141 079c 12       		.uleb128 0x12
+ 2142 079d 6A010000 		.4byte	.LASF55
+ 2143 07a1 01       		.byte	0x1
+ 2144 07a2 6D01     		.2byte	0x16d
+ 2145 07a4 81000000 		.4byte	0x81
+ 2146 07a8 00000000 		.4byte	.LFB77
+ 2147 07ac 34000000 		.4byte	.LFE77-.LFB77
+ 2148 07b0 01       		.uleb128 0x1
+ 2149 07b1 9C       		.byte	0x9c
+ 2150 07b2 C7070000 		.4byte	0x7c7
+ 2151 07b6 13       		.uleb128 0x13
+ 2152 07b7 38010000 		.4byte	.LASF56
+ 2153 07bb 01       		.byte	0x1
+ 2154 07bc 6D01     		.2byte	0x16d
+ 2155 07be 81000000 		.4byte	0x81
+ 2156 07c2 36020000 		.4byte	.LLST14
+ 2157 07c6 00       		.byte	0
+ 2158 07c7 12       		.uleb128 0x12
+ 2159 07c8 EB010000 		.4byte	.LASF57
+ 2160 07cc 01       		.byte	0x1
+ 2161 07cd 6601     		.2byte	0x166
+ 2162 07cf 81000000 		.4byte	0x81
+ 2163 07d3 00000000 		.4byte	.LFB76
+ 2164 07d7 1A000000 		.4byte	.LFE76-.LFB76
+ 2165 07db 01       		.uleb128 0x1
+ 2166 07dc 9C       		.byte	0x9c
+ 2167 07dd 14080000 		.4byte	0x814
+ 2168 07e1 13       		.uleb128 0x13
+ 2169 07e2 A5030000 		.4byte	.LASF58
+ 2170 07e6 01       		.byte	0x1
+ 2171 07e7 6601     		.2byte	0x166
+ 2172 07e9 79010000 		.4byte	0x179
+ 2173 07ed 57020000 		.4byte	.LLST15
+ 2174 07f1 19       		.uleb128 0x19
+ 2175 07f2 6E756D00 		.ascii	"num\000"
+ 2176 07f6 01       		.byte	0x1
+ 2177 07f7 6701     		.2byte	0x167
+ 2178 07f9 81000000 		.4byte	0x81
+ 2179 07fd 75020000 		.4byte	.LLST16
+ 2180 0801 10       		.uleb128 0x10
+ 2181 0802 0A000000 		.4byte	.LVL90
+ 2182 0806 9C070000 		.4byte	0x79c
+ 2183 080a 10       		.uleb128 0x10
+ 2184 080b 14000000 		.4byte	.LVL92
+ 2185 080f 9C070000 		.4byte	0x79c
+ 2186 0813 00       		.byte	0
+ 2187 0814 12       		.uleb128 0x12
+ 2188 0815 F3030000 		.4byte	.LASF59
+ 2189 0819 01       		.byte	0x1
+ 2190 081a 7A01     		.2byte	0x17a
+ 2191 081c 8D000000 		.4byte	0x8d
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 49
+
+
+ 2192 0820 00000000 		.4byte	.LFB78
+ 2193 0824 24000000 		.4byte	.LFE78-.LFB78
+ 2194 0828 01       		.uleb128 0x1
+ 2195 0829 9C       		.byte	0x9c
+ 2196 082a 71080000 		.4byte	0x871
+ 2197 082e 13       		.uleb128 0x13
+ 2198 082f A5030000 		.4byte	.LASF58
+ 2199 0833 01       		.byte	0x1
+ 2200 0834 7A01     		.2byte	0x17a
+ 2201 0836 79010000 		.4byte	0x179
+ 2202 083a 93020000 		.4byte	.LLST17
+ 2203 083e 1F       		.uleb128 0x1f
+ 2204 083f 6C656E00 		.ascii	"len\000"
+ 2205 0843 01       		.byte	0x1
+ 2206 0844 7A01     		.2byte	0x17a
+ 2207 0846 81000000 		.4byte	0x81
+ 2208 084a 01       		.uleb128 0x1
+ 2209 084b 51       		.byte	0x51
+ 2210 084c 19       		.uleb128 0x19
+ 2211 084d 6E756D00 		.ascii	"num\000"
+ 2212 0851 01       		.byte	0x1
+ 2213 0852 7B01     		.2byte	0x17b
+ 2214 0854 8D000000 		.4byte	0x8d
+ 2215 0858 B4020000 		.4byte	.LLST18
+ 2216 085c 20       		.uleb128 0x20
+ 2217 085d 00000000 		.4byte	.Ldebug_ranges0+0
+ 2218 0861 19       		.uleb128 0x19
+ 2219 0862 6900     		.ascii	"i\000"
+ 2220 0864 01       		.byte	0x1
+ 2221 0865 7C01     		.2byte	0x17c
+ 2222 0867 68000000 		.4byte	0x68
+ 2223 086b DE020000 		.4byte	.LLST19
+ 2224 086f 00       		.byte	0
+ 2225 0870 00       		.byte	0
+ 2226 0871 0D       		.uleb128 0xd
+ 2227 0872 5A030000 		.4byte	.LASF60
+ 2228 0876 01       		.byte	0x1
+ 2229 0877 9B       		.byte	0x9b
+ 2230 0878 00000000 		.4byte	.LFB67
+ 2231 087c 74010000 		.4byte	.LFE67-.LFB67
+ 2232 0880 01       		.uleb128 0x1
+ 2233 0881 9C       		.byte	0x9c
+ 2234 0882 6F0B0000 		.4byte	0xb6f
+ 2235 0886 1B       		.uleb128 0x1b
+ 2236 0887 53030000 		.4byte	.LASF61
+ 2237 088b 01       		.byte	0x1
+ 2238 088c 9B       		.byte	0x9b
+ 2239 088d 79010000 		.4byte	0x179
+ 2240 0891 FD020000 		.4byte	.LLST20
+ 2241 0895 18       		.uleb128 0x18
+ 2242 0896 20000000 		.4byte	.LBB6
+ 2243 089a 54010000 		.4byte	.LBE6-.LBB6
+ 2244 089e 1D       		.uleb128 0x1d
+ 2245 089f 21040000 		.4byte	.LASF62
+ 2246 08a3 01       		.byte	0x1
+ 2247 08a4 BD       		.byte	0xbd
+ 2248 08a5 81000000 		.4byte	0x81
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 50
+
+
+ 2249 08a9 97030000 		.4byte	.LLST21
+ 2250 08ad 16       		.uleb128 0x16
+ 2251 08ae 2C000000 		.4byte	.LBB7
+ 2252 08b2 50000000 		.4byte	.LBE7-.LBB7
+ 2253 08b6 B5090000 		.4byte	0x9b5
+ 2254 08ba 1D       		.uleb128 0x1d
+ 2255 08bb 75000000 		.4byte	.LASF63
+ 2256 08bf 01       		.byte	0x1
+ 2257 08c0 A0       		.byte	0xa0
+ 2258 08c1 81000000 		.4byte	0x81
+ 2259 08c5 AA030000 		.4byte	.LLST22
+ 2260 08c9 1D       		.uleb128 0x1d
+ 2261 08ca CE020000 		.4byte	.LASF64
+ 2262 08ce 01       		.byte	0x1
+ 2263 08cf A1       		.byte	0xa1
+ 2264 08d0 81000000 		.4byte	0x81
+ 2265 08d4 BD030000 		.4byte	.LLST23
+ 2266 08d8 0E       		.uleb128 0xe
+ 2267 08d9 32000000 		.4byte	.LVL104
+ 2268 08dd C7070000 		.4byte	0x7c7
+ 2269 08e1 EC080000 		.4byte	0x8ec
+ 2270 08e5 0F       		.uleb128 0xf
+ 2271 08e6 01       		.uleb128 0x1
+ 2272 08e7 50       		.byte	0x50
+ 2273 08e8 02       		.uleb128 0x2
+ 2274 08e9 74       		.byte	0x74
+ 2275 08ea 13       		.sleb128 19
+ 2276 08eb 00       		.byte	0
+ 2277 08ec 0E       		.uleb128 0xe
+ 2278 08ed 3C000000 		.4byte	.LVL106
+ 2279 08f1 C7070000 		.4byte	0x7c7
+ 2280 08f5 00090000 		.4byte	0x900
+ 2281 08f9 0F       		.uleb128 0xf
+ 2282 08fa 01       		.uleb128 0x1
+ 2283 08fb 50       		.byte	0x50
+ 2284 08fc 02       		.uleb128 0x2
+ 2285 08fd 74       		.byte	0x74
+ 2286 08fe 18       		.sleb128 24
+ 2287 08ff 00       		.byte	0
+ 2288 0900 0E       		.uleb128 0xe
+ 2289 0901 46000000 		.4byte	.LVL109
+ 2290 0905 8E040000 		.4byte	0x48e
+ 2291 0909 1A090000 		.4byte	0x91a
+ 2292 090d 0F       		.uleb128 0xf
+ 2293 090e 01       		.uleb128 0x1
+ 2294 090f 50       		.byte	0x50
+ 2295 0910 02       		.uleb128 0x2
+ 2296 0911 76       		.byte	0x76
+ 2297 0912 00       		.sleb128 0
+ 2298 0913 0F       		.uleb128 0xf
+ 2299 0914 01       		.uleb128 0x1
+ 2300 0915 51       		.byte	0x51
+ 2301 0916 02       		.uleb128 0x2
+ 2302 0917 77       		.byte	0x77
+ 2303 0918 00       		.sleb128 0
+ 2304 0919 00       		.byte	0
+ 2305 091a 0E       		.uleb128 0xe
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 51
+
+
+ 2306 091b 4E000000 		.4byte	.LVL110
+ 2307 091f 3D0C0000 		.4byte	0xc3d
+ 2308 0923 32090000 		.4byte	0x932
+ 2309 0927 0F       		.uleb128 0xf
+ 2310 0928 01       		.uleb128 0x1
+ 2311 0929 50       		.byte	0x50
+ 2312 092a 01       		.uleb128 0x1
+ 2313 092b 30       		.byte	0x30
+ 2314 092c 0F       		.uleb128 0xf
+ 2315 092d 01       		.uleb128 0x1
+ 2316 092e 51       		.byte	0x51
+ 2317 092f 01       		.uleb128 0x1
+ 2318 0930 30       		.byte	0x30
+ 2319 0931 00       		.byte	0
+ 2320 0932 0E       		.uleb128 0xe
+ 2321 0933 5C000000 		.4byte	.LVL111
+ 2322 0937 A00C0000 		.4byte	0xca0
+ 2323 093b 5B090000 		.4byte	0x95b
+ 2324 093f 0F       		.uleb128 0xf
+ 2325 0940 01       		.uleb128 0x1
+ 2326 0941 50       		.byte	0x50
+ 2327 0942 02       		.uleb128 0x2
+ 2328 0943 75       		.byte	0x75
+ 2329 0944 00       		.sleb128 0
+ 2330 0945 0F       		.uleb128 0xf
+ 2331 0946 01       		.uleb128 0x1
+ 2332 0947 51       		.byte	0x51
+ 2333 0948 05       		.uleb128 0x5
+ 2334 0949 03       		.byte	0x3
+ 2335 094a 50000000 		.4byte	.LC6
+ 2336 094e 0F       		.uleb128 0xf
+ 2337 094f 01       		.uleb128 0x1
+ 2338 0950 52       		.byte	0x52
+ 2339 0951 02       		.uleb128 0x2
+ 2340 0952 76       		.byte	0x76
+ 2341 0953 00       		.sleb128 0
+ 2342 0954 0F       		.uleb128 0xf
+ 2343 0955 01       		.uleb128 0x1
+ 2344 0956 53       		.byte	0x53
+ 2345 0957 02       		.uleb128 0x2
+ 2346 0958 77       		.byte	0x77
+ 2347 0959 00       		.sleb128 0
+ 2348 095a 00       		.byte	0
+ 2349 095b 0E       		.uleb128 0xe
+ 2350 095c 62000000 		.4byte	.LVL112
+ 2351 0960 480C0000 		.4byte	0xc48
+ 2352 0964 6F090000 		.4byte	0x96f
+ 2353 0968 0F       		.uleb128 0xf
+ 2354 0969 01       		.uleb128 0x1
+ 2355 096a 50       		.byte	0x50
+ 2356 096b 02       		.uleb128 0x2
+ 2357 096c 75       		.byte	0x75
+ 2358 096d 00       		.sleb128 0
+ 2359 096e 00       		.byte	0
+ 2360 096f 0E       		.uleb128 0xe
+ 2361 0970 6A000000 		.4byte	.LVL113
+ 2362 0974 3D0C0000 		.4byte	0xc3d
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 52
+
+
+ 2363 0978 87090000 		.4byte	0x987
+ 2364 097c 0F       		.uleb128 0xf
+ 2365 097d 01       		.uleb128 0x1
+ 2366 097e 50       		.byte	0x50
+ 2367 097f 01       		.uleb128 0x1
+ 2368 0980 31       		.byte	0x31
+ 2369 0981 0F       		.uleb128 0xf
+ 2370 0982 01       		.uleb128 0x1
+ 2371 0983 51       		.byte	0x51
+ 2372 0984 01       		.uleb128 0x1
+ 2373 0985 30       		.byte	0x30
+ 2374 0986 00       		.byte	0
+ 2375 0987 0E       		.uleb128 0xe
+ 2376 0988 76000000 		.4byte	.LVL114
+ 2377 098c A00C0000 		.4byte	0xca0
+ 2378 0990 A4090000 		.4byte	0x9a4
+ 2379 0994 0F       		.uleb128 0xf
+ 2380 0995 01       		.uleb128 0x1
+ 2381 0996 50       		.byte	0x50
+ 2382 0997 02       		.uleb128 0x2
+ 2383 0998 75       		.byte	0x75
+ 2384 0999 00       		.sleb128 0
+ 2385 099a 0F       		.uleb128 0xf
+ 2386 099b 01       		.uleb128 0x1
+ 2387 099c 51       		.byte	0x51
+ 2388 099d 05       		.uleb128 0x5
+ 2389 099e 03       		.byte	0x3
+ 2390 099f 64000000 		.4byte	.LC7
+ 2391 09a3 00       		.byte	0
+ 2392 09a4 11       		.uleb128 0x11
+ 2393 09a5 7C000000 		.4byte	.LVL115
+ 2394 09a9 480C0000 		.4byte	0xc48
+ 2395 09ad 0F       		.uleb128 0xf
+ 2396 09ae 01       		.uleb128 0x1
+ 2397 09af 50       		.byte	0x50
+ 2398 09b0 02       		.uleb128 0x2
+ 2399 09b1 75       		.byte	0x75
+ 2400 09b2 00       		.sleb128 0
+ 2401 09b3 00       		.byte	0
+ 2402 09b4 00       		.byte	0
+ 2403 09b5 16       		.uleb128 0x16
+ 2404 09b6 82000000 		.4byte	.LBB8
+ 2405 09ba 3E000000 		.4byte	.LBE8-.LBB8
+ 2406 09be 960A0000 		.4byte	0xa96
+ 2407 09c2 1D       		.uleb128 0x1d
+ 2408 09c3 AB000000 		.4byte	.LASF65
+ 2409 09c7 01       		.byte	0x1
+ 2410 09c8 AC       		.byte	0xac
+ 2411 09c9 81000000 		.4byte	0x81
+ 2412 09cd D0030000 		.4byte	.LLST24
+ 2413 09d1 1D       		.uleb128 0x1d
+ 2414 09d2 02040000 		.4byte	.LASF66
+ 2415 09d6 01       		.byte	0x1
+ 2416 09d7 AD       		.byte	0xad
+ 2417 09d8 81000000 		.4byte	0x81
+ 2418 09dc E3030000 		.4byte	.LLST25
+ 2419 09e0 0E       		.uleb128 0xe
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 53
+
+
+ 2420 09e1 88000000 		.4byte	.LVL118
+ 2421 09e5 C7070000 		.4byte	0x7c7
+ 2422 09e9 F4090000 		.4byte	0x9f4
+ 2423 09ed 0F       		.uleb128 0xf
+ 2424 09ee 01       		.uleb128 0x1
+ 2425 09ef 50       		.byte	0x50
+ 2426 09f0 02       		.uleb128 0x2
+ 2427 09f1 74       		.byte	0x74
+ 2428 09f2 12       		.sleb128 18
+ 2429 09f3 00       		.byte	0
+ 2430 09f4 0E       		.uleb128 0xe
+ 2431 09f5 8E000000 		.4byte	.LVL120
+ 2432 09f9 63030000 		.4byte	0x363
+ 2433 09fd 080A0000 		.4byte	0xa08
+ 2434 0a01 0F       		.uleb128 0xf
+ 2435 0a02 01       		.uleb128 0x1
+ 2436 0a03 50       		.byte	0x50
+ 2437 0a04 02       		.uleb128 0x2
+ 2438 0a05 78       		.byte	0x78
+ 2439 0a06 00       		.sleb128 0
+ 2440 0a07 00       		.byte	0
+ 2441 0a08 0E       		.uleb128 0xe
+ 2442 0a09 9C000000 		.4byte	.LVL123
+ 2443 0a0d A00C0000 		.4byte	0xca0
+ 2444 0a11 2B0A0000 		.4byte	0xa2b
+ 2445 0a15 0F       		.uleb128 0xf
+ 2446 0a16 01       		.uleb128 0x1
+ 2447 0a17 50       		.byte	0x50
+ 2448 0a18 02       		.uleb128 0x2
+ 2449 0a19 75       		.byte	0x75
+ 2450 0a1a 00       		.sleb128 0
+ 2451 0a1b 0F       		.uleb128 0xf
+ 2452 0a1c 01       		.uleb128 0x1
+ 2453 0a1d 51       		.byte	0x51
+ 2454 0a1e 05       		.uleb128 0x5
+ 2455 0a1f 03       		.byte	0x3
+ 2456 0a20 70000000 		.4byte	.LC8
+ 2457 0a24 0F       		.uleb128 0xf
+ 2458 0a25 01       		.uleb128 0x1
+ 2459 0a26 52       		.byte	0x52
+ 2460 0a27 02       		.uleb128 0x2
+ 2461 0a28 77       		.byte	0x77
+ 2462 0a29 00       		.sleb128 0
+ 2463 0a2a 00       		.byte	0
+ 2464 0a2b 0E       		.uleb128 0xe
+ 2465 0a2c A4000000 		.4byte	.LVL124
+ 2466 0a30 3D0C0000 		.4byte	0xc3d
+ 2467 0a34 430A0000 		.4byte	0xa43
+ 2468 0a38 0F       		.uleb128 0xf
+ 2469 0a39 01       		.uleb128 0x1
+ 2470 0a3a 50       		.byte	0x50
+ 2471 0a3b 01       		.uleb128 0x1
+ 2472 0a3c 30       		.byte	0x30
+ 2473 0a3d 0F       		.uleb128 0xf
+ 2474 0a3e 01       		.uleb128 0x1
+ 2475 0a3f 51       		.byte	0x51
+ 2476 0a40 01       		.uleb128 0x1
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 54
+
+
+ 2477 0a41 30       		.byte	0x30
+ 2478 0a42 00       		.byte	0
+ 2479 0a43 0E       		.uleb128 0xe
+ 2480 0a44 B2000000 		.4byte	.LVL125
+ 2481 0a48 A00C0000 		.4byte	0xca0
+ 2482 0a4c 6C0A0000 		.4byte	0xa6c
+ 2483 0a50 0F       		.uleb128 0xf
+ 2484 0a51 01       		.uleb128 0x1
+ 2485 0a52 50       		.byte	0x50
+ 2486 0a53 02       		.uleb128 0x2
+ 2487 0a54 76       		.byte	0x76
+ 2488 0a55 00       		.sleb128 0
+ 2489 0a56 0F       		.uleb128 0xf
+ 2490 0a57 01       		.uleb128 0x1
+ 2491 0a58 51       		.byte	0x51
+ 2492 0a59 05       		.uleb128 0x5
+ 2493 0a5a 03       		.byte	0x3
+ 2494 0a5b 84000000 		.4byte	.LC9
+ 2495 0a5f 0F       		.uleb128 0xf
+ 2496 0a60 01       		.uleb128 0x1
+ 2497 0a61 52       		.byte	0x52
+ 2498 0a62 02       		.uleb128 0x2
+ 2499 0a63 78       		.byte	0x78
+ 2500 0a64 00       		.sleb128 0
+ 2501 0a65 0F       		.uleb128 0xf
+ 2502 0a66 01       		.uleb128 0x1
+ 2503 0a67 53       		.byte	0x53
+ 2504 0a68 02       		.uleb128 0x2
+ 2505 0a69 77       		.byte	0x77
+ 2506 0a6a 00       		.sleb128 0
+ 2507 0a6b 00       		.byte	0
+ 2508 0a6c 0E       		.uleb128 0xe
+ 2509 0a6d B8000000 		.4byte	.LVL126
+ 2510 0a71 480C0000 		.4byte	0xc48
+ 2511 0a75 800A0000 		.4byte	0xa80
+ 2512 0a79 0F       		.uleb128 0xf
+ 2513 0a7a 01       		.uleb128 0x1
+ 2514 0a7b 50       		.byte	0x50
+ 2515 0a7c 02       		.uleb128 0x2
+ 2516 0a7d 76       		.byte	0x76
+ 2517 0a7e 00       		.sleb128 0
+ 2518 0a7f 00       		.byte	0
+ 2519 0a80 11       		.uleb128 0x11
+ 2520 0a81 C0000000 		.4byte	.LVL127
+ 2521 0a85 950C0000 		.4byte	0xc95
+ 2522 0a89 0F       		.uleb128 0xf
+ 2523 0a8a 01       		.uleb128 0x1
+ 2524 0a8b 50       		.byte	0x50
+ 2525 0a8c 02       		.uleb128 0x2
+ 2526 0a8d 75       		.byte	0x75
+ 2527 0a8e 00       		.sleb128 0
+ 2528 0a8f 0F       		.uleb128 0xf
+ 2529 0a90 01       		.uleb128 0x1
+ 2530 0a91 51       		.byte	0x51
+ 2531 0a92 01       		.uleb128 0x1
+ 2532 0a93 3E       		.byte	0x3e
+ 2533 0a94 00       		.byte	0
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 55
+
+
+ 2534 0a95 00       		.byte	0
+ 2535 0a96 0E       		.uleb128 0xe
+ 2536 0a97 CE000000 		.4byte	.LVL128
+ 2537 0a9b 3D0C0000 		.4byte	0xc3d
+ 2538 0a9f AE0A0000 		.4byte	0xaae
+ 2539 0aa3 0F       		.uleb128 0xf
+ 2540 0aa4 01       		.uleb128 0x1
+ 2541 0aa5 50       		.byte	0x50
+ 2542 0aa6 01       		.uleb128 0x1
+ 2543 0aa7 30       		.byte	0x30
+ 2544 0aa8 0F       		.uleb128 0xf
+ 2545 0aa9 01       		.uleb128 0x1
+ 2546 0aaa 51       		.byte	0x51
+ 2547 0aab 01       		.uleb128 0x1
+ 2548 0aac 30       		.byte	0x30
+ 2549 0aad 00       		.byte	0
+ 2550 0aae 0E       		.uleb128 0xe
+ 2551 0aaf D4000000 		.4byte	.LVL129
+ 2552 0ab3 480C0000 		.4byte	0xc48
+ 2553 0ab7 C50A0000 		.4byte	0xac5
+ 2554 0abb 0F       		.uleb128 0xf
+ 2555 0abc 01       		.uleb128 0x1
+ 2556 0abd 50       		.byte	0x50
+ 2557 0abe 05       		.uleb128 0x5
+ 2558 0abf 03       		.byte	0x3
+ 2559 0ac0 9C000000 		.4byte	.LC10
+ 2560 0ac4 00       		.byte	0
+ 2561 0ac5 10       		.uleb128 0x10
+ 2562 0ac6 D8000000 		.4byte	.LVL130
+ 2563 0aca 78060000 		.4byte	0x678
+ 2564 0ace 0E       		.uleb128 0xe
+ 2565 0acf E4000000 		.4byte	.LVL133
+ 2566 0ad3 14080000 		.4byte	0x814
+ 2567 0ad7 E70A0000 		.4byte	0xae7
+ 2568 0adb 0F       		.uleb128 0xf
+ 2569 0adc 01       		.uleb128 0x1
+ 2570 0add 50       		.byte	0x50
+ 2571 0ade 02       		.uleb128 0x2
+ 2572 0adf 74       		.byte	0x74
+ 2573 0ae0 16       		.sleb128 22
+ 2574 0ae1 0F       		.uleb128 0xf
+ 2575 0ae2 01       		.uleb128 0x1
+ 2576 0ae3 51       		.byte	0x51
+ 2577 0ae4 01       		.uleb128 0x1
+ 2578 0ae5 33       		.byte	0x33
+ 2579 0ae6 00       		.byte	0
+ 2580 0ae7 0E       		.uleb128 0xe
+ 2581 0ae8 F0000000 		.4byte	.LVL135
+ 2582 0aec 8E040000 		.4byte	0x48e
+ 2583 0af0 FA0A0000 		.4byte	0xafa
+ 2584 0af4 0F       		.uleb128 0xf
+ 2585 0af5 01       		.uleb128 0x1
+ 2586 0af6 50       		.byte	0x50
+ 2587 0af7 01       		.uleb128 0x1
+ 2588 0af8 35       		.byte	0x35
+ 2589 0af9 00       		.byte	0
+ 2590 0afa 0E       		.uleb128 0xe
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 56
+
+
+ 2591 0afb FC000000 		.4byte	.LVL138
+ 2592 0aff 14080000 		.4byte	0x814
+ 2593 0b03 130B0000 		.4byte	0xb13
+ 2594 0b07 0F       		.uleb128 0xf
+ 2595 0b08 01       		.uleb128 0x1
+ 2596 0b09 50       		.byte	0x50
+ 2597 0b0a 02       		.uleb128 0x2
+ 2598 0b0b 74       		.byte	0x74
+ 2599 0b0c 0C       		.sleb128 12
+ 2600 0b0d 0F       		.uleb128 0xf
+ 2601 0b0e 01       		.uleb128 0x1
+ 2602 0b0f 51       		.byte	0x51
+ 2603 0b10 01       		.uleb128 0x1
+ 2604 0b11 31       		.byte	0x31
+ 2605 0b12 00       		.byte	0
+ 2606 0b13 0E       		.uleb128 0xe
+ 2607 0b14 0A010000 		.4byte	.LVL139
+ 2608 0b18 30050000 		.4byte	0x530
+ 2609 0b1c 2A0B0000 		.4byte	0xb2a
+ 2610 0b20 0F       		.uleb128 0xf
+ 2611 0b21 01       		.uleb128 0x1
+ 2612 0b22 50       		.byte	0x50
+ 2613 0b23 05       		.uleb128 0x5
+ 2614 0b24 03       		.byte	0x3
+ 2615 0b25 00000000 		.4byte	.LANCHOR0
+ 2616 0b29 00       		.byte	0
+ 2617 0b2a 0E       		.uleb128 0xe
+ 2618 0b2b 16010000 		.4byte	.LVL142
+ 2619 0b2f 14080000 		.4byte	0x814
+ 2620 0b33 430B0000 		.4byte	0xb43
+ 2621 0b37 0F       		.uleb128 0xf
+ 2622 0b38 01       		.uleb128 0x1
+ 2623 0b39 50       		.byte	0x50
+ 2624 0b3a 02       		.uleb128 0x2
+ 2625 0b3b 74       		.byte	0x74
+ 2626 0b3c 13       		.sleb128 19
+ 2627 0b3d 0F       		.uleb128 0xf
+ 2628 0b3e 01       		.uleb128 0x1
+ 2629 0b3f 51       		.byte	0x51
+ 2630 0b40 01       		.uleb128 0x1
+ 2631 0b41 31       		.byte	0x31
+ 2632 0b42 00       		.byte	0
+ 2633 0b43 0E       		.uleb128 0xe
+ 2634 0b44 24010000 		.4byte	.LVL143
+ 2635 0b48 81050000 		.4byte	0x581
+ 2636 0b4c 5A0B0000 		.4byte	0xb5a
+ 2637 0b50 0F       		.uleb128 0xf
+ 2638 0b51 01       		.uleb128 0x1
+ 2639 0b52 50       		.byte	0x50
+ 2640 0b53 05       		.uleb128 0x5
+ 2641 0b54 03       		.byte	0x3
+ 2642 0b55 00000000 		.4byte	.LANCHOR0
+ 2643 0b59 00       		.byte	0
+ 2644 0b5a 11       		.uleb128 0x11
+ 2645 0b5b 4E010000 		.4byte	.LVL146
+ 2646 0b5f 81050000 		.4byte	0x581
+ 2647 0b63 0F       		.uleb128 0xf
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 57
+
+
+ 2648 0b64 01       		.uleb128 0x1
+ 2649 0b65 50       		.byte	0x50
+ 2650 0b66 05       		.uleb128 0x5
+ 2651 0b67 03       		.byte	0x3
+ 2652 0b68 00000000 		.4byte	.LANCHOR0
+ 2653 0b6c 00       		.byte	0
+ 2654 0b6d 00       		.byte	0
+ 2655 0b6e 00       		.byte	0
+ 2656 0b6f 21       		.uleb128 0x21
+ 2657 0b70 86040000 		.4byte	.LASF67
+ 2658 0b74 06       		.byte	0x6
+ 2659 0b75 1207     		.2byte	0x712
+ 2660 0b77 7B0B0000 		.4byte	0xb7b
+ 2661 0b7b 22       		.uleb128 0x22
+ 2662 0b7c 76000000 		.4byte	0x76
+ 2663 0b80 0B       		.uleb128 0xb
+ 2664 0b81 B3000000 		.4byte	0xb3
+ 2665 0b85 900B0000 		.4byte	0xb90
+ 2666 0b89 0C       		.uleb128 0xc
+ 2667 0b8a C1000000 		.4byte	0xc1
+ 2668 0b8e 27       		.byte	0x27
+ 2669 0b8f 00       		.byte	0
+ 2670 0b90 23       		.uleb128 0x23
+ 2671 0b91 FE010000 		.4byte	.LASF68
+ 2672 0b95 07       		.byte	0x7
+ 2673 0b96 36       		.byte	0x36
+ 2674 0b97 800B0000 		.4byte	0xb80
+ 2675 0b9b 05       		.uleb128 0x5
+ 2676 0b9c 03       		.byte	0x3
+ 2677 0b9d 00000000 		.4byte	USB_str
+ 2678 0ba1 0B       		.uleb128 0xb
+ 2679 0ba2 81000000 		.4byte	0x81
+ 2680 0ba6 B10B0000 		.4byte	0xbb1
+ 2681 0baa 0C       		.uleb128 0xc
+ 2682 0bab C1000000 		.4byte	0xc1
+ 2683 0baf 27       		.byte	0x27
+ 2684 0bb0 00       		.byte	0
+ 2685 0bb1 23       		.uleb128 0x23
+ 2686 0bb2 01010000 		.4byte	.LASF69
+ 2687 0bb6 07       		.byte	0x7
+ 2688 0bb7 35       		.byte	0x35
+ 2689 0bb8 A10B0000 		.4byte	0xba1
+ 2690 0bbc 05       		.uleb128 0x5
+ 2691 0bbd 03       		.byte	0x3
+ 2692 0bbe 00000000 		.4byte	OUT_Data_Buffer
+ 2693 0bc2 24       		.uleb128 0x24
+ 2694 0bc3 19040000 		.4byte	.LASF70
+ 2695 0bc7 01       		.byte	0x1
+ 2696 0bc8 4E       		.byte	0x4e
+ 2697 0bc9 800B0000 		.4byte	0xb80
+ 2698 0bcd 23       		.uleb128 0x23
+ 2699 0bce 7E050000 		.4byte	.LASF71
+ 2700 0bd2 01       		.byte	0x1
+ 2701 0bd3 1F       		.byte	0x1f
+ 2702 0bd4 AD010000 		.4byte	0x1ad
+ 2703 0bd8 05       		.uleb128 0x5
+ 2704 0bd9 03       		.byte	0x3
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 58
+
+
+ 2705 0bda 00000000 		.4byte	read_buffer
+ 2706 0bde 0B       		.uleb128 0xb
+ 2707 0bdf 81000000 		.4byte	0x81
+ 2708 0be3 EE0B0000 		.4byte	0xbee
+ 2709 0be7 0C       		.uleb128 0xc
+ 2710 0be8 C1000000 		.4byte	0xc1
+ 2711 0bec 01       		.byte	0x1
+ 2712 0bed 00       		.byte	0
+ 2713 0bee 23       		.uleb128 0x23
+ 2714 0bef 4C010000 		.4byte	.LASF72
+ 2715 0bf3 01       		.byte	0x1
+ 2716 0bf4 20       		.byte	0x20
+ 2717 0bf5 DE0B0000 		.4byte	0xbde
+ 2718 0bf9 05       		.uleb128 0x5
+ 2719 0bfa 03       		.byte	0x3
+ 2720 0bfb 00000000 		.4byte	write_buffer
+ 2721 0bff 23       		.uleb128 0x23
+ 2722 0c00 00000000 		.4byte	.LASF73
+ 2723 0c04 01       		.byte	0x1
+ 2724 0c05 39       		.byte	0x39
+ 2725 0c06 7F010000 		.4byte	0x17f
+ 2726 0c0a 05       		.uleb128 0x5
+ 2727 0c0b 03       		.byte	0x3
+ 2728 0c0c 00000000 		.4byte	as7262
+ 2729 0c10 23       		.uleb128 0x23
+ 2730 0c11 D5030000 		.4byte	.LASF74
+ 2731 0c15 01       		.byte	0x1
+ 2732 0c16 4B       		.byte	0x4b
+ 2733 0c17 8A010000 		.4byte	0x18a
+ 2734 0c1b 05       		.uleb128 0x5
+ 2735 0c1c 03       		.byte	0x3
+ 2736 0c1d 00000000 		.4byte	all_calibrated_data
+ 2737 0c21 23       		.uleb128 0x23
+ 2738 0c22 4B040000 		.4byte	.LASF75
+ 2739 0c26 01       		.byte	0x1
+ 2740 0c27 4D       		.byte	0x4d
+ 2741 0c28 BD010000 		.4byte	0x1bd
+ 2742 0c2c 05       		.uleb128 0x5
+ 2743 0c2d 03       		.byte	0x3
+ 2744 0c2e 00000000 		.4byte	color_data
+ 2745 0c32 25       		.uleb128 0x25
+ 2746 0c33 34050000 		.4byte	.LASF76
+ 2747 0c37 34050000 		.4byte	.LASF76
+ 2748 0c3b 08       		.byte	0x8
+ 2749 0c3c 26       		.byte	0x26
+ 2750 0c3d 25       		.uleb128 0x25
+ 2751 0c3e 0C040000 		.4byte	.LASF77
+ 2752 0c42 0C040000 		.4byte	.LASF77
+ 2753 0c46 09       		.byte	0x9
+ 2754 0c47 3D       		.byte	0x3d
+ 2755 0c48 25       		.uleb128 0x25
+ 2756 0c49 0C030000 		.4byte	.LASF78
+ 2757 0c4d 0C030000 		.4byte	.LASF78
+ 2758 0c51 09       		.byte	0x9
+ 2759 0c52 3C       		.byte	0x3c
+ 2760 0c53 25       		.uleb128 0x25
+ 2761 0c54 B7000000 		.4byte	.LASF79
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 59
+
+
+ 2762 0c58 B7000000 		.4byte	.LASF79
+ 2763 0c5c 0A       		.byte	0xa
+ 2764 0c5d 2B       		.byte	0x2b
+ 2765 0c5e 25       		.uleb128 0x25
+ 2766 0c5f 8C010000 		.4byte	.LASF80
+ 2767 0c63 8C010000 		.4byte	.LASF80
+ 2768 0c67 0B       		.byte	0xb
+ 2769 0c68 26       		.byte	0x26
+ 2770 0c69 25       		.uleb128 0x25
+ 2771 0c6a 16020000 		.4byte	.LASF81
+ 2772 0c6e 16020000 		.4byte	.LASF81
+ 2773 0c72 0C       		.byte	0xc
+ 2774 0c73 24       		.byte	0x24
+ 2775 0c74 25       		.uleb128 0x25
+ 2776 0c75 9D000000 		.4byte	.LASF82
+ 2777 0c79 9D000000 		.4byte	.LASF82
+ 2778 0c7d 0C       		.byte	0xc
+ 2779 0c7e 21       		.byte	0x21
+ 2780 0c7f 25       		.uleb128 0x25
+ 2781 0c80 21050000 		.4byte	.LASF83
+ 2782 0c84 21050000 		.4byte	.LASF83
+ 2783 0c88 0D       		.byte	0xd
+ 2784 0c89 76       		.byte	0x76
+ 2785 0c8a 25       		.uleb128 0x25
+ 2786 0c8b 34000000 		.4byte	.LASF84
+ 2787 0c8f 34000000 		.4byte	.LASF84
+ 2788 0c93 09       		.byte	0x9
+ 2789 0c94 3A       		.byte	0x3a
+ 2790 0c95 25       		.uleb128 0x25
+ 2791 0c96 07000000 		.4byte	.LASF85
+ 2792 0c9a 07000000 		.4byte	.LASF85
+ 2793 0c9e 07       		.byte	0x7
+ 2794 0c9f 43       		.byte	0x43
+ 2795 0ca0 25       		.uleb128 0x25
+ 2796 0ca1 58020000 		.4byte	.LASF86
+ 2797 0ca5 58020000 		.4byte	.LASF86
+ 2798 0ca9 0E       		.byte	0xe
+ 2799 0caa E7       		.byte	0xe7
+ 2800 0cab 00       		.byte	0
+ 2801              		.section	.debug_abbrev,"",%progbits
+ 2802              	.Ldebug_abbrev0:
+ 2803 0000 01       		.uleb128 0x1
+ 2804 0001 11       		.uleb128 0x11
+ 2805 0002 01       		.byte	0x1
+ 2806 0003 25       		.uleb128 0x25
+ 2807 0004 0E       		.uleb128 0xe
+ 2808 0005 13       		.uleb128 0x13
+ 2809 0006 0B       		.uleb128 0xb
+ 2810 0007 03       		.uleb128 0x3
+ 2811 0008 0E       		.uleb128 0xe
+ 2812 0009 1B       		.uleb128 0x1b
+ 2813 000a 0E       		.uleb128 0xe
+ 2814 000b 55       		.uleb128 0x55
+ 2815 000c 17       		.uleb128 0x17
+ 2816 000d 11       		.uleb128 0x11
+ 2817 000e 01       		.uleb128 0x1
+ 2818 000f 10       		.uleb128 0x10
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 60
+
+
+ 2819 0010 17       		.uleb128 0x17
+ 2820 0011 00       		.byte	0
+ 2821 0012 00       		.byte	0
+ 2822 0013 02       		.uleb128 0x2
+ 2823 0014 24       		.uleb128 0x24
+ 2824 0015 00       		.byte	0
+ 2825 0016 0B       		.uleb128 0xb
+ 2826 0017 0B       		.uleb128 0xb
+ 2827 0018 3E       		.uleb128 0x3e
+ 2828 0019 0B       		.uleb128 0xb
+ 2829 001a 03       		.uleb128 0x3
+ 2830 001b 0E       		.uleb128 0xe
+ 2831 001c 00       		.byte	0
+ 2832 001d 00       		.byte	0
+ 2833 001e 03       		.uleb128 0x3
+ 2834 001f 16       		.uleb128 0x16
+ 2835 0020 00       		.byte	0
+ 2836 0021 03       		.uleb128 0x3
+ 2837 0022 0E       		.uleb128 0xe
+ 2838 0023 3A       		.uleb128 0x3a
+ 2839 0024 0B       		.uleb128 0xb
+ 2840 0025 3B       		.uleb128 0x3b
+ 2841 0026 0B       		.uleb128 0xb
+ 2842 0027 49       		.uleb128 0x49
+ 2843 0028 13       		.uleb128 0x13
+ 2844 0029 00       		.byte	0
+ 2845 002a 00       		.byte	0
+ 2846 002b 04       		.uleb128 0x4
+ 2847 002c 24       		.uleb128 0x24
+ 2848 002d 00       		.byte	0
+ 2849 002e 0B       		.uleb128 0xb
+ 2850 002f 0B       		.uleb128 0xb
+ 2851 0030 3E       		.uleb128 0x3e
+ 2852 0031 0B       		.uleb128 0xb
+ 2853 0032 03       		.uleb128 0x3
+ 2854 0033 08       		.uleb128 0x8
+ 2855 0034 00       		.byte	0
+ 2856 0035 00       		.byte	0
+ 2857 0036 05       		.uleb128 0x5
+ 2858 0037 16       		.uleb128 0x16
+ 2859 0038 00       		.byte	0
+ 2860 0039 03       		.uleb128 0x3
+ 2861 003a 0E       		.uleb128 0xe
+ 2862 003b 3A       		.uleb128 0x3a
+ 2863 003c 0B       		.uleb128 0xb
+ 2864 003d 3B       		.uleb128 0x3b
+ 2865 003e 05       		.uleb128 0x5
+ 2866 003f 49       		.uleb128 0x49
+ 2867 0040 13       		.uleb128 0x13
+ 2868 0041 00       		.byte	0
+ 2869 0042 00       		.byte	0
+ 2870 0043 06       		.uleb128 0x6
+ 2871 0044 13       		.uleb128 0x13
+ 2872 0045 01       		.byte	0x1
+ 2873 0046 0B       		.uleb128 0xb
+ 2874 0047 0B       		.uleb128 0xb
+ 2875 0048 3A       		.uleb128 0x3a
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 61
+
+
+ 2876 0049 0B       		.uleb128 0xb
+ 2877 004a 3B       		.uleb128 0x3b
+ 2878 004b 0B       		.uleb128 0xb
+ 2879 004c 01       		.uleb128 0x1
+ 2880 004d 13       		.uleb128 0x13
+ 2881 004e 00       		.byte	0
+ 2882 004f 00       		.byte	0
+ 2883 0050 07       		.uleb128 0x7
+ 2884 0051 0D       		.uleb128 0xd
+ 2885 0052 00       		.byte	0
+ 2886 0053 03       		.uleb128 0x3
+ 2887 0054 0E       		.uleb128 0xe
+ 2888 0055 3A       		.uleb128 0x3a
+ 2889 0056 0B       		.uleb128 0xb
+ 2890 0057 3B       		.uleb128 0x3b
+ 2891 0058 0B       		.uleb128 0xb
+ 2892 0059 49       		.uleb128 0x49
+ 2893 005a 13       		.uleb128 0x13
+ 2894 005b 38       		.uleb128 0x38
+ 2895 005c 0B       		.uleb128 0xb
+ 2896 005d 00       		.byte	0
+ 2897 005e 00       		.byte	0
+ 2898 005f 08       		.uleb128 0x8
+ 2899 0060 0F       		.uleb128 0xf
+ 2900 0061 00       		.byte	0
+ 2901 0062 0B       		.uleb128 0xb
+ 2902 0063 0B       		.uleb128 0xb
+ 2903 0064 49       		.uleb128 0x49
+ 2904 0065 13       		.uleb128 0x13
+ 2905 0066 00       		.byte	0
+ 2906 0067 00       		.byte	0
+ 2907 0068 09       		.uleb128 0x9
+ 2908 0069 17       		.uleb128 0x17
+ 2909 006a 01       		.byte	0x1
+ 2910 006b 03       		.uleb128 0x3
+ 2911 006c 0E       		.uleb128 0xe
+ 2912 006d 0B       		.uleb128 0xb
+ 2913 006e 0B       		.uleb128 0xb
+ 2914 006f 3A       		.uleb128 0x3a
+ 2915 0070 0B       		.uleb128 0xb
+ 2916 0071 3B       		.uleb128 0x3b
+ 2917 0072 0B       		.uleb128 0xb
+ 2918 0073 01       		.uleb128 0x1
+ 2919 0074 13       		.uleb128 0x13
+ 2920 0075 00       		.byte	0
+ 2921 0076 00       		.byte	0
+ 2922 0077 0A       		.uleb128 0xa
+ 2923 0078 0D       		.uleb128 0xd
+ 2924 0079 00       		.byte	0
+ 2925 007a 03       		.uleb128 0x3
+ 2926 007b 0E       		.uleb128 0xe
+ 2927 007c 3A       		.uleb128 0x3a
+ 2928 007d 0B       		.uleb128 0xb
+ 2929 007e 3B       		.uleb128 0x3b
+ 2930 007f 0B       		.uleb128 0xb
+ 2931 0080 49       		.uleb128 0x49
+ 2932 0081 13       		.uleb128 0x13
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 62
+
+
+ 2933 0082 00       		.byte	0
+ 2934 0083 00       		.byte	0
+ 2935 0084 0B       		.uleb128 0xb
+ 2936 0085 01       		.uleb128 0x1
+ 2937 0086 01       		.byte	0x1
+ 2938 0087 49       		.uleb128 0x49
+ 2939 0088 13       		.uleb128 0x13
+ 2940 0089 01       		.uleb128 0x1
+ 2941 008a 13       		.uleb128 0x13
+ 2942 008b 00       		.byte	0
+ 2943 008c 00       		.byte	0
+ 2944 008d 0C       		.uleb128 0xc
+ 2945 008e 21       		.uleb128 0x21
+ 2946 008f 00       		.byte	0
+ 2947 0090 49       		.uleb128 0x49
+ 2948 0091 13       		.uleb128 0x13
+ 2949 0092 2F       		.uleb128 0x2f
+ 2950 0093 0B       		.uleb128 0xb
+ 2951 0094 00       		.byte	0
+ 2952 0095 00       		.byte	0
+ 2953 0096 0D       		.uleb128 0xd
+ 2954 0097 2E       		.uleb128 0x2e
+ 2955 0098 01       		.byte	0x1
+ 2956 0099 3F       		.uleb128 0x3f
+ 2957 009a 19       		.uleb128 0x19
+ 2958 009b 03       		.uleb128 0x3
+ 2959 009c 0E       		.uleb128 0xe
+ 2960 009d 3A       		.uleb128 0x3a
+ 2961 009e 0B       		.uleb128 0xb
+ 2962 009f 3B       		.uleb128 0x3b
+ 2963 00a0 0B       		.uleb128 0xb
+ 2964 00a1 27       		.uleb128 0x27
+ 2965 00a2 19       		.uleb128 0x19
+ 2966 00a3 11       		.uleb128 0x11
+ 2967 00a4 01       		.uleb128 0x1
+ 2968 00a5 12       		.uleb128 0x12
+ 2969 00a6 06       		.uleb128 0x6
+ 2970 00a7 40       		.uleb128 0x40
+ 2971 00a8 18       		.uleb128 0x18
+ 2972 00a9 9742     		.uleb128 0x2117
+ 2973 00ab 19       		.uleb128 0x19
+ 2974 00ac 01       		.uleb128 0x1
+ 2975 00ad 13       		.uleb128 0x13
+ 2976 00ae 00       		.byte	0
+ 2977 00af 00       		.byte	0
+ 2978 00b0 0E       		.uleb128 0xe
+ 2979 00b1 898201   		.uleb128 0x4109
+ 2980 00b4 01       		.byte	0x1
+ 2981 00b5 11       		.uleb128 0x11
+ 2982 00b6 01       		.uleb128 0x1
+ 2983 00b7 31       		.uleb128 0x31
+ 2984 00b8 13       		.uleb128 0x13
+ 2985 00b9 01       		.uleb128 0x1
+ 2986 00ba 13       		.uleb128 0x13
+ 2987 00bb 00       		.byte	0
+ 2988 00bc 00       		.byte	0
+ 2989 00bd 0F       		.uleb128 0xf
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 63
+
+
+ 2990 00be 8A8201   		.uleb128 0x410a
+ 2991 00c1 00       		.byte	0
+ 2992 00c2 02       		.uleb128 0x2
+ 2993 00c3 18       		.uleb128 0x18
+ 2994 00c4 9142     		.uleb128 0x2111
+ 2995 00c6 18       		.uleb128 0x18
+ 2996 00c7 00       		.byte	0
+ 2997 00c8 00       		.byte	0
+ 2998 00c9 10       		.uleb128 0x10
+ 2999 00ca 898201   		.uleb128 0x4109
+ 3000 00cd 00       		.byte	0
+ 3001 00ce 11       		.uleb128 0x11
+ 3002 00cf 01       		.uleb128 0x1
+ 3003 00d0 31       		.uleb128 0x31
+ 3004 00d1 13       		.uleb128 0x13
+ 3005 00d2 00       		.byte	0
+ 3006 00d3 00       		.byte	0
+ 3007 00d4 11       		.uleb128 0x11
+ 3008 00d5 898201   		.uleb128 0x4109
+ 3009 00d8 01       		.byte	0x1
+ 3010 00d9 11       		.uleb128 0x11
+ 3011 00da 01       		.uleb128 0x1
+ 3012 00db 31       		.uleb128 0x31
+ 3013 00dc 13       		.uleb128 0x13
+ 3014 00dd 00       		.byte	0
+ 3015 00de 00       		.byte	0
+ 3016 00df 12       		.uleb128 0x12
+ 3017 00e0 2E       		.uleb128 0x2e
+ 3018 00e1 01       		.byte	0x1
+ 3019 00e2 3F       		.uleb128 0x3f
+ 3020 00e3 19       		.uleb128 0x19
+ 3021 00e4 03       		.uleb128 0x3
+ 3022 00e5 0E       		.uleb128 0xe
+ 3023 00e6 3A       		.uleb128 0x3a
+ 3024 00e7 0B       		.uleb128 0xb
+ 3025 00e8 3B       		.uleb128 0x3b
+ 3026 00e9 05       		.uleb128 0x5
+ 3027 00ea 27       		.uleb128 0x27
+ 3028 00eb 19       		.uleb128 0x19
+ 3029 00ec 49       		.uleb128 0x49
+ 3030 00ed 13       		.uleb128 0x13
+ 3031 00ee 11       		.uleb128 0x11
+ 3032 00ef 01       		.uleb128 0x1
+ 3033 00f0 12       		.uleb128 0x12
+ 3034 00f1 06       		.uleb128 0x6
+ 3035 00f2 40       		.uleb128 0x40
+ 3036 00f3 18       		.uleb128 0x18
+ 3037 00f4 9742     		.uleb128 0x2117
+ 3038 00f6 19       		.uleb128 0x19
+ 3039 00f7 01       		.uleb128 0x1
+ 3040 00f8 13       		.uleb128 0x13
+ 3041 00f9 00       		.byte	0
+ 3042 00fa 00       		.byte	0
+ 3043 00fb 13       		.uleb128 0x13
+ 3044 00fc 05       		.uleb128 0x5
+ 3045 00fd 00       		.byte	0
+ 3046 00fe 03       		.uleb128 0x3
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 64
+
+
+ 3047 00ff 0E       		.uleb128 0xe
+ 3048 0100 3A       		.uleb128 0x3a
+ 3049 0101 0B       		.uleb128 0xb
+ 3050 0102 3B       		.uleb128 0x3b
+ 3051 0103 05       		.uleb128 0x5
+ 3052 0104 49       		.uleb128 0x49
+ 3053 0105 13       		.uleb128 0x13
+ 3054 0106 02       		.uleb128 0x2
+ 3055 0107 17       		.uleb128 0x17
+ 3056 0108 00       		.byte	0
+ 3057 0109 00       		.byte	0
+ 3058 010a 14       		.uleb128 0x14
+ 3059 010b 34       		.uleb128 0x34
+ 3060 010c 00       		.byte	0
+ 3061 010d 03       		.uleb128 0x3
+ 3062 010e 0E       		.uleb128 0xe
+ 3063 010f 3A       		.uleb128 0x3a
+ 3064 0110 0B       		.uleb128 0xb
+ 3065 0111 3B       		.uleb128 0x3b
+ 3066 0112 05       		.uleb128 0x5
+ 3067 0113 49       		.uleb128 0x49
+ 3068 0114 13       		.uleb128 0x13
+ 3069 0115 00       		.byte	0
+ 3070 0116 00       		.byte	0
+ 3071 0117 15       		.uleb128 0x15
+ 3072 0118 34       		.uleb128 0x34
+ 3073 0119 00       		.byte	0
+ 3074 011a 03       		.uleb128 0x3
+ 3075 011b 0E       		.uleb128 0xe
+ 3076 011c 3A       		.uleb128 0x3a
+ 3077 011d 0B       		.uleb128 0xb
+ 3078 011e 3B       		.uleb128 0x3b
+ 3079 011f 05       		.uleb128 0x5
+ 3080 0120 49       		.uleb128 0x49
+ 3081 0121 13       		.uleb128 0x13
+ 3082 0122 02       		.uleb128 0x2
+ 3083 0123 17       		.uleb128 0x17
+ 3084 0124 00       		.byte	0
+ 3085 0125 00       		.byte	0
+ 3086 0126 16       		.uleb128 0x16
+ 3087 0127 0B       		.uleb128 0xb
+ 3088 0128 01       		.byte	0x1
+ 3089 0129 11       		.uleb128 0x11
+ 3090 012a 01       		.uleb128 0x1
+ 3091 012b 12       		.uleb128 0x12
+ 3092 012c 06       		.uleb128 0x6
+ 3093 012d 01       		.uleb128 0x1
+ 3094 012e 13       		.uleb128 0x13
+ 3095 012f 00       		.byte	0
+ 3096 0130 00       		.byte	0
+ 3097 0131 17       		.uleb128 0x17
+ 3098 0132 2E       		.uleb128 0x2e
+ 3099 0133 01       		.byte	0x1
+ 3100 0134 3F       		.uleb128 0x3f
+ 3101 0135 19       		.uleb128 0x19
+ 3102 0136 03       		.uleb128 0x3
+ 3103 0137 0E       		.uleb128 0xe
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 65
+
+
+ 3104 0138 3A       		.uleb128 0x3a
+ 3105 0139 0B       		.uleb128 0xb
+ 3106 013a 3B       		.uleb128 0x3b
+ 3107 013b 05       		.uleb128 0x5
+ 3108 013c 27       		.uleb128 0x27
+ 3109 013d 19       		.uleb128 0x19
+ 3110 013e 11       		.uleb128 0x11
+ 3111 013f 01       		.uleb128 0x1
+ 3112 0140 12       		.uleb128 0x12
+ 3113 0141 06       		.uleb128 0x6
+ 3114 0142 40       		.uleb128 0x40
+ 3115 0143 18       		.uleb128 0x18
+ 3116 0144 9742     		.uleb128 0x2117
+ 3117 0146 19       		.uleb128 0x19
+ 3118 0147 01       		.uleb128 0x1
+ 3119 0148 13       		.uleb128 0x13
+ 3120 0149 00       		.byte	0
+ 3121 014a 00       		.byte	0
+ 3122 014b 18       		.uleb128 0x18
+ 3123 014c 0B       		.uleb128 0xb
+ 3124 014d 01       		.byte	0x1
+ 3125 014e 11       		.uleb128 0x11
+ 3126 014f 01       		.uleb128 0x1
+ 3127 0150 12       		.uleb128 0x12
+ 3128 0151 06       		.uleb128 0x6
+ 3129 0152 00       		.byte	0
+ 3130 0153 00       		.byte	0
+ 3131 0154 19       		.uleb128 0x19
+ 3132 0155 34       		.uleb128 0x34
+ 3133 0156 00       		.byte	0
+ 3134 0157 03       		.uleb128 0x3
+ 3135 0158 08       		.uleb128 0x8
+ 3136 0159 3A       		.uleb128 0x3a
+ 3137 015a 0B       		.uleb128 0xb
+ 3138 015b 3B       		.uleb128 0x3b
+ 3139 015c 05       		.uleb128 0x5
+ 3140 015d 49       		.uleb128 0x49
+ 3141 015e 13       		.uleb128 0x13
+ 3142 015f 02       		.uleb128 0x2
+ 3143 0160 17       		.uleb128 0x17
+ 3144 0161 00       		.byte	0
+ 3145 0162 00       		.byte	0
+ 3146 0163 1A       		.uleb128 0x1a
+ 3147 0164 2E       		.uleb128 0x2e
+ 3148 0165 01       		.byte	0x1
+ 3149 0166 3F       		.uleb128 0x3f
+ 3150 0167 19       		.uleb128 0x19
+ 3151 0168 03       		.uleb128 0x3
+ 3152 0169 0E       		.uleb128 0xe
+ 3153 016a 3A       		.uleb128 0x3a
+ 3154 016b 0B       		.uleb128 0xb
+ 3155 016c 3B       		.uleb128 0x3b
+ 3156 016d 0B       		.uleb128 0xb
+ 3157 016e 27       		.uleb128 0x27
+ 3158 016f 19       		.uleb128 0x19
+ 3159 0170 49       		.uleb128 0x49
+ 3160 0171 13       		.uleb128 0x13
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 66
+
+
+ 3161 0172 11       		.uleb128 0x11
+ 3162 0173 01       		.uleb128 0x1
+ 3163 0174 12       		.uleb128 0x12
+ 3164 0175 06       		.uleb128 0x6
+ 3165 0176 40       		.uleb128 0x40
+ 3166 0177 18       		.uleb128 0x18
+ 3167 0178 9742     		.uleb128 0x2117
+ 3168 017a 19       		.uleb128 0x19
+ 3169 017b 01       		.uleb128 0x1
+ 3170 017c 13       		.uleb128 0x13
+ 3171 017d 00       		.byte	0
+ 3172 017e 00       		.byte	0
+ 3173 017f 1B       		.uleb128 0x1b
+ 3174 0180 05       		.uleb128 0x5
+ 3175 0181 00       		.byte	0
+ 3176 0182 03       		.uleb128 0x3
+ 3177 0183 0E       		.uleb128 0xe
+ 3178 0184 3A       		.uleb128 0x3a
+ 3179 0185 0B       		.uleb128 0xb
+ 3180 0186 3B       		.uleb128 0x3b
+ 3181 0187 0B       		.uleb128 0xb
+ 3182 0188 49       		.uleb128 0x49
+ 3183 0189 13       		.uleb128 0x13
+ 3184 018a 02       		.uleb128 0x2
+ 3185 018b 17       		.uleb128 0x17
+ 3186 018c 00       		.byte	0
+ 3187 018d 00       		.byte	0
+ 3188 018e 1C       		.uleb128 0x1c
+ 3189 018f 34       		.uleb128 0x34
+ 3190 0190 00       		.byte	0
+ 3191 0191 03       		.uleb128 0x3
+ 3192 0192 0E       		.uleb128 0xe
+ 3193 0193 3A       		.uleb128 0x3a
+ 3194 0194 0B       		.uleb128 0xb
+ 3195 0195 3B       		.uleb128 0x3b
+ 3196 0196 0B       		.uleb128 0xb
+ 3197 0197 49       		.uleb128 0x49
+ 3198 0198 13       		.uleb128 0x13
+ 3199 0199 02       		.uleb128 0x2
+ 3200 019a 18       		.uleb128 0x18
+ 3201 019b 00       		.byte	0
+ 3202 019c 00       		.byte	0
+ 3203 019d 1D       		.uleb128 0x1d
+ 3204 019e 34       		.uleb128 0x34
+ 3205 019f 00       		.byte	0
+ 3206 01a0 03       		.uleb128 0x3
+ 3207 01a1 0E       		.uleb128 0xe
+ 3208 01a2 3A       		.uleb128 0x3a
+ 3209 01a3 0B       		.uleb128 0xb
+ 3210 01a4 3B       		.uleb128 0x3b
+ 3211 01a5 0B       		.uleb128 0xb
+ 3212 01a6 49       		.uleb128 0x49
+ 3213 01a7 13       		.uleb128 0x13
+ 3214 01a8 02       		.uleb128 0x2
+ 3215 01a9 17       		.uleb128 0x17
+ 3216 01aa 00       		.byte	0
+ 3217 01ab 00       		.byte	0
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 67
+
+
+ 3218 01ac 1E       		.uleb128 0x1e
+ 3219 01ad 2E       		.uleb128 0x2e
+ 3220 01ae 01       		.byte	0x1
+ 3221 01af 3F       		.uleb128 0x3f
+ 3222 01b0 19       		.uleb128 0x19
+ 3223 01b1 03       		.uleb128 0x3
+ 3224 01b2 0E       		.uleb128 0xe
+ 3225 01b3 3A       		.uleb128 0x3a
+ 3226 01b4 0B       		.uleb128 0xb
+ 3227 01b5 3B       		.uleb128 0x3b
+ 3228 01b6 0B       		.uleb128 0xb
+ 3229 01b7 27       		.uleb128 0x27
+ 3230 01b8 19       		.uleb128 0x19
+ 3231 01b9 11       		.uleb128 0x11
+ 3232 01ba 01       		.uleb128 0x1
+ 3233 01bb 12       		.uleb128 0x12
+ 3234 01bc 06       		.uleb128 0x6
+ 3235 01bd 40       		.uleb128 0x40
+ 3236 01be 18       		.uleb128 0x18
+ 3237 01bf 9642     		.uleb128 0x2116
+ 3238 01c1 19       		.uleb128 0x19
+ 3239 01c2 01       		.uleb128 0x1
+ 3240 01c3 13       		.uleb128 0x13
+ 3241 01c4 00       		.byte	0
+ 3242 01c5 00       		.byte	0
+ 3243 01c6 1F       		.uleb128 0x1f
+ 3244 01c7 05       		.uleb128 0x5
+ 3245 01c8 00       		.byte	0
+ 3246 01c9 03       		.uleb128 0x3
+ 3247 01ca 08       		.uleb128 0x8
+ 3248 01cb 3A       		.uleb128 0x3a
+ 3249 01cc 0B       		.uleb128 0xb
+ 3250 01cd 3B       		.uleb128 0x3b
+ 3251 01ce 05       		.uleb128 0x5
+ 3252 01cf 49       		.uleb128 0x49
+ 3253 01d0 13       		.uleb128 0x13
+ 3254 01d1 02       		.uleb128 0x2
+ 3255 01d2 18       		.uleb128 0x18
+ 3256 01d3 00       		.byte	0
+ 3257 01d4 00       		.byte	0
+ 3258 01d5 20       		.uleb128 0x20
+ 3259 01d6 0B       		.uleb128 0xb
+ 3260 01d7 01       		.byte	0x1
+ 3261 01d8 55       		.uleb128 0x55
+ 3262 01d9 17       		.uleb128 0x17
+ 3263 01da 00       		.byte	0
+ 3264 01db 00       		.byte	0
+ 3265 01dc 21       		.uleb128 0x21
+ 3266 01dd 34       		.uleb128 0x34
+ 3267 01de 00       		.byte	0
+ 3268 01df 03       		.uleb128 0x3
+ 3269 01e0 0E       		.uleb128 0xe
+ 3270 01e1 3A       		.uleb128 0x3a
+ 3271 01e2 0B       		.uleb128 0xb
+ 3272 01e3 3B       		.uleb128 0x3b
+ 3273 01e4 05       		.uleb128 0x5
+ 3274 01e5 49       		.uleb128 0x49
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 68
+
+
+ 3275 01e6 13       		.uleb128 0x13
+ 3276 01e7 3F       		.uleb128 0x3f
+ 3277 01e8 19       		.uleb128 0x19
+ 3278 01e9 3C       		.uleb128 0x3c
+ 3279 01ea 19       		.uleb128 0x19
+ 3280 01eb 00       		.byte	0
+ 3281 01ec 00       		.byte	0
+ 3282 01ed 22       		.uleb128 0x22
+ 3283 01ee 35       		.uleb128 0x35
+ 3284 01ef 00       		.byte	0
+ 3285 01f0 49       		.uleb128 0x49
+ 3286 01f1 13       		.uleb128 0x13
+ 3287 01f2 00       		.byte	0
+ 3288 01f3 00       		.byte	0
+ 3289 01f4 23       		.uleb128 0x23
+ 3290 01f5 34       		.uleb128 0x34
+ 3291 01f6 00       		.byte	0
+ 3292 01f7 03       		.uleb128 0x3
+ 3293 01f8 0E       		.uleb128 0xe
+ 3294 01f9 3A       		.uleb128 0x3a
+ 3295 01fa 0B       		.uleb128 0xb
+ 3296 01fb 3B       		.uleb128 0x3b
+ 3297 01fc 0B       		.uleb128 0xb
+ 3298 01fd 49       		.uleb128 0x49
+ 3299 01fe 13       		.uleb128 0x13
+ 3300 01ff 3F       		.uleb128 0x3f
+ 3301 0200 19       		.uleb128 0x19
+ 3302 0201 02       		.uleb128 0x2
+ 3303 0202 18       		.uleb128 0x18
+ 3304 0203 00       		.byte	0
+ 3305 0204 00       		.byte	0
+ 3306 0205 24       		.uleb128 0x24
+ 3307 0206 34       		.uleb128 0x34
+ 3308 0207 00       		.byte	0
+ 3309 0208 03       		.uleb128 0x3
+ 3310 0209 0E       		.uleb128 0xe
+ 3311 020a 3A       		.uleb128 0x3a
+ 3312 020b 0B       		.uleb128 0xb
+ 3313 020c 3B       		.uleb128 0x3b
+ 3314 020d 0B       		.uleb128 0xb
+ 3315 020e 49       		.uleb128 0x49
+ 3316 020f 13       		.uleb128 0x13
+ 3317 0210 3F       		.uleb128 0x3f
+ 3318 0211 19       		.uleb128 0x19
+ 3319 0212 3C       		.uleb128 0x3c
+ 3320 0213 19       		.uleb128 0x19
+ 3321 0214 00       		.byte	0
+ 3322 0215 00       		.byte	0
+ 3323 0216 25       		.uleb128 0x25
+ 3324 0217 2E       		.uleb128 0x2e
+ 3325 0218 00       		.byte	0
+ 3326 0219 3F       		.uleb128 0x3f
+ 3327 021a 19       		.uleb128 0x19
+ 3328 021b 3C       		.uleb128 0x3c
+ 3329 021c 19       		.uleb128 0x19
+ 3330 021d 6E       		.uleb128 0x6e
+ 3331 021e 0E       		.uleb128 0xe
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 69
+
+
+ 3332 021f 03       		.uleb128 0x3
+ 3333 0220 0E       		.uleb128 0xe
+ 3334 0221 3A       		.uleb128 0x3a
+ 3335 0222 0B       		.uleb128 0xb
+ 3336 0223 3B       		.uleb128 0x3b
+ 3337 0224 0B       		.uleb128 0xb
+ 3338 0225 00       		.byte	0
+ 3339 0226 00       		.byte	0
+ 3340 0227 00       		.byte	0
+ 3341              		.section	.debug_loc,"",%progbits
+ 3342              	.Ldebug_loc0:
+ 3343              	.LLST0:
+ 3344 0000 00000000 		.4byte	.LVL9
+ 3345 0004 0C000000 		.4byte	.LVL10
+ 3346 0008 0100     		.2byte	0x1
+ 3347 000a 50       		.byte	0x50
+ 3348 000b 0C000000 		.4byte	.LVL10
+ 3349 000f 1C000000 		.4byte	.LFE73
+ 3350 0013 0400     		.2byte	0x4
+ 3351 0015 F3       		.byte	0xf3
+ 3352 0016 01       		.uleb128 0x1
+ 3353 0017 50       		.byte	0x50
+ 3354 0018 9F       		.byte	0x9f
+ 3355 0019 00000000 		.4byte	0
+ 3356 001d 00000000 		.4byte	0
+ 3357              	.LLST1:
+ 3358 0021 00000000 		.4byte	.LVL12
+ 3359 0025 0C000000 		.4byte	.LVL14
+ 3360 0029 0100     		.2byte	0x1
+ 3361 002b 50       		.byte	0x50
+ 3362 002c 0C000000 		.4byte	.LVL14
+ 3363 0030 0F000000 		.4byte	.LVL15-1
+ 3364 0034 0500     		.2byte	0x5
+ 3365 0036 03       		.byte	0x3
+ 3366 0037 00000000 		.4byte	write_buffer
+ 3367 003b 0F000000 		.4byte	.LVL15-1
+ 3368 003f 18000000 		.4byte	.LFE75
+ 3369 0043 0400     		.2byte	0x4
+ 3370 0045 F3       		.byte	0xf3
+ 3371 0046 01       		.uleb128 0x1
+ 3372 0047 50       		.byte	0x50
+ 3373 0048 9F       		.byte	0x9f
+ 3374 0049 00000000 		.4byte	0
+ 3375 004d 00000000 		.4byte	0
+ 3376              	.LLST2:
+ 3377 0051 00000000 		.4byte	.LVL12
+ 3378 0055 0A000000 		.4byte	.LVL13
+ 3379 0059 0100     		.2byte	0x1
+ 3380 005b 51       		.byte	0x51
+ 3381 005c 0A000000 		.4byte	.LVL13
+ 3382 0060 0F000000 		.4byte	.LVL15-1
+ 3383 0064 0500     		.2byte	0x5
+ 3384 0066 03       		.byte	0x3
+ 3385 0067 01000000 		.4byte	write_buffer+1
+ 3386 006b 0F000000 		.4byte	.LVL15-1
+ 3387 006f 18000000 		.4byte	.LFE75
+ 3388 0073 0400     		.2byte	0x4
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 70
+
+
+ 3389 0075 F3       		.byte	0xf3
+ 3390 0076 01       		.uleb128 0x1
+ 3391 0077 51       		.byte	0x51
+ 3392 0078 9F       		.byte	0x9f
+ 3393 0079 00000000 		.4byte	0
+ 3394 007d 00000000 		.4byte	0
+ 3395              	.LLST3:
+ 3396 0081 00000000 		.4byte	.LVL16
+ 3397 0085 06000000 		.4byte	.LVL17
+ 3398 0089 0100     		.2byte	0x1
+ 3399 008b 50       		.byte	0x50
+ 3400 008c 06000000 		.4byte	.LVL17
+ 3401 0090 4E000000 		.4byte	.LFE72
+ 3402 0094 0400     		.2byte	0x4
+ 3403 0096 F3       		.byte	0xf3
+ 3404 0097 01       		.uleb128 0x1
+ 3405 0098 50       		.byte	0x50
+ 3406 0099 9F       		.byte	0x9f
+ 3407 009a 00000000 		.4byte	0
+ 3408 009e 00000000 		.4byte	0
+ 3409              	.LLST4:
+ 3410 00a2 0A000000 		.4byte	.LVL18
+ 3411 00a6 12000000 		.4byte	.LVL19
+ 3412 00aa 0100     		.2byte	0x1
+ 3413 00ac 50       		.byte	0x50
+ 3414 00ad 1C000000 		.4byte	.LVL21
+ 3415 00b1 24000000 		.4byte	.LVL22
+ 3416 00b5 0100     		.2byte	0x1
+ 3417 00b7 50       		.byte	0x50
+ 3418 00b8 2A000000 		.4byte	.LVL24
+ 3419 00bc 2E000000 		.4byte	.LVL25
+ 3420 00c0 0100     		.2byte	0x1
+ 3421 00c2 50       		.byte	0x50
+ 3422 00c3 38000000 		.4byte	.LVL27
+ 3423 00c7 40000000 		.4byte	.LVL28
+ 3424 00cb 0100     		.2byte	0x1
+ 3425 00cd 50       		.byte	0x50
+ 3426 00ce 46000000 		.4byte	.LVL30
+ 3427 00d2 48000000 		.4byte	.LVL31
+ 3428 00d6 0100     		.2byte	0x1
+ 3429 00d8 50       		.byte	0x50
+ 3430 00d9 00000000 		.4byte	0
+ 3431 00dd 00000000 		.4byte	0
+ 3432              	.LLST5:
+ 3433 00e1 02000000 		.4byte	.LVL33
+ 3434 00e5 06000000 		.4byte	.LVL34
+ 3435 00e9 0200     		.2byte	0x2
+ 3436 00eb 30       		.byte	0x30
+ 3437 00ec 9F       		.byte	0x9f
+ 3438 00ed 06000000 		.4byte	.LVL34
+ 3439 00f1 16000000 		.4byte	.LVL36
+ 3440 00f5 0100     		.2byte	0x1
+ 3441 00f7 54       		.byte	0x54
+ 3442 00f8 18000000 		.4byte	.LVL37
+ 3443 00fc 1E000000 		.4byte	.LVL38
+ 3444 0100 0100     		.2byte	0x1
+ 3445 0102 54       		.byte	0x54
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 71
+
+
+ 3446 0103 00000000 		.4byte	0
+ 3447 0107 00000000 		.4byte	0
+ 3448              	.LLST6:
+ 3449 010b 00000000 		.4byte	.LVL39
+ 3450 010f 06000000 		.4byte	.LVL40
+ 3451 0113 0100     		.2byte	0x1
+ 3452 0115 50       		.byte	0x50
+ 3453 0116 06000000 		.4byte	.LVL40
+ 3454 011a 32000000 		.4byte	.LFE74
+ 3455 011e 0400     		.2byte	0x4
+ 3456 0120 F3       		.byte	0xf3
+ 3457 0121 01       		.uleb128 0x1
+ 3458 0122 50       		.byte	0x50
+ 3459 0123 9F       		.byte	0x9f
+ 3460 0124 00000000 		.4byte	0
+ 3461 0128 00000000 		.4byte	0
+ 3462              	.LLST7:
+ 3463 012c 00000000 		.4byte	.LVL39
+ 3464 0130 06000000 		.4byte	.LVL40
+ 3465 0134 0100     		.2byte	0x1
+ 3466 0136 51       		.byte	0x51
+ 3467 0137 06000000 		.4byte	.LVL40
+ 3468 013b 32000000 		.4byte	.LFE74
+ 3469 013f 0400     		.2byte	0x4
+ 3470 0141 F3       		.byte	0xf3
+ 3471 0142 01       		.uleb128 0x1
+ 3472 0143 51       		.byte	0x51
+ 3473 0144 9F       		.byte	0x9f
+ 3474 0145 00000000 		.4byte	0
+ 3475 0149 00000000 		.4byte	0
+ 3476              	.LLST8:
+ 3477 014d 0C000000 		.4byte	.LVL41
+ 3478 0151 18000000 		.4byte	.LVL42
+ 3479 0155 0100     		.2byte	0x1
+ 3480 0157 50       		.byte	0x50
+ 3481 0158 22000000 		.4byte	.LVL44
+ 3482 015c 2C000000 		.4byte	.LVL45
+ 3483 0160 0100     		.2byte	0x1
+ 3484 0162 50       		.byte	0x50
+ 3485 0163 00000000 		.4byte	0
+ 3486 0167 00000000 		.4byte	0
+ 3487              	.LLST9:
+ 3488 016b 00000000 		.4byte	.LVL47
+ 3489 016f 1A000000 		.4byte	.LVL49
+ 3490 0173 0100     		.2byte	0x1
+ 3491 0175 50       		.byte	0x50
+ 3492 0176 1A000000 		.4byte	.LVL49
+ 3493 017a 24000000 		.4byte	.LFE68
+ 3494 017e 0100     		.2byte	0x1
+ 3495 0180 55       		.byte	0x55
+ 3496 0181 00000000 		.4byte	0
+ 3497 0185 00000000 		.4byte	0
+ 3498              	.LLST10:
+ 3499 0189 00000000 		.4byte	.LVL51
+ 3500 018d 1E000000 		.4byte	.LVL53
+ 3501 0191 0100     		.2byte	0x1
+ 3502 0193 50       		.byte	0x50
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 72
+
+
+ 3503 0194 1E000000 		.4byte	.LVL53
+ 3504 0198 28000000 		.4byte	.LFE69
+ 3505 019c 0100     		.2byte	0x1
+ 3506 019e 55       		.byte	0x55
+ 3507 019f 00000000 		.4byte	0
+ 3508 01a3 00000000 		.4byte	0
+ 3509              	.LLST11:
+ 3510 01a7 08000000 		.4byte	.LVL55
+ 3511 01ab 0E000000 		.4byte	.LVL56
+ 3512 01af 0100     		.2byte	0x1
+ 3513 01b1 50       		.byte	0x50
+ 3514 01b2 0E000000 		.4byte	.LVL56
+ 3515 01b6 11000000 		.4byte	.LVL57-1
+ 3516 01ba 0500     		.2byte	0x5
+ 3517 01bc 03       		.byte	0x3
+ 3518 01bd 08000000 		.4byte	as7262+8
+ 3519 01c1 12000000 		.4byte	.LVL57
+ 3520 01c5 16000000 		.4byte	.LVL58
+ 3521 01c9 0100     		.2byte	0x1
+ 3522 01cb 50       		.byte	0x50
+ 3523 01cc 16000000 		.4byte	.LVL58
+ 3524 01d0 19000000 		.4byte	.LVL59-1
+ 3525 01d4 0500     		.2byte	0x5
+ 3526 01d6 03       		.byte	0x3
+ 3527 01d7 09000000 		.4byte	as7262+9
+ 3528 01db 1A000000 		.4byte	.LVL59
+ 3529 01df 1C000000 		.4byte	.LVL60
+ 3530 01e3 0100     		.2byte	0x1
+ 3531 01e5 50       		.byte	0x50
+ 3532 01e6 24000000 		.4byte	.LVL61
+ 3533 01ea 28000000 		.4byte	.LVL62
+ 3534 01ee 0100     		.2byte	0x1
+ 3535 01f0 50       		.byte	0x50
+ 3536 01f1 00000000 		.4byte	0
+ 3537 01f5 00000000 		.4byte	0
+ 3538              	.LLST12:
+ 3539 01f9 56000000 		.4byte	.LVL79
+ 3540 01fd 7A000000 		.4byte	.LVL85
+ 3541 0201 0100     		.2byte	0x1
+ 3542 0203 55       		.byte	0x55
+ 3543 0204 00000000 		.4byte	0
+ 3544 0208 00000000 		.4byte	0
+ 3545              	.LLST13:
+ 3546 020c 46000000 		.4byte	.LVL75
+ 3547 0210 48000000 		.4byte	.LVL76
+ 3548 0214 0200     		.2byte	0x2
+ 3549 0216 30       		.byte	0x30
+ 3550 0217 9F       		.byte	0x9f
+ 3551 0218 48000000 		.4byte	.LVL76
+ 3552 021c 58000000 		.4byte	.LVL80
+ 3553 0220 0100     		.2byte	0x1
+ 3554 0222 54       		.byte	0x54
+ 3555 0223 5A000000 		.4byte	.LVL81
+ 3556 0227 7A000000 		.4byte	.LVL85
+ 3557 022b 0100     		.2byte	0x1
+ 3558 022d 54       		.byte	0x54
+ 3559 022e 00000000 		.4byte	0
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 73
+
+
+ 3560 0232 00000000 		.4byte	0
+ 3561              	.LLST14:
+ 3562 0236 00000000 		.4byte	.LVL86
+ 3563 023a 08000000 		.4byte	.LVL87
+ 3564 023e 0100     		.2byte	0x1
+ 3565 0240 50       		.byte	0x50
+ 3566 0241 08000000 		.4byte	.LVL87
+ 3567 0245 34000000 		.4byte	.LFE77
+ 3568 0249 0400     		.2byte	0x4
+ 3569 024b F3       		.byte	0xf3
+ 3570 024c 01       		.uleb128 0x1
+ 3571 024d 50       		.byte	0x50
+ 3572 024e 9F       		.byte	0x9f
+ 3573 024f 00000000 		.4byte	0
+ 3574 0253 00000000 		.4byte	0
+ 3575              	.LLST15:
+ 3576 0257 00000000 		.4byte	.LVL88
+ 3577 025b 06000000 		.4byte	.LVL89
+ 3578 025f 0100     		.2byte	0x1
+ 3579 0261 50       		.byte	0x50
+ 3580 0262 06000000 		.4byte	.LVL89
+ 3581 0266 1A000000 		.4byte	.LFE76
+ 3582 026a 0100     		.2byte	0x1
+ 3583 026c 55       		.byte	0x55
+ 3584 026d 00000000 		.4byte	0
+ 3585 0271 00000000 		.4byte	0
+ 3586              	.LLST16:
+ 3587 0275 0E000000 		.4byte	.LVL91
+ 3588 0279 16000000 		.4byte	.LVL93
+ 3589 027d 0100     		.2byte	0x1
+ 3590 027f 54       		.byte	0x54
+ 3591 0280 16000000 		.4byte	.LVL93
+ 3592 0284 1A000000 		.4byte	.LFE76
+ 3593 0288 0100     		.2byte	0x1
+ 3594 028a 50       		.byte	0x50
+ 3595 028b 00000000 		.4byte	0
+ 3596 028f 00000000 		.4byte	0
+ 3597              	.LLST17:
+ 3598 0293 00000000 		.4byte	.LVL94
+ 3599 0297 20000000 		.4byte	.LVL100
+ 3600 029b 0100     		.2byte	0x1
+ 3601 029d 50       		.byte	0x50
+ 3602 029e 20000000 		.4byte	.LVL100
+ 3603 02a2 24000000 		.4byte	.LFE78
+ 3604 02a6 0400     		.2byte	0x4
+ 3605 02a8 F3       		.byte	0xf3
+ 3606 02a9 01       		.uleb128 0x1
+ 3607 02aa 50       		.byte	0x50
+ 3608 02ab 9F       		.byte	0x9f
+ 3609 02ac 00000000 		.4byte	0
+ 3610 02b0 00000000 		.4byte	0
+ 3611              	.LLST18:
+ 3612 02b4 02000000 		.4byte	.LVL95
+ 3613 02b8 08000000 		.4byte	.LVL96
+ 3614 02bc 0200     		.2byte	0x2
+ 3615 02be 30       		.byte	0x30
+ 3616 02bf 9F       		.byte	0x9f
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 74
+
+
+ 3617 02c0 08000000 		.4byte	.LVL96
+ 3618 02c4 0E000000 		.4byte	.LVL97
+ 3619 02c8 0100     		.2byte	0x1
+ 3620 02ca 53       		.byte	0x53
+ 3621 02cb 18000000 		.4byte	.LVL98
+ 3622 02cf 24000000 		.4byte	.LFE78
+ 3623 02d3 0100     		.2byte	0x1
+ 3624 02d5 53       		.byte	0x53
+ 3625 02d6 00000000 		.4byte	0
+ 3626 02da 00000000 		.4byte	0
+ 3627              	.LLST19:
+ 3628 02de 02000000 		.4byte	.LVL95
+ 3629 02e2 08000000 		.4byte	.LVL96
+ 3630 02e6 0200     		.2byte	0x2
+ 3631 02e8 30       		.byte	0x30
+ 3632 02e9 9F       		.byte	0x9f
+ 3633 02ea 08000000 		.4byte	.LVL96
+ 3634 02ee 22000000 		.4byte	.LVL101
+ 3635 02f2 0100     		.2byte	0x1
+ 3636 02f4 54       		.byte	0x54
+ 3637 02f5 00000000 		.4byte	0
+ 3638 02f9 00000000 		.4byte	0
+ 3639              	.LLST20:
+ 3640 02fd 00000000 		.4byte	.LVL102
+ 3641 0301 2E000000 		.4byte	.LVL103
+ 3642 0305 0100     		.2byte	0x1
+ 3643 0307 50       		.byte	0x50
+ 3644 0308 2E000000 		.4byte	.LVL103
+ 3645 030c 7E000000 		.4byte	.LVL116
+ 3646 0310 0100     		.2byte	0x1
+ 3647 0312 54       		.byte	0x54
+ 3648 0313 7E000000 		.4byte	.LVL116
+ 3649 0317 84000000 		.4byte	.LVL117
+ 3650 031b 0100     		.2byte	0x1
+ 3651 031d 50       		.byte	0x50
+ 3652 031e 84000000 		.4byte	.LVL117
+ 3653 0322 DC000000 		.4byte	.LVL131
+ 3654 0326 0100     		.2byte	0x1
+ 3655 0328 54       		.byte	0x54
+ 3656 0329 DC000000 		.4byte	.LVL131
+ 3657 032d E0000000 		.4byte	.LVL132
+ 3658 0331 0100     		.2byte	0x1
+ 3659 0333 50       		.byte	0x50
+ 3660 0334 E0000000 		.4byte	.LVL132
+ 3661 0338 F4000000 		.4byte	.LVL136
+ 3662 033c 0100     		.2byte	0x1
+ 3663 033e 54       		.byte	0x54
+ 3664 033f F4000000 		.4byte	.LVL136
+ 3665 0343 F8000000 		.4byte	.LVL137
+ 3666 0347 0100     		.2byte	0x1
+ 3667 0349 50       		.byte	0x50
+ 3668 034a F8000000 		.4byte	.LVL137
+ 3669 034e 0E010000 		.4byte	.LVL140
+ 3670 0352 0100     		.2byte	0x1
+ 3671 0354 54       		.byte	0x54
+ 3672 0355 0E010000 		.4byte	.LVL140
+ 3673 0359 12010000 		.4byte	.LVL141
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 75
+
+
+ 3674 035d 0100     		.2byte	0x1
+ 3675 035f 50       		.byte	0x50
+ 3676 0360 12010000 		.4byte	.LVL141
+ 3677 0364 28010000 		.4byte	.LVL144
+ 3678 0368 0100     		.2byte	0x1
+ 3679 036a 54       		.byte	0x54
+ 3680 036b 28010000 		.4byte	.LVL144
+ 3681 036f 4A010000 		.4byte	.LVL145
+ 3682 0373 0100     		.2byte	0x1
+ 3683 0375 50       		.byte	0x50
+ 3684 0376 4A010000 		.4byte	.LVL145
+ 3685 037a 52010000 		.4byte	.LVL147
+ 3686 037e 0100     		.2byte	0x1
+ 3687 0380 54       		.byte	0x54
+ 3688 0381 52010000 		.4byte	.LVL147
+ 3689 0385 74010000 		.4byte	.LFE67
+ 3690 0389 0400     		.2byte	0x4
+ 3691 038b F3       		.byte	0xf3
+ 3692 038c 01       		.uleb128 0x1
+ 3693 038d 50       		.byte	0x50
+ 3694 038e 9F       		.byte	0x9f
+ 3695 038f 00000000 		.4byte	0
+ 3696 0393 00000000 		.4byte	0
+ 3697              	.LLST21:
+ 3698 0397 E6000000 		.4byte	.LVL134
+ 3699 039b EF000000 		.4byte	.LVL135-1
+ 3700 039f 0100     		.2byte	0x1
+ 3701 03a1 51       		.byte	0x51
+ 3702 03a2 00000000 		.4byte	0
+ 3703 03a6 00000000 		.4byte	0
+ 3704              	.LLST22:
+ 3705 03aa 34000000 		.4byte	.LVL105
+ 3706 03ae 7E000000 		.4byte	.LVL116
+ 3707 03b2 0100     		.2byte	0x1
+ 3708 03b4 56       		.byte	0x56
+ 3709 03b5 00000000 		.4byte	0
+ 3710 03b9 00000000 		.4byte	0
+ 3711              	.LLST23:
+ 3712 03bd 3E000000 		.4byte	.LVL107
+ 3713 03c1 42000000 		.4byte	.LVL108
+ 3714 03c5 0100     		.2byte	0x1
+ 3715 03c7 50       		.byte	0x50
+ 3716 03c8 00000000 		.4byte	0
+ 3717 03cc 00000000 		.4byte	0
+ 3718              	.LLST24:
+ 3719 03d0 8A000000 		.4byte	.LVL119
+ 3720 03d4 C0000000 		.4byte	.LVL127
+ 3721 03d8 0100     		.2byte	0x1
+ 3722 03da 58       		.byte	0x58
+ 3723 03db 00000000 		.4byte	0
+ 3724 03df 00000000 		.4byte	0
+ 3725              	.LLST25:
+ 3726 03e3 90000000 		.4byte	.LVL121
+ 3727 03e7 98000000 		.4byte	.LVL122
+ 3728 03eb 0100     		.2byte	0x1
+ 3729 03ed 50       		.byte	0x50
+ 3730 03ee 00000000 		.4byte	0
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 76
+
+
+ 3731 03f2 00000000 		.4byte	0
+ 3732              		.section	.debug_aranges,"",%progbits
+ 3733 0000 8C000000 		.4byte	0x8c
+ 3734 0004 0200     		.2byte	0x2
+ 3735 0006 00000000 		.4byte	.Ldebug_info0
+ 3736 000a 04       		.byte	0x4
+ 3737 000b 00       		.byte	0
+ 3738 000c 0000     		.2byte	0
+ 3739 000e 0000     		.2byte	0
+ 3740 0010 00000000 		.4byte	.LFB64
+ 3741 0014 34000000 		.4byte	.LFE64-.LFB64
+ 3742 0018 00000000 		.4byte	.LFB65
+ 3743 001c 1C000000 		.4byte	.LFE65-.LFB65
+ 3744 0020 00000000 		.4byte	.LFB73
+ 3745 0024 1C000000 		.4byte	.LFE73-.LFB73
+ 3746 0028 00000000 		.4byte	.LFB75
+ 3747 002c 18000000 		.4byte	.LFE75-.LFB75
+ 3748 0030 00000000 		.4byte	.LFB72
+ 3749 0034 4E000000 		.4byte	.LFE72-.LFB72
+ 3750 0038 00000000 		.4byte	.LFB71
+ 3751 003c 24000000 		.4byte	.LFE71-.LFB71
+ 3752 0040 00000000 		.4byte	.LFB74
+ 3753 0044 32000000 		.4byte	.LFE74-.LFB74
+ 3754 0048 00000000 		.4byte	.LFB68
+ 3755 004c 24000000 		.4byte	.LFE68-.LFB68
+ 3756 0050 00000000 		.4byte	.LFB69
+ 3757 0054 28000000 		.4byte	.LFE69-.LFB69
+ 3758 0058 00000000 		.4byte	.LFB66
+ 3759 005c 50000000 		.4byte	.LFE66-.LFB66
+ 3760 0060 00000000 		.4byte	.LFB70
+ 3761 0064 9C000000 		.4byte	.LFE70-.LFB70
+ 3762 0068 00000000 		.4byte	.LFB77
+ 3763 006c 34000000 		.4byte	.LFE77-.LFB77
+ 3764 0070 00000000 		.4byte	.LFB76
+ 3765 0074 1A000000 		.4byte	.LFE76-.LFB76
+ 3766 0078 00000000 		.4byte	.LFB78
+ 3767 007c 24000000 		.4byte	.LFE78-.LFB78
+ 3768 0080 00000000 		.4byte	.LFB67
+ 3769 0084 74010000 		.4byte	.LFE67-.LFB67
+ 3770 0088 00000000 		.4byte	0
+ 3771 008c 00000000 		.4byte	0
+ 3772              		.section	.debug_ranges,"",%progbits
+ 3773              	.Ldebug_ranges0:
+ 3774 0000 02000000 		.4byte	.LBB4
+ 3775 0004 04000000 		.4byte	.LBE4
+ 3776 0008 06000000 		.4byte	.LBB5
+ 3777 000c 1E000000 		.4byte	.LBE5
+ 3778 0010 00000000 		.4byte	0
+ 3779 0014 00000000 		.4byte	0
+ 3780 0018 00000000 		.4byte	.LFB64
+ 3781 001c 34000000 		.4byte	.LFE64
+ 3782 0020 00000000 		.4byte	.LFB65
+ 3783 0024 1C000000 		.4byte	.LFE65
+ 3784 0028 00000000 		.4byte	.LFB73
+ 3785 002c 1C000000 		.4byte	.LFE73
+ 3786 0030 00000000 		.4byte	.LFB75
+ 3787 0034 18000000 		.4byte	.LFE75
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 77
+
+
+ 3788 0038 00000000 		.4byte	.LFB72
+ 3789 003c 4E000000 		.4byte	.LFE72
+ 3790 0040 00000000 		.4byte	.LFB71
+ 3791 0044 24000000 		.4byte	.LFE71
+ 3792 0048 00000000 		.4byte	.LFB74
+ 3793 004c 32000000 		.4byte	.LFE74
+ 3794 0050 00000000 		.4byte	.LFB68
+ 3795 0054 24000000 		.4byte	.LFE68
+ 3796 0058 00000000 		.4byte	.LFB69
+ 3797 005c 28000000 		.4byte	.LFE69
+ 3798 0060 00000000 		.4byte	.LFB66
+ 3799 0064 50000000 		.4byte	.LFE66
+ 3800 0068 00000000 		.4byte	.LFB70
+ 3801 006c 9C000000 		.4byte	.LFE70
+ 3802 0070 00000000 		.4byte	.LFB77
+ 3803 0074 34000000 		.4byte	.LFE77
+ 3804 0078 00000000 		.4byte	.LFB76
+ 3805 007c 1A000000 		.4byte	.LFE76
+ 3806 0080 00000000 		.4byte	.LFB78
+ 3807 0084 24000000 		.4byte	.LFE78
+ 3808 0088 00000000 		.4byte	.LFB67
+ 3809 008c 74010000 		.4byte	.LFE67
+ 3810 0090 00000000 		.4byte	0
+ 3811 0094 00000000 		.4byte	0
+ 3812              		.section	.debug_line,"",%progbits
+ 3813              	.Ldebug_line0:
+ 3814 0000 DE030000 		.section	.debug_str,"MS",%progbits,1
+ 3814      02002D02 
+ 3814      00000201 
+ 3814      FB0E0D00 
+ 3814      01010101 
+ 3815              	.LASF73:
+ 3816 0000 61733732 		.ascii	"as7262\000"
+ 3816      363200
+ 3817              	.LASF85:
+ 3818 0007 5553425F 		.ascii	"USB_Export_Data\000"
+ 3818      4578706F 
+ 3818      72745F44 
+ 3818      61746100 
+ 3819              	.LASF13:
+ 3820 0017 666C6F61 		.ascii	"float32\000"
+ 3820      74333200 
+ 3821              	.LASF27:
+ 3822 001f 64657669 		.ascii	"device_type\000"
+ 3822      63655F74 
+ 3822      79706500 
+ 3823              	.LASF88:
+ 3824 002b 41533732 		.ascii	"AS7262.c\000"
+ 3824      36322E63 
+ 3824      00
+ 3825              	.LASF84:
+ 3826 0034 4C43445F 		.ascii	"LCD_WriteControl\000"
+ 3826      57726974 
+ 3826      65436F6E 
+ 3826      74726F6C 
+ 3826      00
+ 3827              	.LASF48:
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 78
+
+
+ 3828 0045 61733732 		.ascii	"as7262_ptr\000"
+ 3828      36325F70 
+ 3828      747200
+ 3829              	.LASF21:
+ 3830 0050 696E7465 		.ascii	"interrupt_on\000"
+ 3830      72727570 
+ 3830      745F6F6E 
+ 3830      00
+ 3831              	.LASF18:
+ 3832 005d 73697A65 		.ascii	"sizetype\000"
+ 3832      74797065 
+ 3832      00
+ 3833              	.LASF90:
+ 3834 0066 43616C69 		.ascii	"CalibratedData\000"
+ 3834      62726174 
+ 3834      65644461 
+ 3834      746100
+ 3835              	.LASF63:
+ 3836 0075 7265675F 		.ascii	"reg_to_write\000"
+ 3836      746F5F77 
+ 3836      72697465 
+ 3836      00
+ 3837              	.LASF29:
+ 3838 0082 66775F76 		.ascii	"fw_version\000"
+ 3838      65727369 
+ 3838      6F6E00
+ 3839              	.LASF51:
+ 3840 008d 6C65645F 		.ascii	"led_control_reg\000"
+ 3840      636F6E74 
+ 3840      726F6C5F 
+ 3840      72656700 
+ 3841              	.LASF82:
+ 3842 009d 73656E73 		.ascii	"sensor_write8\000"
+ 3842      6F725F77 
+ 3842      72697465 
+ 3842      3800
+ 3843              	.LASF65:
+ 3844 00ab 7265675F 		.ascii	"reg_to_read\000"
+ 3844      746F5F72 
+ 3844      65616400 
+ 3845              	.LASF79:
+ 3846 00b7 41533732 		.ascii	"AS7262_INT_ClearInterrupt\000"
+ 3846      36325F49 
+ 3846      4E545F43 
+ 3846      6C656172 
+ 3846      496E7465 
+ 3847              	.LASF24:
+ 3848 00d1 4C45445F 		.ascii	"LED_on\000"
+ 3848      6F6E00
+ 3849              	.LASF41:
+ 3850 00d8 76616C75 		.ascii	"value\000"
+ 3850      6500
+ 3851              	.LASF12:
+ 3852 00de 75696E74 		.ascii	"uint16\000"
+ 3852      313600
+ 3853              	.LASF32:
+ 3854 00e5 4C45445F 		.ascii	"LED_control_reg_value\000"
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 79
+
+
+ 3854      636F6E74 
+ 3854      726F6C5F 
+ 3854      7265675F 
+ 3854      76616C75 
+ 3855              	.LASF11:
+ 3856 00fb 75696E74 		.ascii	"uint8\000"
+ 3856      3800
+ 3857              	.LASF69:
+ 3858 0101 4F55545F 		.ascii	"OUT_Data_Buffer\000"
+ 3858      44617461 
+ 3858      5F427566 
+ 3858      66657200 
+ 3859              	.LASF30:
+ 3860 0111 636F6D6D 		.ascii	"comm_error\000"
+ 3860      5F657272 
+ 3860      6F7200
+ 3861              	.LASF2:
+ 3862 011c 73686F72 		.ascii	"short int\000"
+ 3862      7420696E 
+ 3862      7400
+ 3863              	.LASF14:
+ 3864 0126 666C6F61 		.ascii	"float\000"
+ 3864      7400
+ 3865              	.LASF52:
+ 3866 012c 41533732 		.ascii	"AS7262_Init\000"
+ 3866      36325F49 
+ 3866      6E697400 
+ 3867              	.LASF56:
+ 3868 0138 5F636861 		.ascii	"_char\000"
+ 3868      7200
+ 3869              	.LASF6:
+ 3870 013e 6C6F6E67 		.ascii	"long long int\000"
+ 3870      206C6F6E 
+ 3870      6720696E 
+ 3870      7400
+ 3871              	.LASF72:
+ 3872 014c 77726974 		.ascii	"write_buffer\000"
+ 3872      655F6275 
+ 3872      66666572 
+ 3872      00
+ 3873              	.LASF22:
+ 3874 0159 696E7465 		.ascii	"integration_time\000"
+ 3874      67726174 
+ 3874      696F6E5F 
+ 3874      74696D65 
+ 3874      00
+ 3875              	.LASF55:
+ 3876 016a 6865785F 		.ascii	"hex_value_from_char\000"
+ 3876      76616C75 
+ 3876      655F6672 
+ 3876      6F6D5F63 
+ 3876      68617200 
+ 3877              	.LASF16:
+ 3878 017e 63686172 		.ascii	"char\000"
+ 3878      00
+ 3879              	.LASF4:
+ 3880 0183 6C6F6E67 		.ascii	"long int\000"
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 80
+
+
+ 3880      20696E74 
+ 3880      00
+ 3881              	.LASF80:
+ 3882 018c 4C45445F 		.ascii	"LED_3_Write\000"
+ 3882      335F5772 
+ 3882      69746500 
+ 3883              	.LASF89:
+ 3884 0198 443A5C50 		.ascii	"D:\\PSoC_Projects\\Spectrometers\\PSoC-ColorSensors"
+ 3884      536F435F 
+ 3884      50726F6A 
+ 3884      65637473 
+ 3884      5C537065 
+ 3885 01c8 5F537065 		.ascii	"_Spectrometers\\AS7262\\AS7262.cydsn\000"
+ 3885      6374726F 
+ 3885      6D657465 
+ 3885      72735C41 
+ 3885      53373236 
+ 3886              	.LASF57:
+ 3887 01eb 636F6E76 		.ascii	"convert_hex_string\000"
+ 3887      6572745F 
+ 3887      6865785F 
+ 3887      73747269 
+ 3887      6E6700
+ 3888              	.LASF68:
+ 3889 01fe 5553425F 		.ascii	"USB_str\000"
+ 3889      73747200 
+ 3890              	.LASF35:
+ 3891 0206 63616C69 		.ascii	"calibrated_data\000"
+ 3891      62726174 
+ 3891      65645F64 
+ 3891      61746100 
+ 3892              	.LASF81:
+ 3893 0216 73656E73 		.ascii	"sensor_read8\000"
+ 3893      6F725F72 
+ 3893      65616438 
+ 3893      00
+ 3894              	.LASF17:
+ 3895 0223 6C6F6E67 		.ascii	"long double\000"
+ 3895      20646F75 
+ 3895      626C6500 
+ 3896              	.LASF40:
+ 3897 022f 7265675F 		.ascii	"reg_addr\000"
+ 3897      61646472 
+ 3897      00
+ 3898              	.LASF1:
+ 3899 0238 756E7369 		.ascii	"unsigned char\000"
+ 3899      676E6564 
+ 3899      20636861 
+ 3899      7200
+ 3900              	.LASF53:
+ 3901 0246 41533732 		.ascii	"AS7262_SingleRead\000"
+ 3901      36325F53 
+ 3901      696E676C 
+ 3901      65526561 
+ 3901      6400
+ 3902              	.LASF86:
+ 3903 0258 73707269 		.ascii	"sprintf\000"
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 81
+
+
+ 3903      6E746600 
+ 3904              	.LASF0:
+ 3905 0260 7369676E 		.ascii	"signed char\000"
+ 3905      65642063 
+ 3905      68617200 
+ 3906              	.LASF7:
+ 3907 026c 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 3907      206C6F6E 
+ 3907      6720756E 
+ 3907      7369676E 
+ 3907      65642069 
+ 3908              	.LASF8:
+ 3909 0283 756E7369 		.ascii	"unsigned int\000"
+ 3909      676E6564 
+ 3909      20696E74 
+ 3909      00
+ 3910              	.LASF25:
+ 3911 0290 696E6469 		.ascii	"indicator_power_level\000"
+ 3911      6361746F 
+ 3911      725F706F 
+ 3911      7765725F 
+ 3911      6C657665 
+ 3912              	.LASF28:
+ 3913 02a6 68775F76 		.ascii	"hw_version\000"
+ 3913      65727369 
+ 3913      6F6E00
+ 3914              	.LASF43:
+ 3915 02b1 4932435F 		.ascii	"I2C_AS7262_Read\000"
+ 3915      41533732 
+ 3915      36325F52 
+ 3915      65616400 
+ 3916              	.LASF26:
+ 3917 02c1 696E6469 		.ascii	"indicator_on\000"
+ 3917      6361746F 
+ 3917      725F6F6E 
+ 3917      00
+ 3918              	.LASF64:
+ 3919 02ce 76616C75 		.ascii	"value_to_write\000"
+ 3919      655F746F 
+ 3919      5F777269 
+ 3919      746500
+ 3920              	.LASF20:
+ 3921 02dd 6761696E 		.ascii	"gain\000"
+ 3921      00
+ 3922              	.LASF33:
+ 3923 02e2 41533732 		.ascii	"AS7262_settings\000"
+ 3923      36325F73 
+ 3923      65747469 
+ 3923      6E677300 
+ 3924              	.LASF3:
+ 3925 02f2 73686F72 		.ascii	"short unsigned int\000"
+ 3925      7420756E 
+ 3925      7369676E 
+ 3925      65642069 
+ 3925      6E7400
+ 3926              	.LASF42:
+ 3927 0305 73746174 		.ascii	"status\000"
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 82
+
+
+ 3927      757300
+ 3928              	.LASF78:
+ 3929 030c 4C43445F 		.ascii	"LCD_PrintString\000"
+ 3929      5072696E 
+ 3929      74537472 
+ 3929      696E6700 
+ 3930              	.LASF10:
+ 3931 031c 696E7433 		.ascii	"int32_t\000"
+ 3931      325F7400 
+ 3932              	.LASF39:
+ 3933 0324 4932435F 		.ascii	"I2C_AS7262_WriteRegister\000"
+ 3933      41533732 
+ 3933      36325F57 
+ 3933      72697465 
+ 3933      52656769 
+ 3934              	.LASF19:
+ 3935 033d 6D656173 		.ascii	"measurement_mode\000"
+ 3935      7572656D 
+ 3935      656E745F 
+ 3935      6D6F6465 
+ 3935      00
+ 3936              	.LASF44:
+ 3937 034e 64617461 		.ascii	"data\000"
+ 3937      00
+ 3938              	.LASF61:
+ 3939 0353 62756666 		.ascii	"buffer\000"
+ 3939      657200
+ 3940              	.LASF60:
+ 3941 035a 41533732 		.ascii	"AS7262_Commands\000"
+ 3941      36325F43 
+ 3941      6F6D6D61 
+ 3941      6E647300 
+ 3942              	.LASF23:
+ 3943 036a 4C45445F 		.ascii	"LED_power_level\000"
+ 3943      706F7765 
+ 3943      725F6C65 
+ 3943      76656C00 
+ 3944              	.LASF49:
+ 3945 037a 636F6E74 		.ascii	"control_reg\000"
+ 3945      726F6C5F 
+ 3945      72656700 
+ 3946              	.LASF5:
+ 3947 0386 6C6F6E67 		.ascii	"long unsigned int\000"
+ 3947      20756E73 
+ 3947      69676E65 
+ 3947      6420696E 
+ 3947      7400
+ 3948              	.LASF54:
+ 3949 0398 6661696C 		.ascii	"failed_tries\000"
+ 3949      65645F74 
+ 3949      72696573 
+ 3949      00
+ 3950              	.LASF58:
+ 3951 03a5 61727261 		.ascii	"array\000"
+ 3951      7900
+ 3952              	.LASF45:
+ 3953 03ab 41533732 		.ascii	"AS7262_ReadAllData\000"
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 83
+
+
+ 3953      36325F52 
+ 3953      65616441 
+ 3953      6C6C4461 
+ 3953      746100
+ 3954              	.LASF36:
+ 3955 03be 6973725F 		.ascii	"isr_handler_basic_read\000"
+ 3955      68616E64 
+ 3955      6C65725F 
+ 3955      62617369 
+ 3955      635F7265 
+ 3956              	.LASF74:
+ 3957 03d5 616C6C5F 		.ascii	"all_calibrated_data\000"
+ 3957      63616C69 
+ 3957      62726174 
+ 3957      65645F64 
+ 3957      61746100 
+ 3958              	.LASF9:
+ 3959 03e9 5F5F696E 		.ascii	"__int32_t\000"
+ 3959      7433325F 
+ 3959      7400
+ 3960              	.LASF59:
+ 3961 03f3 436F6E76 		.ascii	"ConvertDecimal\000"
+ 3961      65727444 
+ 3961      6563696D 
+ 3961      616C00
+ 3962              	.LASF66:
+ 3963 0402 7265675F 		.ascii	"reg_value\000"
+ 3963      76616C75 
+ 3963      6500
+ 3964              	.LASF77:
+ 3965 040c 4C43445F 		.ascii	"LCD_Position\000"
+ 3965      506F7369 
+ 3965      74696F6E 
+ 3965      00
+ 3966              	.LASF70:
+ 3967 0419 4C43445F 		.ascii	"LCD_str\000"
+ 3967      73747200 
+ 3968              	.LASF62:
+ 3969 0421 6E65775F 		.ascii	"new_integration_time\000"
+ 3969      696E7465 
+ 3969      67726174 
+ 3969      696F6E5F 
+ 3969      74696D65 
+ 3970              	.LASF50:
+ 3971 0436 75706461 		.ascii	"update_LED_reg_value\000"
+ 3971      74655F4C 
+ 3971      45445F72 
+ 3971      65675F76 
+ 3971      616C7565 
+ 3972              	.LASF75:
+ 3973 044b 636F6C6F 		.ascii	"color_data\000"
+ 3973      725F6461 
+ 3973      746100
+ 3974              	.LASF15:
+ 3975 0456 646F7562 		.ascii	"double\000"
+ 3975      6C6500
+ 3976              	.LASF46:
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 84
+
+
+ 3977 045d 4932435F 		.ascii	"I2C_AS7262_Write\000"
+ 3977      41533732 
+ 3977      36325F57 
+ 3977      72697465 
+ 3977      00
+ 3978              	.LASF38:
+ 3979 046e 4932435F 		.ascii	"I2C_AS7262_ReadRegister\000"
+ 3979      41533732 
+ 3979      36325F52 
+ 3979      65616452 
+ 3979      65676973 
+ 3980              	.LASF67:
+ 3981 0486 49544D5F 		.ascii	"ITM_RxBuffer\000"
+ 3981      52784275 
+ 3981      66666572 
+ 3981      00
+ 3982              	.LASF87:
+ 3983 0493 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 3983      43313120 
+ 3983      352E342E 
+ 3983      31203230 
+ 3983      31363036 
+ 3984 04c6 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m3 -mthumb -g -O"
+ 3984      20726576 
+ 3984      6973696F 
+ 3984      6E203233 
+ 3984      37373135 
+ 3985 04f9 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 3985      66756E63 
+ 3985      74696F6E 
+ 3985      2D736563 
+ 3985      74696F6E 
+ 3986              	.LASF83:
+ 3987 0521 43794465 		.ascii	"CyDelay\000"
+ 3987      6C617900 
+ 3988              	.LASF34:
+ 3989 0529 64617461 		.ascii	"data_bytes\000"
+ 3989      5F627974 
+ 3989      657300
+ 3990              	.LASF76:
+ 3991 0534 4C45445F 		.ascii	"LED_4_Write\000"
+ 3991      345F5772 
+ 3991      69746500 
+ 3992              	.LASF37:
+ 3993 0540 6973725F 		.ascii	"isr_handler_debug1\000"
+ 3993      68616E64 
+ 3993      6C65725F 
+ 3993      64656275 
+ 3993      673100
+ 3994              	.LASF31:
+ 3995 0553 636F6E74 		.ascii	"control_reg_value\000"
+ 3995      726F6C5F 
+ 3995      7265675F 
+ 3995      76616C75 
+ 3995      6500
+ 3996              	.LASF47:
+ 3997 0565 75706461 		.ascii	"update_control_reg_value\000"
+ARM GAS  C:\Users\kvl6\AppData\Local\Temp\ccDFWSTJ.s 			page 85
+
+
+ 3997      74655F63 
+ 3997      6F6E7472 
+ 3997      6F6C5F72 
+ 3997      65675F76 
+ 3998              	.LASF71:
+ 3999 057e 72656164 		.ascii	"read_buffer\000"
+ 3999      5F627566 
+ 3999      66657200 
+ 4000              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran
