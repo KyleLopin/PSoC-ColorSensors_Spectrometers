@@ -1826,7 +1826,7 @@
         <register>
           <name>Status_Reg_1_STATUS_REG</name>
           <description>No description available</description>
-          <addressOffset>0x40006566</addressOffset>
+          <addressOffset>0x4000656B</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -1835,7 +1835,7 @@
         <register>
           <name>Status_Reg_1_MASK_REG</name>
           <description>No description available</description>
-          <addressOffset>0x40006586</addressOffset>
+          <addressOffset>0x4000658B</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -1844,7 +1844,7 @@
         <register>
           <name>Status_Reg_1_STATUS_AUX_CTL_REG</name>
           <description>No description available</description>
-          <addressOffset>0x40006596</addressOffset>
+          <addressOffset>0x4000659B</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -2477,7 +2477,7 @@
         <register>
           <name>C12880_TRG_COMPARE_Reg</name>
           <description>UDB.D0 - Assigned Compare Value</description>
-          <addressOffset>0x40006428</addressOffset>
+          <addressOffset>0x40006528</addressOffset>
           <size>16</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -2486,7 +2486,7 @@
         <register>
           <name>C12880_TRG_Control_Reg</name>
           <description>UDB Control Register - Assigned Control Register Value</description>
-          <addressOffset>0x40006479</addressOffset>
+          <addressOffset>0x4000657A</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -2518,7 +2518,7 @@
         <register>
           <name>C12880_TRG_STATUS_MASK</name>
           <description>UDB Status bits Interrupt Mask Enable Register</description>
-          <addressOffset>0x40006489</addressOffset>
+          <addressOffset>0x40006589</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -2564,7 +2564,7 @@
         <register>
           <name>C12880_TRG_STATUS_AUX_CTRLDP0</name>
           <description>UDB Auxilliary Control Register</description>
-          <addressOffset>0x40006498</addressOffset>
+          <addressOffset>0x40006598</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -2689,7 +2689,7 @@
         <register>
           <name>C12880_TRG_STATUS_AUX_CTRLDP1</name>
           <description>UDB Auxilliary Control Register</description>
-          <addressOffset>0x40006499</addressOffset>
+          <addressOffset>0x40006599</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -2826,7 +2826,7 @@
         <register>
           <name>C12880_CLK_COMPARE_Reg</name>
           <description>UDB.D0 - Assigned Compare Value</description>
-          <addressOffset>0x40006526</addressOffset>
+          <addressOffset>0x40006428</addressOffset>
           <size>16</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -2835,7 +2835,7 @@
         <register>
           <name>C12880_CLK_Control_Reg</name>
           <description>UDB Control Register - Assigned Control Register Value</description>
-          <addressOffset>0x40006577</addressOffset>
+          <addressOffset>0x40006479</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -2867,7 +2867,7 @@
         <register>
           <name>C12880_CLK_STATUS_MASK</name>
           <description>UDB Status bits Interrupt Mask Enable Register</description>
-          <addressOffset>0x40006587</addressOffset>
+          <addressOffset>0x40006489</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -2913,7 +2913,7 @@
         <register>
           <name>C12880_CLK_STATUS_AUX_CTRLDP0</name>
           <description>UDB Auxilliary Control Register</description>
-          <addressOffset>0x40006596</addressOffset>
+          <addressOffset>0x40006498</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -3038,7 +3038,7 @@
         <register>
           <name>C12880_CLK_STATUS_AUX_CTRLDP1</name>
           <description>UDB Auxilliary Control Register</description>
-          <addressOffset>0x40006597</addressOffset>
+          <addressOffset>0x40006499</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -3196,7 +3196,7 @@
         <register>
           <name>C12880_ST_COMPARE_Reg</name>
           <description>UDB.D0 - Assigned Compare Value</description>
-          <addressOffset>0x40006528</addressOffset>
+          <addressOffset>0x4000652A</addressOffset>
           <size>16</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -3205,7 +3205,7 @@
         <register>
           <name>C12880_ST_Control_Reg</name>
           <description>UDB Control Register - Assigned Control Register Value</description>
-          <addressOffset>0x4000657A</addressOffset>
+          <addressOffset>0x40006578</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -3237,7 +3237,7 @@
         <register>
           <name>C12880_ST_STATUS_MASK</name>
           <description>UDB Status bits Interrupt Mask Enable Register</description>
-          <addressOffset>0x40006589</addressOffset>
+          <addressOffset>0x40006588</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -3283,7 +3283,7 @@
         <register>
           <name>C12880_ST_STATUS_AUX_CTRLDP0</name>
           <description>UDB Auxilliary Control Register</description>
-          <addressOffset>0x40006598</addressOffset>
+          <addressOffset>0x4000659A</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -3408,7 +3408,7 @@
         <register>
           <name>C12880_ST_STATUS_AUX_CTRLDP1</name>
           <description>UDB Auxilliary Control Register</description>
-          <addressOffset>0x40006599</addressOffset>
+          <addressOffset>0x4000659B</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>

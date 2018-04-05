@@ -28,6 +28,7 @@ uint8 use_laser_flash = False;
 
 CY_ISR( c12880_finished_handler ) {
     data_read = True;
+    currently_reading = False;
     if (use_led_flash) {
         turn_led_off();
     }
@@ -56,7 +57,7 @@ void c12880_dma_config(void) {
 
 void C12880_Commands(uint8 buffer[]) {
     switch ( buffer[7] ) {
-        case 'R': ;  // C12880|READ
+        case 'R': ;  // C12880|READ_SINGLE|0|0
 //        LCD_Position(0,0);
 //        LCD_PrintString("USB start");
             use_led_flash = buffer[19] - '0';
@@ -65,7 +66,7 @@ void C12880_Commands(uint8 buffer[]) {
             C12880_Read(use_led_flash, use_laser_flash);
             break;
         
-        case 'I': ;
+        case 'I': ;  // C12880|INTEGRATION|XXX
             uint16 integration_time = Convert2Dec(&buffer[19], 3);
             uint16 integration_cycles = integration_time*500 - 48;
             
@@ -75,7 +76,24 @@ void C12880_Commands(uint8 buffer[]) {
         
             break;
             
-        case 'D': ;
+        case 'Q': ;  // C12880|QUERY_RUN
+            if (currently_reading == True) {
+                USB_Export_Data((uint8*)"NOT DONE ", 9);
+            }
+            else if (data_read == True) {
+                USB_Export_Data((uint8*)"READ DONE", 9);
+            }
+            else {
+                USB_Export_Data((uint8*)"NO DATA  ", 9);
+            }
+            break;
+            
+        case 'E': ;  // C12880|EXPORT_DATA
+            C12880_Export_Data();
+            data_read = False;
+            break;
+            
+        case 'D': ;  // C12880|DEBUG
             Export_C12880_State();
             break;
     }
@@ -91,9 +109,11 @@ void C12880_Start(void) {
     PWM_EoC_Debug_Start();
     c12880_dma_config();
     isr_read_complete_StartEx( c12880_finished_handler );
+    currently_reading = False;
 }
 
 void C12880_Read(uint8 use_led, uint8 use_laser) {
+    currently_reading = True;
     if (use_led) {
         turn_led_on(64);
         CyDelay(100);

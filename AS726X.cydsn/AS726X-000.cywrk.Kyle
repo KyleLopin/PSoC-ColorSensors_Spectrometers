@@ -18,7 +18,7 @@
 <v>Output</v>
 </TreeKeys>
 <TreeStates>
-<CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="AS726X-000\AS726X">
+<CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="AS726X-000\AS726X\Header Files\helper_functions.h">
 <ExpandedNodeIds>
 <v>AS726X-000</v>
 <v>AS726X-000\AS7262</v>
@@ -64,12 +64,9 @@
 <v>AS726X-000\AS726X\Source Files\AS726X.c</v>
 <v>AS726X-000\AS726X\Source Files\helper_functions.c</v>
 <v>AS726X-000\AS726X\Source Files\main.c</v>
-<v>AS726X-000\AS726X\Generated_Source</v>
 <v>AS726X-000\AS726X\Generated_Source\PSoC5</v>
 </ExpandedNodeIds>
 <VisibleNodeIds>
-<v>AS726X-000</v>
-<v>AS726X-000\AS7262</v>
 <v>AS726X-000\AS7262\TopDesign</v>
 <v>AS726X-000\AS7262\AS7262.cydwr</v>
 <v>AS726X-000\AS7262\AS7262.cydwr\Pins</v>
@@ -106,6 +103,13 @@
 <v>AS726X-000\AS726X\AS726X.cydwr\EEPROM</v>
 <v>AS726X-000\AS726X\Header Files</v>
 <v>AS726X-000\AS726X\Header Files\AS726X.h</v>
+<v>AS726X-000\AS726X\Header Files\cyapicallbacks.h</v>
+<v>AS726X-000\AS726X\Header Files\helper_functions.h</v>
+<v>AS726X-000\AS726X\Source Files</v>
+<v>AS726X-000\AS726X\Source Files\AS726X.c</v>
+<v>AS726X-000\AS726X\Source Files\helper_functions.c</v>
+<v>AS726X-000\AS726X\Source Files\main.c</v>
+<v>AS726X-000\AS726X\Generated_Source</v>
 </VisibleNodeIds>
 </CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
 <CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="">
@@ -139,6 +143,7 @@
 <v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\AS7262.lst</v>
 <v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\AS7262_INT.lst</v>
 <v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\Cm3Start.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\cy_em_eeprom.lst</v>
 <v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\CyBootAsmGnu.lst</v>
 <v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\CyDmac.lst</v>
 <v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\cyfitter_cfg.lst</v>
@@ -252,6 +257,7 @@
 <v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\AS7262.lst</v>
 <v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\AS7262_INT.lst</v>
 <v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\Cm3Start.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\cy_em_eeprom.lst</v>
 <v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\CyBootAsmGnu.lst</v>
 <v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\CyDmac.lst</v>
 <v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\cyfitter_cfg.lst</v>
@@ -281,6 +287,10 @@
 <v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\SDA.lst</v>
 <v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\Timer_1.lst</v>
 <v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\Timer_1_PM.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\timer_clock.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\usb_functions.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS.lst</v>
+<v>AS726X-000\AS7262\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS_audio.lst</v>
 </VisibleNodeIds>
 </CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
 </TreeStates>

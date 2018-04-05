@@ -930,9 +930,9 @@
   <block name="Em_EEPROM_Dynamic" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="EoS" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="Status_Reg_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
-    <register name="Status_Reg_1_STATUS_REG" address="0x40006566" bitWidth="8" desc="" hidden="false" />
-    <register name="Status_Reg_1_MASK_REG" address="0x40006586" bitWidth="8" desc="" hidden="false" />
-    <register name="Status_Reg_1_STATUS_AUX_CTL_REG" address="0x40006596" bitWidth="8" desc="" hidden="false">
+    <register name="Status_Reg_1_STATUS_REG" address="0x4000656B" bitWidth="8" desc="" hidden="false" />
+    <register name="Status_Reg_1_MASK_REG" address="0x4000658B" bitWidth="8" desc="" hidden="false" />
+    <register name="Status_Reg_1_STATUS_AUX_CTL_REG" address="0x4000659B" bitWidth="8" desc="" hidden="false">
       <field name="FIFO0" from="5" to="5" access="RW" resetVal="" desc="FIFO0 clear" hidden="false">
         <value name="ENABLED" value="1" desc="Enable counter" />
         <value name="DISABLED" value="0" desc="Disable counter" />
@@ -1081,20 +1081,20 @@
     <block name="OneTerminal_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="ZeroTerminal_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="PWMUDB" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-    <register name="C12880_TRG_COMPARE_Reg" address="0x40006428" bitWidth="16" desc="UDB.D0 - Assigned Compare Value" hidden="false" />
-    <register name="C12880_TRG_Control_Reg" address="0x40006479" bitWidth="8" desc="UDB Control Register - Assigned Control Register Value" hidden="false">
+    <register name="C12880_TRG_COMPARE_Reg" address="0x40006528" bitWidth="16" desc="UDB.D0 - Assigned Compare Value" hidden="false" />
+    <register name="C12880_TRG_Control_Reg" address="0x4000657A" bitWidth="8" desc="UDB Control Register - Assigned Control Register Value" hidden="false">
       <field name="CTRL_ENABLE" from="7" to="7" access="RW" resetVal="" desc="Enable the PWM" hidden="false" />
       <field name="CTRL_CMPMODE2" from="5" to="3" access="RW" resetVal="" desc="Compare mode 2" hidden="false" />
       <field name="CTRL_CMPMODE1" from="2" to="0" access="RW" resetVal="" desc="Compare mode 1" hidden="false" />
     </register>
-    <register name="C12880_TRG_STATUS_MASK" address="0x40006489" bitWidth="8" desc="UDB Status bits Interrupt Mask Enable Register" hidden="false">
+    <register name="C12880_TRG_STATUS_MASK" address="0x40006589" bitWidth="8" desc="UDB Status bits Interrupt Mask Enable Register" hidden="false">
       <field name="PWM_STS_CMP1" from="0" to="0" access="R" resetVal="" desc="Enables the Interrupt on Compare 1" hidden="false" />
       <field name="PWM_STS_CMP2" from="1" to="1" access="R" resetVal="" desc="Enables the Interrupt on Compare 2" hidden="false" />
       <field name="PWM_STS_TC" from="2" to="2" access="R" resetVal="" desc="Enables the Interrupt on Terminal Count" hidden="false" />
       <field name="PWM_STS_FIFO_FULL" from="3" to="3" access="R" resetVal="" desc="FIFO Full Status Mask " hidden="false" />
       <field name="PWM_STS_KILL" from="5" to="5" access="R" resetVal="" desc="Enables the Interrupt on Kill" hidden="false" />
     </register>
-    <register name="C12880_TRG_STATUS_AUX_CTRLDP0" address="0x40006498" bitWidth="8" desc="UDB Auxilliary Control Register" hidden="false">
+    <register name="C12880_TRG_STATUS_AUX_CTRLDP0" address="0x40006598" bitWidth="8" desc="UDB Auxilliary Control Register" hidden="false">
       <field name="FIFO0_CLR" from="0" to="0" access="RW" resetVal="" desc="FIFO0 clear" hidden="false">
         <value name="E_FIFO_CLR_0" value="0" desc="Normal FIFO operation" />
         <value name="E_FIFO_CLR_1" value="1" desc="Clear FIFO state" />
@@ -1120,7 +1120,7 @@
         <value name="E_CNT_START1" value="1" desc="Enable counter" />
       </field>
     </register>
-    <register name="C12880_TRG_STATUS_AUX_CTRLDP1" address="0x40006499" bitWidth="8" desc="UDB Auxilliary Control Register" hidden="false">
+    <register name="C12880_TRG_STATUS_AUX_CTRLDP1" address="0x40006599" bitWidth="8" desc="UDB Auxilliary Control Register" hidden="false">
       <field name="FIFO0_CLR" from="0" to="0" access="RW" resetVal="" desc="FIFO0 clear" hidden="false">
         <value name="E_FIFO_CLR_0" value="0" desc="Normal FIFO operation" />
         <value name="E_FIFO_CLR_1" value="1" desc="Clear FIFO state" />
@@ -1157,20 +1157,20 @@
     <block name="OneTerminal_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="ZeroTerminal_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="PWMUDB" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-    <register name="C12880_CLK_COMPARE_Reg" address="0x40006526" bitWidth="16" desc="UDB.D0 - Assigned Compare Value" hidden="false" />
-    <register name="C12880_CLK_Control_Reg" address="0x40006577" bitWidth="8" desc="UDB Control Register - Assigned Control Register Value" hidden="false">
+    <register name="C12880_CLK_COMPARE_Reg" address="0x40006428" bitWidth="16" desc="UDB.D0 - Assigned Compare Value" hidden="false" />
+    <register name="C12880_CLK_Control_Reg" address="0x40006479" bitWidth="8" desc="UDB Control Register - Assigned Control Register Value" hidden="false">
       <field name="CTRL_ENABLE" from="7" to="7" access="RW" resetVal="" desc="Enable the PWM" hidden="false" />
       <field name="CTRL_CMPMODE2" from="5" to="3" access="RW" resetVal="" desc="Compare mode 2" hidden="false" />
       <field name="CTRL_CMPMODE1" from="2" to="0" access="RW" resetVal="" desc="Compare mode 1" hidden="false" />
     </register>
-    <register name="C12880_CLK_STATUS_MASK" address="0x40006587" bitWidth="8" desc="UDB Status bits Interrupt Mask Enable Register" hidden="false">
+    <register name="C12880_CLK_STATUS_MASK" address="0x40006489" bitWidth="8" desc="UDB Status bits Interrupt Mask Enable Register" hidden="false">
       <field name="PWM_STS_CMP1" from="0" to="0" access="R" resetVal="" desc="Enables the Interrupt on Compare 1" hidden="false" />
       <field name="PWM_STS_CMP2" from="1" to="1" access="R" resetVal="" desc="Enables the Interrupt on Compare 2" hidden="false" />
       <field name="PWM_STS_TC" from="2" to="2" access="R" resetVal="" desc="Enables the Interrupt on Terminal Count" hidden="false" />
       <field name="PWM_STS_FIFO_FULL" from="3" to="3" access="R" resetVal="" desc="FIFO Full Status Mask " hidden="false" />
       <field name="PWM_STS_KILL" from="5" to="5" access="R" resetVal="" desc="Enables the Interrupt on Kill" hidden="false" />
     </register>
-    <register name="C12880_CLK_STATUS_AUX_CTRLDP0" address="0x40006596" bitWidth="8" desc="UDB Auxilliary Control Register" hidden="false">
+    <register name="C12880_CLK_STATUS_AUX_CTRLDP0" address="0x40006498" bitWidth="8" desc="UDB Auxilliary Control Register" hidden="false">
       <field name="FIFO0_CLR" from="0" to="0" access="RW" resetVal="" desc="FIFO0 clear" hidden="false">
         <value name="E_FIFO_CLR_0" value="0" desc="Normal FIFO operation" />
         <value name="E_FIFO_CLR_1" value="1" desc="Clear FIFO state" />
@@ -1196,7 +1196,7 @@
         <value name="E_CNT_START1" value="1" desc="Enable counter" />
       </field>
     </register>
-    <register name="C12880_CLK_STATUS_AUX_CTRLDP1" address="0x40006597" bitWidth="8" desc="UDB Auxilliary Control Register" hidden="false">
+    <register name="C12880_CLK_STATUS_AUX_CTRLDP1" address="0x40006499" bitWidth="8" desc="UDB Auxilliary Control Register" hidden="false">
       <field name="FIFO0_CLR" from="0" to="0" access="RW" resetVal="" desc="FIFO0 clear" hidden="false">
         <value name="E_FIFO_CLR_0" value="0" desc="Normal FIFO operation" />
         <value name="E_FIFO_CLR_1" value="1" desc="Clear FIFO state" />
@@ -1240,20 +1240,20 @@
     <block name="OneTerminal_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="ZeroTerminal_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="PWMUDB" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-    <register name="C12880_ST_COMPARE_Reg" address="0x40006528" bitWidth="16" desc="UDB.D0 - Assigned Compare Value" hidden="false" />
-    <register name="C12880_ST_Control_Reg" address="0x4000657A" bitWidth="8" desc="UDB Control Register - Assigned Control Register Value" hidden="false">
+    <register name="C12880_ST_COMPARE_Reg" address="0x4000652A" bitWidth="16" desc="UDB.D0 - Assigned Compare Value" hidden="false" />
+    <register name="C12880_ST_Control_Reg" address="0x40006578" bitWidth="8" desc="UDB Control Register - Assigned Control Register Value" hidden="false">
       <field name="CTRL_ENABLE" from="7" to="7" access="RW" resetVal="" desc="Enable the PWM" hidden="false" />
       <field name="CTRL_CMPMODE2" from="5" to="3" access="RW" resetVal="" desc="Compare mode 2" hidden="false" />
       <field name="CTRL_CMPMODE1" from="2" to="0" access="RW" resetVal="" desc="Compare mode 1" hidden="false" />
     </register>
-    <register name="C12880_ST_STATUS_MASK" address="0x40006589" bitWidth="8" desc="UDB Status bits Interrupt Mask Enable Register" hidden="false">
+    <register name="C12880_ST_STATUS_MASK" address="0x40006588" bitWidth="8" desc="UDB Status bits Interrupt Mask Enable Register" hidden="false">
       <field name="PWM_STS_CMP1" from="0" to="0" access="R" resetVal="" desc="Enables the Interrupt on Compare 1" hidden="false" />
       <field name="PWM_STS_CMP2" from="1" to="1" access="R" resetVal="" desc="Enables the Interrupt on Compare 2" hidden="false" />
       <field name="PWM_STS_TC" from="2" to="2" access="R" resetVal="" desc="Enables the Interrupt on Terminal Count" hidden="false" />
       <field name="PWM_STS_FIFO_FULL" from="3" to="3" access="R" resetVal="" desc="FIFO Full Status Mask " hidden="false" />
       <field name="PWM_STS_KILL" from="5" to="5" access="R" resetVal="" desc="Enables the Interrupt on Kill" hidden="false" />
     </register>
-    <register name="C12880_ST_STATUS_AUX_CTRLDP0" address="0x40006598" bitWidth="8" desc="UDB Auxilliary Control Register" hidden="false">
+    <register name="C12880_ST_STATUS_AUX_CTRLDP0" address="0x4000659A" bitWidth="8" desc="UDB Auxilliary Control Register" hidden="false">
       <field name="FIFO0_CLR" from="0" to="0" access="RW" resetVal="" desc="FIFO0 clear" hidden="false">
         <value name="E_FIFO_CLR_0" value="0" desc="Normal FIFO operation" />
         <value name="E_FIFO_CLR_1" value="1" desc="Clear FIFO state" />
@@ -1279,7 +1279,7 @@
         <value name="E_CNT_START1" value="1" desc="Enable counter" />
       </field>
     </register>
-    <register name="C12880_ST_STATUS_AUX_CTRLDP1" address="0x40006599" bitWidth="8" desc="UDB Auxilliary Control Register" hidden="false">
+    <register name="C12880_ST_STATUS_AUX_CTRLDP1" address="0x4000659B" bitWidth="8" desc="UDB Auxilliary Control Register" hidden="false">
       <field name="FIFO0_CLR" from="0" to="0" access="RW" resetVal="" desc="FIFO0 clear" hidden="false">
         <value name="E_FIFO_CLR_0" value="0" desc="Normal FIFO operation" />
         <value name="E_FIFO_CLR_1" value="1" desc="Clear FIFO state" />

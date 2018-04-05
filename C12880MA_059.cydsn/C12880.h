@@ -24,6 +24,9 @@
 #include "lighting.h"
 #include "usb_protocols.h"
     
+#define True                1
+#define False               0
+    
 /***************************************
 *     DMA Constants and variables
 ***************************************/  
@@ -76,7 +79,7 @@ union C12880DebugData c12880_debug_data;
 ***************************************/
 
 extern uint8 data_read;
-extern 
+uint8 currently_reading;
 
 
 /***************************************

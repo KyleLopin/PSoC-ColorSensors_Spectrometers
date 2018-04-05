@@ -105,12 +105,12 @@ int main(void)
                 
         
         
-        if ( data_read ) {
-
-            C12880_Export_Data();
-            // reset the flag
-            data_read = False;
-        }
+//        if ( data_read ) {
+//
+//            C12880_Export_Data();
+//            // reset the flag
+//            data_read = False;
+//        }
     }
 }
 

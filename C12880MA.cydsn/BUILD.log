@@ -1,44 +1,28 @@
---------------- Build Started: 02/18/2018 15:10:41 Project: C12880MA, Configuration: ARM GCC 5.4-2016-q2-update Debug ---------------
-cydsfit.exe -.appdatapath "C:\Users\Kyle\AppData\Local\Cypress Semiconductor\PSoC Creator\4.1" -.fdsnotice -.fdswarpdepfile=warp_dependencies.txt -.fdselabdepfile=elab_dependencies.txt -.fdsbldfile=generated_files.txt -.fdsreffile=referenced_files.txt -p "C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA.cydsn\C12880MA.cyprj" -d CY8C5868AXI-LP035 -s "C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA.cydsn\Generated_Source\PSoC5" -- -yv2 -q10 -ygs -o2 -v3 -.fftcfgtype=LE
-Elaborating Design...
-HDL Generation...
-Synthesis...
-Tech Mapping...
-Info: plm.M0038: The pin named Pin_debug_EOC(0) at location P0[0] prevents usage of special purposes: OpAmp:out. (App=cydsfit)
-Info: plm.M0038: The pin named Pin_debug_EOS(0) at location P0[1] prevents usage of special purposes: OpAmp:out. (App=cydsfit)
-Analog Placement...
-Log: apr.M0058: The analog placement iterative improvement is 51% done. (App=cydsfit)
-Log: apr.M0058: The analog placement iterative improvement is 71% done. (App=cydsfit)
-Analog Routing...
-Analog Code Generation...
-Digital Placement...
-Digital Routing...
-Bitstream Generation...
-Bitstream Verification...
-Static timing analysis...
-API Generation...
-Dependency Generation...
-Cleanup...
+--------------- Build Started: 04/02/2018 10:01:57 Project: C12880MA, Configuration: ARM GCC 5.4-2016-q2-update Debug ---------------
+The code generation step is up to date.
+arm-none-eabi-gcc.exe -mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=.\CortexM3\ARM_GCC_541\Debug/main.lst -g -D DEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Og -c main.c -o .\CortexM3\ARM_GCC_541\Debug\main.o
+main.c: In function 'main':
+main.c:56:11: warning: unused variable 'cystatus' [-Wunused-variable]
+     uint8 cystatus = 0;
+           ^
+main.c:55:11: warning: unused variable 'blank2' [-Wunused-variable]
+     uint8 blank2 = 0;
+           ^
+main.c:54:11: warning: unused variable 'blank' [-Wunused-variable]
+     uint8 blank = 0;
+           ^
+main.c:53:12: warning: unused variable 'num' [-Wunused-variable]
+     uint16 num = 0;
+            ^
 arm-none-eabi-gcc.exe -mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=.\CortexM3\ARM_GCC_541\Debug/C12880.lst -g -D DEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Og -c C12880.c -o .\CortexM3\ARM_GCC_541\Debug\C12880.o
-arm-none-eabi-gcc.exe -mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=.\CortexM3\ARM_GCC_541\Debug/lighting.lst -g -D DEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Og -c lighting.c -o .\CortexM3\ARM_GCC_541\Debug\lighting.o
-lighting.c: In function 'lighting_commands':
-lighting.c:54:50: warning: passing argument 1 of 'Convert2Dec2' makes pointer from integer without a cast [-Wint-conversion]
-                 uint8 power_level = Convert2Dec2(buffer[7], 2);
-                                                  ^
-lighting.c:30:8: note: expected 'uint8 * {aka unsigned char *}' but argument is of type 'uint8 {aka unsigned char}'
- uint16 Convert2Dec2(uint8 array[], uint8 len);
-        ^
-lighting.c:69:50: warning: passing argument 1 of 'Convert2Dec2' makes pointer from integer without a cast [-Wint-conversion]
-                 uint8 power_level = Convert2Dec2(buffer[9], 2);
-                                                  ^
-lighting.c:30:8: note: expected 'uint8 * {aka unsigned char *}' but argument is of type 'uint8 {aka unsigned char}'
- uint16 Convert2Dec2(uint8 array[], uint8 len);
-        ^
-arm-none-eabi-ar.exe -rs .\CortexM3\ARM_GCC_541\Debug\C12880MA.a .\CortexM3\ARM_GCC_541\Debug\ADC.o .\CortexM3\ARM_GCC_541\Debug\ADC_INT.o .\CortexM3\ARM_GCC_541\Debug\ADC_PM.o .\CortexM3\ARM_GCC_541\Debug\Pin_Video.o .\CortexM3\ARM_GCC_541\Debug\C12880_CLK.o .\CortexM3\ARM_GCC_541\Debug\C12880_CLK_PM.o .\CortexM3\ARM_GCC_541\Debug\C12880_TRG.o .\CortexM3\ARM_GCC_541\Debug\C12880_TRG_PM.o .\CortexM3\ARM_GCC_541\Debug\Master.o .\CortexM3\ARM_GCC_541\Debug\Pin_TRG.o .\CortexM3\ARM_GCC_541\Debug\Pin_ST.o .\CortexM3\ARM_GCC_541\Debug\C12880_ST.o .\CortexM3\ARM_GCC_541\Debug\C12880_ST_PM.o .\CortexM3\ARM_GCC_541\Debug\Pin_CLK.o .\CortexM3\ARM_GCC_541\Debug\Pin_debug_EOC.o .\CortexM3\ARM_GCC_541\Debug\Pin_debug_EOS.o .\CortexM3\ARM_GCC_541\Debug\SW1.o .\CortexM3\ARM_GCC_541\Debug\isr_sw.o .\CortexM3\ARM_GCC_541\Debug\LCD.o .\CortexM3\ARM_GCC_541\Debug\LCD_PM.o .\CortexM3\ARM_GCC_541\Debug\ADC_IRQ.o .\CortexM3\ARM_GCC_541\Debug\ADC_theACLK.o .\CortexM3\ARM_GCC_541\Debug\LCD_LCDPort.o .\CortexM3\ARM_GCC_541\Debug\CyDmac.o .\CortexM3\ARM_GCC_541\Debug\CyFlash.o .\CortexM3\ARM_GCC_541\Debug\CyLib.o .\CortexM3\ARM_GCC_541\Debug\cyPm.o .\CortexM3\ARM_GCC_541\Debug\CySpc.o .\CortexM3\ARM_GCC_541\Debug\cyutils.o .\CortexM3\ARM_GCC_541\Debug\C12880_ctrl_reg.o .\CortexM3\ARM_GCC_541\Debug\C12880_ctrl_reg_PM.o .\CortexM3\ARM_GCC_541\Debug\Pin_ctrl_reg.o .\CortexM3\ARM_GCC_541\Debug\Pin_Debug_SoC.o .\CortexM3\ARM_GCC_541\Debug\ADC_Bypass.o .\CortexM3\ARM_GCC_541\Debug\DMA_Video_dma.o .\CortexM3\ARM_GCC_541\Debug\isr_read_complete.o .\CortexM3\ARM_GCC_541\Debug\USBFS.o .\CortexM3\ARM_GCC_541\Debug\USBFS_audio.o .\CortexM3\ARM_GCC_541\Debug\USBFS_boot.o .\CortexM3\ARM_GCC_541\Debug\USBFS_cdc.o .\CortexM3\ARM_GCC_541\Debug\USBFS_cls.o .\CortexM3\ARM_GCC_541\Debug\USBFS_descr.o .\CortexM3\ARM_GCC_541\Debug\USBFS_drv.o .\CortexM3\ARM_GCC_541\Debug\USBFS_episr.o .\CortexM3\ARM_GCC_541\Debug\USBFS_hid.o .\CortexM3\ARM_GCC_541\Debug\USBFS_pm.o .\CortexM3\ARM_GCC_541\Debug\USBFS_std.o .\CortexM3\ARM_GCC_541\Debug\USBFS_vnd.o .\CortexM3\ARM_GCC_541\Debug\USBFS_midi.o .\CortexM3\ARM_GCC_541\Debug\USBFS_msc.o .\CortexM3\ARM_GCC_541\Debug\USBFS_Dm.o .\CortexM3\ARM_GCC_541\Debug\USBFS_Dp.o .\CortexM3\ARM_GCC_541\Debug\Pin_complete.o .\CortexM3\ARM_GCC_541\Debug\Comp_1.o .\CortexM3\ARM_GCC_541\Debug\Comp_1_PM.o .\CortexM3\ARM_GCC_541\Debug\Pin_1.o .\CortexM3\ARM_GCC_541\Debug\Pin_video_comp.o .\CortexM3\ARM_GCC_541\Debug\LED.o .\CortexM3\ARM_GCC_541\Debug\Laser.o .\CortexM3\ARM_GCC_541\Debug\Opamp_video.o .\CortexM3\ARM_GCC_541\Debug\Opamp_video_PM.o .\CortexM3\ARM_GCC_541\Debug\CyBootAsmGnu.o
+arm-none-eabi-ar.exe -rs .\CortexM3\ARM_GCC_541\Debug\C12880MA.a .\CortexM3\ARM_GCC_541\Debug\ADC.o .\CortexM3\ARM_GCC_541\Debug\ADC_INT.o .\CortexM3\ARM_GCC_541\Debug\ADC_PM.o .\CortexM3\ARM_GCC_541\Debug\Pin_Video.o .\CortexM3\ARM_GCC_541\Debug\C12880_CLK.o .\CortexM3\ARM_GCC_541\Debug\C12880_CLK_PM.o .\CortexM3\ARM_GCC_541\Debug\C12880_TRG.o .\CortexM3\ARM_GCC_541\Debug\C12880_TRG_PM.o .\CortexM3\ARM_GCC_541\Debug\Master.o .\CortexM3\ARM_GCC_541\Debug\Pin_TRG.o .\CortexM3\ARM_GCC_541\Debug\Pin_ST.o .\CortexM3\ARM_GCC_541\Debug\C12880_ST.o .\CortexM3\ARM_GCC_541\Debug\C12880_ST_PM.o .\CortexM3\ARM_GCC_541\Debug\Pin_CLK.o .\CortexM3\ARM_GCC_541\Debug\Pin_debug_EOC.o .\CortexM3\ARM_GCC_541\Debug\Pin_debug_EOS.o .\CortexM3\ARM_GCC_541\Debug\SW1.o .\CortexM3\ARM_GCC_541\Debug\isr_sw.o .\CortexM3\ARM_GCC_541\Debug\LCD.o .\CortexM3\ARM_GCC_541\Debug\LCD_PM.o .\CortexM3\ARM_GCC_541\Debug\ADC_IRQ.o .\CortexM3\ARM_GCC_541\Debug\ADC_theACLK.o .\CortexM3\ARM_GCC_541\Debug\LCD_LCDPort.o .\CortexM3\ARM_GCC_541\Debug\CyDmac.o .\CortexM3\ARM_GCC_541\Debug\CyFlash.o .\CortexM3\ARM_GCC_541\Debug\CyLib.o .\CortexM3\ARM_GCC_541\Debug\cyPm.o .\CortexM3\ARM_GCC_541\Debug\CySpc.o .\CortexM3\ARM_GCC_541\Debug\cyutils.o .\CortexM3\ARM_GCC_541\Debug\C12880_ctrl_reg.o .\CortexM3\ARM_GCC_541\Debug\C12880_ctrl_reg_PM.o .\CortexM3\ARM_GCC_541\Debug\Pin_ctrl_reg.o .\CortexM3\ARM_GCC_541\Debug\Pin_Debug_SoC.o .\CortexM3\ARM_GCC_541\Debug\ADC_Bypass.o .\CortexM3\ARM_GCC_541\Debug\DMA_Video_dma.o .\CortexM3\ARM_GCC_541\Debug\isr_read_complete.o .\CortexM3\ARM_GCC_541\Debug\USBFS.o .\CortexM3\ARM_GCC_541\Debug\USBFS_audio.o .\CortexM3\ARM_GCC_541\Debug\USBFS_boot.o .\CortexM3\ARM_GCC_541\Debug\USBFS_cdc.o .\CortexM3\ARM_GCC_541\Debug\USBFS_cls.o .\CortexM3\ARM_GCC_541\Debug\USBFS_descr.o .\CortexM3\ARM_GCC_541\Debug\USBFS_drv.o .\CortexM3\ARM_GCC_541\Debug\USBFS_episr.o .\CortexM3\ARM_GCC_541\Debug\USBFS_hid.o .\CortexM3\ARM_GCC_541\Debug\USBFS_pm.o .\CortexM3\ARM_GCC_541\Debug\USBFS_std.o .\CortexM3\ARM_GCC_541\Debug\USBFS_vnd.o .\CortexM3\ARM_GCC_541\Debug\USBFS_midi.o .\CortexM3\ARM_GCC_541\Debug\USBFS_msc.o .\CortexM3\ARM_GCC_541\Debug\USBFS_Dm.o .\CortexM3\ARM_GCC_541\Debug\USBFS_Dp.o .\CortexM3\ARM_GCC_541\Debug\Pin_complete.o .\CortexM3\ARM_GCC_541\Debug\LED.o .\CortexM3\ARM_GCC_541\Debug\Laser.o .\CortexM3\ARM_GCC_541\Debug\Opamp_video.o .\CortexM3\ARM_GCC_541\Debug\Opamp_video_PM.o .\CortexM3\ARM_GCC_541\Debug\Status_Reg_1.o .\CortexM3\ARM_GCC_541\Debug\PWM_EoC_Debug.o .\CortexM3\ARM_GCC_541\Debug\PWM_EoC_Debug_PM.o .\CortexM3\ARM_GCC_541\Debug\EoS.o .\CortexM3\ARM_GCC_541\Debug\cy_em_eeprom.o .\CortexM3\ARM_GCC_541\Debug\CyBootAsmGnu.o
 arm-none-eabi-ar.exe: creating .\CortexM3\ARM_GCC_541\Debug\C12880MA.a
-arm-none-eabi-gcc.exe -Wl,--start-group -o "C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA.cydsn\CortexM3\ARM_GCC_541\Debug\C12880MA.elf" .\CortexM3\ARM_GCC_541\Debug\main.o .\CortexM3\ARM_GCC_541\Debug\C12880.o .\CortexM3\ARM_GCC_541\Debug\usb_protocols.o .\CortexM3\ARM_GCC_541\Debug\lighting.o .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o .\CortexM3\ARM_GCC_541\Debug\cymetadata.o .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o .\CortexM3\ARM_GCC_541\Debug\C12880MA.a "C:\Program Files (x86)\Cypress\PSoC Creator\4.1\PSoC Creator\psoc\content\cycomponentlibrary\CyComponentLibrary.cylib\CortexM3\ARM_GCC_541\Debug\CyComponentLibrary.a" -mcpu=cortex-m3 -mthumb -L Generated_Source\PSoC5 -Wl,-Map,.\CortexM3\ARM_GCC_541\Debug/C12880MA.map -T Generated_Source\PSoC5\cm3gcc.ld -specs=nano.specs -Wl,--gc-sections -g -ffunction-sections -Og -ffat-lto-objects -Wl,--end-group
+arm-none-eabi-gcc.exe -Wl,--start-group -o "C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA.cydsn\CortexM3\ARM_GCC_541\Debug\C12880MA.elf" .\CortexM3\ARM_GCC_541\Debug\main.o .\CortexM3\ARM_GCC_541\Debug\C12880.o .\CortexM3\ARM_GCC_541\Debug\usb_protocols.o .\CortexM3\ARM_GCC_541\Debug\lighting.o .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o .\CortexM3\ARM_GCC_541\Debug\cymetadata.o .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o .\CortexM3\ARM_GCC_541\Debug\C12880MA.a "C:\Program Files (x86)\Cypress\PSoC Creator\4.2\PSoC Creator\psoc\content\cycomponentlibrary\CyComponentLibrary.cylib\CortexM3\ARM_GCC_541\Debug\CyComponentLibrary.a" -mcpu=cortex-m3 -mthumb -L Generated_Source\PSoC5 -Wl,-Map,.\CortexM3\ARM_GCC_541\Debug/C12880MA.map -T Generated_Source\PSoC5\cm3gcc.ld -specs=nano.specs -Wl,--gc-sections -g -ffunction-sections -Og -ffat-lto-objects -Wl,--end-group
 cyelftool.exe -C "C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA.cydsn\CortexM3\ARM_GCC_541\Debug\C12880MA.elf" --flash_row_size 256 --flash_size 262144 --flash_offset 0x00000000
+No ELF section .cychecksum found, creating one
+Application checksum calculated and stored in ELF section .cychecksum
+Checksum calculated and stored in ELF section .cymeta
 cyelftool.exe -S "C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA.cydsn\CortexM3\ARM_GCC_541\Debug\C12880MA.elf"
-Flash used: 10710 of 262144 bytes (4.1%).
-SRAM used: 5353 of 65536 bytes (8.2%). Stack: 2048 bytes. Heap: 2048 bytes.
---------------- Build Succeeded: 02/18/2018 15:11:04 ---------------
+Flash used: 11126 of 262144 bytes (4.2%).
+SRAM used: 5369 of 65536 bytes (8.2%). Stack: 2048 bytes. Heap: 2048 bytes.
+--------------- Build Succeeded: 04/02/2018 10:02:01 ---------------

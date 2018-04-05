@@ -373,6 +373,7 @@
       <Data key="ca87f262-7aa1-43d7-b711-b915ed64a3d5" value="Pin_debug_EOS" />
       <Data key="dc11a522-bc97-4aa7-9852-bdaad3f596f4" value="Pin_ST" />
       <Data key="e851a3b9-efb8-48be-bbb8-b303b216c393" value="Pin_CLK" />
+      <Data key="f92daed7-4ffa-4ebd-8472-447da98849aa" value="EoS" />
     </Group>
   </Group>
   <Group key="EEPROM">
@@ -3611,6 +3612,11 @@
     <Group key="e851a3b9-efb8-48be-bbb8-b303b216c393">
       <Group key="0">
         <Data key="Port Format" value="3,2" />
+      </Group>
+    </Group>
+    <Group key="f92daed7-4ffa-4ebd-8472-447da98849aa">
+      <Group key="0">
+        <Data key="Port Format" value="0,7" />
       </Group>
     </Group>
     <Group key="UnAssigned Pins" />
