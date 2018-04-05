@@ -35,8 +35,6 @@ CY_ISR( c12880_finished_handler ) {
     if (use_laser_flash) {
         turn_laser_off();
     }
-//    LCD_Position(0,0);
-//    LCD_PrintString("C12880 finish");
 }
 
 
