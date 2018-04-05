@@ -94,6 +94,7 @@ void C12880_Commands(uint8 buffer[]) {
             break;
             
         case 'D': ;  // C12880|DEBUG
+            
             Export_C12880_State();
             break;
     }
@@ -149,7 +150,7 @@ void Export_C12880_State(void) {
     c12880_debug_data.data_debug.EoS_status = Status_Reg_1_Read();
     CyDmaTdGetConfiguration(DMA_Video_TD[0], &c12880_debug_data.data_debug.dma_transfer_count, 
                             NULL, NULL);
-    USB_Export_Data(&c12880_debug_data.data_bytes[0], 24);
+    USB_Export_Data(&c12880_debug_data.data_bytes[0], 11);
 }
 
 
