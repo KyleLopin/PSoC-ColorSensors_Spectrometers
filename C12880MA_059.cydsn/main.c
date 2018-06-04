@@ -28,32 +28,27 @@
 
 
 char LCD_str[40];
-bool Input_Flag = false;
+bool Input_Flag = False;
 uint8 data_read = False;
+
+/***************************************
+*      external C12880 variables
+***************************************/ 
 
 extern uint8 DMA_Video_Chan;
 extern uint8 DMA_Video_TD[1];
+extern bool c12880_process_flag;
 
 extern union C12880Data c12880_data;
 
-int main(void)
-{
+int main(void) {
 //    isr_sw_StartEx( SW_Handler );
     
     CyGlobalIntEnable; /* Enable global interrupts. */
     
-//    LCD_Start();
-    
     USB_Start();
     C12880_Start();
-//    LCD_ClearDisplay();
-//    LCD_Position(0, 0);
-//    LCD_PrintString(" C12880 Start2");
     
-//    uint16 num = 0;
-//    uint8 blank = 0;
-//    uint8 blank2 = 0;
-//    uint8 cystatus = 0;
 
     for(;;)
     {
@@ -67,10 +62,6 @@ int main(void)
             Input_Flag = USB_CheckInput(OUT_Data_Buffer);  // check if there is a response from the computer
         }
         
-//        LCD_Position(1, 0);
-////        cystatus = CyDmaTdGetConfiguration( DMA_Video_TD[0], &num, &blank, &blank2 );
-//        sprintf(LCD_str, "td: %d", c12880_data.data[10]);
-//        LCD_PrintString(LCD_str);
         
         if (Input_Flag == true) {
             switch (OUT_Data_Buffer[0]) {  
@@ -88,7 +79,7 @@ int main(void)
                 }
                 break;
                 
-            case LIGHTING: ;
+            case LIGHTING: ;  // LASER || LED || LIGHT
                 lighting_commands( OUT_Data_Buffer );
                     
                 break;
@@ -101,16 +92,13 @@ int main(void)
                  OUT_Data_Buffer[i] = '0';  // clear data buffer cause it has been processed
             }
             Input_Flag = false;  // turn off input flag because it has been processed        
-        }   
-                
+        }
         
-        
-//        if ( data_read ) {
-//
-//            C12880_Export_Data();
-//            // reset the flag
-//            data_read = False;
-//        }
+        if ( c12880_process_flag == True ) {
+            c12880_process_flag = False;  // reset the flag so this won't fire till irs is called
+            C12880_Process_Commands();
+        }
+
     }
 }
 
