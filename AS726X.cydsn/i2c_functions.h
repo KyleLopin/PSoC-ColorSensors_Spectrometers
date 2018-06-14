@@ -25,11 +25,6 @@
 #include "stdbool.h"
 #include "stdio.h"
     
-/***************************************
-*        Constants
-***************************************/  
-
-#define NUM_READ_FAILS                  10    
   
 /***************************************
 *        Function Prototypes

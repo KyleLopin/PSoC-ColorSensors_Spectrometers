@@ -18,10 +18,9 @@
 <v>Output</v>
 </TreeKeys>
 <TreeStates>
-<CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="">
+<CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="C12880MA-000\C12880MA_059\Header Files\C12880.h">
 <ExpandedNodeIds>
 <v>C12880MA-000</v>
-<v>C12880MA-000\C12880MA</v>
 <v>C12880MA-000\C12880MA\TopDesign</v>
 <v>C12880MA-000\C12880MA\C12880MA.cydwr</v>
 <v>C12880MA-000\C12880MA\C12880MA.cydwr\Pins</v>
@@ -64,11 +63,32 @@
 <v>C12880MA-000\C12880MA_059\Source Files\usb_protocols.c</v>
 <v>C12880MA-000\C12880MA_059\Generated_Source</v>
 <v>C12880MA-000\C12880MA_059\Generated_Source\PSoC5</v>
+<v>C12880MA-000\C12880MA_BLE\TopDesign</v>
+<v>C12880MA-000\C12880MA_BLE\C12880MA_BLE.cydwr</v>
+<v>C12880MA-000\C12880MA_BLE\C12880MA_BLE.cydwr\Pins</v>
+<v>C12880MA-000\C12880MA_BLE\C12880MA_BLE.cydwr\Analog</v>
+<v>C12880MA-000\C12880MA_BLE\C12880MA_BLE.cydwr\DMA</v>
+<v>C12880MA-000\C12880MA_BLE\C12880MA_BLE.cydwr\Clocks</v>
+<v>C12880MA-000\C12880MA_BLE\C12880MA_BLE.cydwr\Interrupts</v>
+<v>C12880MA-000\C12880MA_BLE\C12880MA_BLE.cydwr\System</v>
+<v>C12880MA-000\C12880MA_BLE\C12880MA_BLE.cydwr\Directives</v>
+<v>C12880MA-000\C12880MA_BLE\C12880MA_BLE.cydwr\Flash Security</v>
+<v>C12880MA-000\C12880MA_BLE\Header Files</v>
+<v>C12880MA-000\C12880MA_BLE\Header Files\C12880.h</v>
+<v>C12880MA-000\C12880MA_BLE\Header Files\cyapicallbacks.h</v>
+<v>C12880MA-000\C12880MA_BLE\Header Files\lighting.h</v>
+<v>C12880MA-000\C12880MA_BLE\Header Files\usb_protocols.h</v>
+<v>C12880MA-000\C12880MA_BLE\Source Files</v>
+<v>C12880MA-000\C12880MA_BLE\Source Files\C12880.c</v>
+<v>C12880MA-000\C12880MA_BLE\Source Files\lighting.c</v>
+<v>C12880MA-000\C12880MA_BLE\Source Files\main.c</v>
+<v>C12880MA-000\C12880MA_BLE\Source Files\usb_protocols.c</v>
+<v>C12880MA-000\C12880MA_BLE\Generated_Source</v>
+<v>C12880MA-000\C12880MA_BLE\Generated_Source\PSoC5</v>
 </ExpandedNodeIds>
 <VisibleNodeIds>
-<v>C12880MA-000\C12880MA\Source Files\main.c</v>
-<v>C12880MA-000\C12880MA\Source Files\usb_protocols.c</v>
-<v>C12880MA-000\C12880MA\Generated_Source</v>
+<v>C12880MA-000</v>
+<v>C12880MA-000\C12880MA</v>
 <v>C12880MA-000\C12880MA_059</v>
 <v>C12880MA-000\C12880MA_059\TopDesign</v>
 <v>C12880MA-000\C12880MA_059\C12880MA_059.cydwr</v>
@@ -101,8 +121,15 @@
 <v>C12880MA-000\C12880MA_059\Generated_Source\PSoC5\C12880_ctrl_reg</v>
 <v>C12880MA-000\C12880MA_059\Generated_Source\PSoC5\C12880_ST</v>
 <v>C12880MA-000\C12880MA_059\Generated_Source\PSoC5\C12880_TRG</v>
+<v>C12880MA-000\C12880MA_059\Generated_Source\PSoC5\Clock_1</v>
+<v>C12880MA-000\C12880MA_059\Generated_Source\PSoC5\Clock_ST</v>
 <v>C12880MA-000\C12880MA_059\Generated_Source\PSoC5\cy_boot</v>
 <v>C12880MA-000\C12880MA_059\Generated_Source\PSoC5\DMA_Video</v>
+<v>C12880MA-000\C12880MA_059\Generated_Source\PSoC5\Em_EEPROM_Dynamic</v>
+<v>C12880MA-000\C12880MA_059\Generated_Source\PSoC5\EoS</v>
+<v>C12880MA-000\C12880MA_059\Generated_Source\PSoC5\isr_read_complete</v>
+<v>C12880MA-000\C12880MA_059\Generated_Source\PSoC5\Laser</v>
+<v>C12880MA-000\C12880MA_059\Generated_Source\PSoC5\LED</v>
 </VisibleNodeIds>
 </CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
 <CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="">
@@ -229,6 +256,8 @@
 <v>C12880MA-000\C12880MA_059\CortexM3\ARM_GCC_541\Debug\Listing Files\C12880_ST_PM.lst</v>
 <v>C12880MA-000\C12880MA_059\CortexM3\ARM_GCC_541\Debug\Listing Files\C12880_TRG.lst</v>
 <v>C12880MA-000\C12880MA_059\CortexM3\ARM_GCC_541\Debug\Listing Files\C12880_TRG_PM.lst</v>
+<v>C12880MA-000\C12880MA_059\CortexM3\ARM_GCC_541\Debug\Listing Files\Clock_1.lst</v>
+<v>C12880MA-000\C12880MA_059\CortexM3\ARM_GCC_541\Debug\Listing Files\Clock_ST.lst</v>
 <v>C12880MA-000\C12880MA_059\CortexM3\ARM_GCC_541\Debug\Listing Files\Cm3Start.lst</v>
 <v>C12880MA-000\C12880MA_059\CortexM3\ARM_GCC_541\Debug\Listing Files\cy_em_eeprom.lst</v>
 <v>C12880MA-000\C12880MA_059\CortexM3\ARM_GCC_541\Debug\Listing Files\CyBootAsmGnu.lst</v>
@@ -245,17 +274,19 @@
 <v>C12880MA-000\C12880MA_059\CortexM3\ARM_GCC_541\Debug\Listing Files\isr_read_complete.lst</v>
 <v>C12880MA-000\C12880MA_059\CortexM3\ARM_GCC_541\Debug\Listing Files\Laser.lst</v>
 <v>C12880MA-000\C12880MA_059\CortexM3\ARM_GCC_541\Debug\Listing Files\LED.lst</v>
+<v>C12880MA-000\C12880MA_059\CortexM3\ARM_GCC_541\Debug\Listing Files\LED_Dimmer.lst</v>
+<v>C12880MA-000\C12880MA_059\CortexM3\ARM_GCC_541\Debug\Listing Files\LED_Dimmer_PM.lst</v>
+<v>C12880MA-000\C12880MA_059\CortexM3\ARM_GCC_541\Debug\Listing Files\LED_MOSFET.lst</v>
 <v>C12880MA-000\C12880MA_059\CortexM3\ARM_GCC_541\Debug\Listing Files\lighting.lst</v>
 <v>C12880MA-000\C12880MA_059\CortexM3\ARM_GCC_541\Debug\Listing Files\main.lst</v>
 <v>C12880MA-000\C12880MA_059\CortexM3\ARM_GCC_541\Debug\Listing Files\Master.lst</v>
-<v>C12880MA-000\C12880MA_059\CortexM3\ARM_GCC_541\Debug\Listing Files\Opamp_video.lst</v>
-<v>C12880MA-000\C12880MA_059\CortexM3\ARM_GCC_541\Debug\Listing Files\Opamp_video_PM.lst</v>
 <v>C12880MA-000\C12880MA_059\CortexM3\ARM_GCC_541\Debug\Listing Files\Pin_CLK.lst</v>
 <v>C12880MA-000\C12880MA_059\CortexM3\ARM_GCC_541\Debug\Listing Files\Pin_ST.lst</v>
 <v>C12880MA-000\C12880MA_059\CortexM3\ARM_GCC_541\Debug\Listing Files\Pin_TRG.lst</v>
 <v>C12880MA-000\C12880MA_059\CortexM3\ARM_GCC_541\Debug\Listing Files\Pin_Video.lst</v>
 <v>C12880MA-000\C12880MA_059\CortexM3\ARM_GCC_541\Debug\Listing Files\PWM_EoC_Debug.lst</v>
 <v>C12880MA-000\C12880MA_059\CortexM3\ARM_GCC_541\Debug\Listing Files\PWM_EoC_Debug_PM.lst</v>
+<v>C12880MA-000\C12880MA_059\CortexM3\ARM_GCC_541\Debug\Listing Files\ST_CLK.lst</v>
 <v>C12880MA-000\C12880MA_059\CortexM3\ARM_GCC_541\Debug\Listing Files\Status_Reg_1.lst</v>
 <v>C12880MA-000\C12880MA_059\CortexM3\ARM_GCC_541\Debug\Listing Files\usb_protocols.lst</v>
 <v>C12880MA-000\C12880MA_059\CortexM3\ARM_GCC_541\Debug\Listing Files\USBFS.lst</v>
@@ -280,45 +311,14 @@
 <v>C12880MA-000\C12880MA_059\C12880MA_059.gpdsc</v>
 <v>C12880MA-000\C12880MA_059\C12880MA_059.rpt</v>
 <v>C12880MA-000\C12880MA_059\C12880MA_059_timing.html</v>
+<v>C12880MA-000\C12880MA_BLE</v>
+<v>C12880MA-000\C12880MA_BLE\C12880MA_BLE.gpdsc</v>
+<v>C12880MA-000\C12880MA_BLE\C12880MA_BLE.rpt</v>
+<v>C12880MA-000\C12880MA_BLE\C12880MA_BLE_timing.html</v>
 </ExpandedNodeIds>
 <VisibleNodeIds>
 <v>C12880MA-000</v>
 <v>C12880MA-000\C12880MA</v>
-<v>C12880MA-000\C12880MA\CortexM3</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\ADC.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\ADC_Bypass.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\ADC_INT.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\ADC_IRQ.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\ADC_PM.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\ADC_theACLK.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\C12880.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\C12880_CLK.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\C12880_CLK_PM.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\C12880_ctrl_reg.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\C12880_ctrl_reg_PM.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\C12880_ST.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\C12880_ST_PM.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\C12880_TRG.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\C12880_TRG_PM.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\Cm3Start.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\cy_em_eeprom.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\CyBootAsmGnu.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\CyDmac.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\cyfitter_cfg.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\CyFlash.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\CyLib.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\cymetadata.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\cyPm.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\CySpc.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\cyutils.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\DMA_Video_dma.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\EoS.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\isr_read_complete.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\isr_sw.lst</v>
-<v>C12880MA-000\C12880MA\CortexM3\ARM_GCC_541\Debug\Listing Files\Laser.lst</v>
 </VisibleNodeIds>
 </CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
 </TreeStates>
@@ -359,20 +359,48 @@
 <v>C12880MA-000\C12880MA_059\System Reference Guides\cy_boot_v5_60</v>
 <v>C12880MA-000\C12880MA_059\ADC_SAR_v3_0.pdf</v>
 <v>C12880MA-000\C12880MA_059\and_v1_0.pdf</v>
-<v>C12880MA-000\C12880MA_059\cy_clock_v2_20.pdf</v>
-<v>C12880MA-000\C12880MA_059\cy_constant_v1_0.pdf</v>
+<v>C12880MA-000\C12880MA_059\cy_clock_v2_20</v>
+<v>C12880MA-000\C12880MA_059\cy_clock_v2_20\cy_clock_v2_20.pdf</v>
+<v>C12880MA-000\C12880MA_059\cy_constant_v1_0</v>
+<v>C12880MA-000\C12880MA_059\cy_constant_v1_0\cy_constant_v1_0.pdf</v>
 <v>C12880MA-000\C12880MA_059\cy_dma_v1_70.pdf</v>
 <v>C12880MA-000\C12880MA_059\cy_isr_v1_70.pdf</v>
 <v>C12880MA-000\C12880MA_059\cy_pins_v2_20</v>
 <v>C12880MA-000\C12880MA_059\cy_pins_v2_20\cy_pins_v2_20.pdf</v>
+<v>C12880MA-000\C12880MA_059\cy_srff_v1_0.pdf</v>
 <v>C12880MA-000\C12880MA_059\CyControlReg_v1_80.pdf</v>
 <v>C12880MA-000\C12880MA_059\CyStatusReg_v1_90.pdf</v>
-<v>C12880MA-000\C12880MA_059\OpAmp_v1_90.pdf</v>
 <v>C12880MA-000\C12880MA_059\PWM_v3_30</v>
 <v>C12880MA-000\C12880MA_059\PWM_v3_30\PWM_v3_30.pdf</v>
 <v>C12880MA-000\C12880MA_059\USBFS_v3_10.pdf</v>
 <v>C12880MA-000\C12880MA_059\ZeroTerminal</v>
 <v>C12880MA-000\C12880MA_059\ZeroTerminal\ZeroTerminal.pdf</v>
+<v>C12880MA-000\C12880MA_BLE</v>
+<v>C12880MA-000\C12880MA_BLE\PSoC 4 Architecture TRM</v>
+<v>C12880MA-000\C12880MA_BLE\PRoC BLE Family Datasheet</v>
+<v>C12880MA-000\C12880MA_BLE\System Reference Guides</v>
+<v>C12880MA-000\C12880MA_BLE\System Reference Guides\cy_boot_v5_60</v>
+<v>C12880MA-000\C12880MA_BLE\System Reference Guides\cy_dmac_v1_10</v>
+<v>C12880MA-000\C12880MA_BLE\System Reference Guides\cy_lfclk_v1_20</v>
+<v>C12880MA-000\C12880MA_BLE\ADC_SAR_SEQ_P4_v2_50.pdf</v>
+<v>C12880MA-000\C12880MA_BLE\ADC_SAR_v3_0.pdf</v>
+<v>C12880MA-000\C12880MA_BLE\and_v1_0.pdf</v>
+<v>C12880MA-000\C12880MA_BLE\cy_clock_v2_20</v>
+<v>C12880MA-000\C12880MA_BLE\cy_clock_v2_20\cy_clock_v2_20.pdf</v>
+<v>C12880MA-000\C12880MA_BLE\cy_constant_v1_0</v>
+<v>C12880MA-000\C12880MA_BLE\cy_constant_v1_0\cy_constant_v1_0.pdf</v>
+<v>C12880MA-000\C12880MA_BLE\cy_isr_v1_70.pdf</v>
+<v>C12880MA-000\C12880MA_BLE\cy_pins_v2_20</v>
+<v>C12880MA-000\C12880MA_BLE\cy_pins_v2_20\cy_pins_v2_20.pdf</v>
+<v>C12880MA-000\C12880MA_BLE\cy_srff_v1_0.pdf</v>
+<v>C12880MA-000\C12880MA_BLE\CyControlReg_v1_80.pdf</v>
+<v>C12880MA-000\C12880MA_BLE\CyStatusReg_v1_90.pdf</v>
+<v>C12880MA-000\C12880MA_BLE\DMA_v1_0.pdf</v>
+<v>C12880MA-000\C12880MA_BLE\PWM_v3_30</v>
+<v>C12880MA-000\C12880MA_BLE\PWM_v3_30\PWM_v3_30.pdf</v>
+<v>C12880MA-000\C12880MA_BLE\USBFS_v3_10.pdf</v>
+<v>C12880MA-000\C12880MA_BLE\ZeroTerminal</v>
+<v>C12880MA-000\C12880MA_BLE\ZeroTerminal\ZeroTerminal.pdf</v>
 </ExpandedNodeIds>
 <VisibleNodeIds>
 <v>C12880MA-000</v>
@@ -406,12 +434,18 @@
 <v>C12880MA-000\C12880MA_059\System Reference Guides\cy_boot_v5_60</v>
 <v>C12880MA-000\C12880MA_059\ADC_SAR_v3_0.pdf</v>
 <v>C12880MA-000\C12880MA_059\and_v1_0.pdf</v>
-<v>C12880MA-000\C12880MA_059\cy_clock_v2_20.pdf</v>
-<v>C12880MA-000\C12880MA_059\cy_constant_v1_0.pdf</v>
+<v>C12880MA-000\C12880MA_059\cy_clock_v2_20</v>
+<v>C12880MA-000\C12880MA_059\cy_clock_v2_20\cy_clock_v2_20.pdf</v>
+<v>C12880MA-000\C12880MA_059\cy_constant_v1_0</v>
+<v>C12880MA-000\C12880MA_059\cy_constant_v1_0\cy_constant_v1_0.pdf</v>
 <v>C12880MA-000\C12880MA_059\cy_dma_v1_70.pdf</v>
 <v>C12880MA-000\C12880MA_059\cy_isr_v1_70.pdf</v>
 <v>C12880MA-000\C12880MA_059\cy_pins_v2_20</v>
 <v>C12880MA-000\C12880MA_059\cy_pins_v2_20\cy_pins_v2_20.pdf</v>
+<v>C12880MA-000\C12880MA_059\cy_srff_v1_0.pdf</v>
+<v>C12880MA-000\C12880MA_059\CyControlReg_v1_80.pdf</v>
+<v>C12880MA-000\C12880MA_059\CyStatusReg_v1_90.pdf</v>
+<v>C12880MA-000\C12880MA_059\PWM_v3_30</v>
 </VisibleNodeIds>
 </CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
 </TreeStatesV2>
@@ -432,6 +466,7 @@
 <name v=".\C12880MA.cydwr" />
 <name v=".\C12880.c" />
 <name v=".\C12880.h" />
+<name v="..\C12880MA_059.cydsn\lighting.h" />
 </OpenDocs>
 <OpenDocsLayout><![CDATA[<?xml version="1.0"?><!--
 
@@ -439,7 +474,7 @@
   Copyright (c) 2001-2016 Actipro Software LLC.  All rights reserved.
   http://www.actiprosoftware.com
 
---><DocumentLayout Version="1.0"><LayoutData><TabbedMdiRootContainer Orientation="Vertical"><TabbedMdiContainer Size="1036, 500" SelectedTabbedMdiWindow="b0782f42-9f1b-45bf-8d5e-4d1e3a523590"><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA_059.cydsn\C12880MA_059.cydwr" Guid="a6c6bfec-40e1-46d3-9cdd-134cfdb76bd1" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA_059.cydsn\TopDesign\TopDesign.cysch" Guid="727f28e0-f0c7-4c18-9a0d-07aa944e6496" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA_059.cydsn\C12880.c" Guid="b0782f42-9f1b-45bf-8d5e-4d1e3a523590" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA_059.cydsn\lighting.c" Guid="9733b4af-e1b1-4dcf-8852-a5f0023a8b4d" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA_059.cydsn\usb_protocols.c" Guid="9161899f-44fb-48c5-934b-233b370e307c" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA_059.cydsn\main.c" Guid="68105900-bf99-4ae8-9c7c-21a02518a455" /><ToolWindow Key="Start Page:bd4649ab-da6b-4d04-a663-c722b8bf99db:Start Page" Guid="f3a4f118-5c92-4dba-9165-9276749dbab5" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA_059.cydsn\C12880.h" Guid="50245a2c-3bf0-4581-8881-7220852cf3ca" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA.cydsn\TopDesign\TopDesign.cysch" Guid="5ae9747a-f22d-4811-80e4-9d4d68d49b3a" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA.cydsn\C12880MA.cydwr" Guid="98ca5a69-1a65-4199-941e-eaa1e4e63060" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA.cydsn\C12880.c" Guid="91873c5e-ea8b-4d2d-a778-60e4f1d2ca1a" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA.cydsn\C12880.h" Guid="70dd747a-eaf2-41ed-9827-b735abb12343" /></TabbedMdiContainer></TabbedMdiRootContainer><FloatingContainers /></LayoutData></DocumentLayout>]]></OpenDocsLayout>
+--><DocumentLayout Version="1.0"><LayoutData><TabbedMdiRootContainer Orientation="Vertical"><TabbedMdiContainer Size="1154, 436" SelectedTabbedMdiWindow="9733b4af-e1b1-4dcf-8852-a5f0023a8b4d"><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA_059.cydsn\C12880MA_059.cydwr" Guid="a6c6bfec-40e1-46d3-9cdd-134cfdb76bd1" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA_059.cydsn\TopDesign\TopDesign.cysch" Guid="727f28e0-f0c7-4c18-9a0d-07aa944e6496" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA_059.cydsn\C12880.c" Guid="b0782f42-9f1b-45bf-8d5e-4d1e3a523590" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA_059.cydsn\lighting.c" Guid="9733b4af-e1b1-4dcf-8852-a5f0023a8b4d" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA_059.cydsn\usb_protocols.c" Guid="9161899f-44fb-48c5-934b-233b370e307c" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA_059.cydsn\main.c" Guid="68105900-bf99-4ae8-9c7c-21a02518a455" /><ToolWindow Key="Start Page:bd4649ab-da6b-4d04-a663-c722b8bf99db:Start Page" Guid="f3a4f118-5c92-4dba-9165-9276749dbab5" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA_059.cydsn\C12880.h" Guid="50245a2c-3bf0-4581-8881-7220852cf3ca" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA.cydsn\TopDesign\TopDesign.cysch" Guid="5ae9747a-f22d-4811-80e4-9d4d68d49b3a" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA.cydsn\C12880MA.cydwr" Guid="98ca5a69-1a65-4199-941e-eaa1e4e63060" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA.cydsn\C12880.c" Guid="91873c5e-ea8b-4d2d-a778-60e4f1d2ca1a" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA.cydsn\C12880.h" Guid="70dd747a-eaf2-41ed-9827-b735abb12343" /><DocumentWindow Key="C:\Users\Kyle\Documents\PSoC Creator\Spectrometers\C12880MA_059.cydsn\lighting.h" Guid="1838affa-0106-4141-aa04-5c406e4994e0" /></TabbedMdiContainer></TabbedMdiRootContainer><FloatingContainers /></LayoutData></DocumentLayout>]]></OpenDocsLayout>
 <config v="" />
 <AutoUpdate v="true" />
 </CyGuid_843a90a4-0c4b-4e44-991d-05e7fb117a21>

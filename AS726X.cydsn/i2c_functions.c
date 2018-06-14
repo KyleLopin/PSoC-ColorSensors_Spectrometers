@@ -93,20 +93,17 @@ static uint8 sensor_read(uint8 address, uint8* buffer, uint8 _register, uint8 nu
     }
     
     I2C_MasterClearWriteBuf();
-    uint8 read_count = 0;
+
     do {
         temp = I2C_MasterReadBuf(address, buffer, num_bytes, I2C_MODE_REPEAT_START);
         for(;;) {
             if (0x00 != (I2C_MasterStatus() & I2C_MSTAT_RD_CMPLT)) {
-                read_count++;
                 break;
             }
         }
-    } while (temp != I2C_MSTR_NO_ERROR && read_count < NUM_READ_FAILS);
-    
+    }
+    while (temp != I2C_MSTR_NO_ERROR);
     I2C_MasterClearReadBuf();
-    
-    return temp;
 }
 
 

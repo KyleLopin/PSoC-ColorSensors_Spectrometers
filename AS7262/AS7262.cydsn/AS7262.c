@@ -1,6 +1,6 @@
 /*******************************************************************************
  * File Name: AS7262.c
- * Version 0.20
+ * Version 0.50
  *
  * Description:
  *  This file provides functions to control an AS7262 color sensor through the I2C.
@@ -79,17 +79,8 @@ extern char LCD_str[40];
 
 
 CY_ISR( isr_handler_basic_read ) {
-    LED_4_Write( 0 );
-    LCD_Position(1, 0);
-    LCD_PrintString("SingleRead3a ");
     // isr_as7262_int_Disable();
     AS7262_INT_ClearInterrupt();
-    LCD_Position(1, 0);
-    LCD_PrintString("SingleRead3b ");
-//    AS7262_ReadAllData();
-//    LCD_Position(1, 0);
-//    LCD_PrintString("SingleRead4 ");
-//    USB_Export_Data(all_calibrated_data.data_bytes, 24);
 }
 
 CY_ISR( isr_handler_debug1 ) {
@@ -160,38 +151,17 @@ void AS7262_Commands(uint8 buffer[]) {
                     uint8 reg_to_write = convert_hex_string(&buffer[19]);
                     uint8 value_to_write = convert_hex_string(&buffer[24]);
                     I2C_AS7262_Write(reg_to_write, value_to_write);
-                    LCD_Position(0, 0); 
-                    sprintf(LCD_str, "R:0x%02x|v:0x%02x  ", reg_to_write, value_to_write);
-                    LCD_PrintString(LCD_str);
-                    LCD_Position(1, 0); 
-                    sprintf(LCD_str, "B:%c|v:%c  ", buffer[24], buffer[25]);
-                    LCD_PrintString(LCD_str);
-                    
                 }
                 else if ( buffer[11] == 'R' ) {  // Read a value from a register
                     uint8 reg_to_read = convert_hex_string(&buffer[18]);
                     uint8 reg_value = I2C_AS7262_Read(reg_to_read);
                     sprintf(USB_str, "REG_VALUE|0x%02X", reg_value);
-                    LCD_Position(0, 0); 
-                    sprintf(LCD_str, "RegR:0x%02x|v:0x%02x  ", reg_to_read, reg_value);
-                    // sprintf(LCD_str, "RegR:0x%d|v:0x%d  ", buffer[18], buffer[19]);
-                    LCD_PrintString(LCD_str);
                     USB_Export_Data((uint8*)USB_str, 14);
                 }
             }
             if ( buffer[12] == 'S' ) {  // get a single data point
-                LCD_Position(0, 0);
-                LCD_PrintString("Single Read");
-                // AS7262_SingleRead();
+                
                 if (  buffer[19] == 'F' ) { 
-                    LCD_Position(0, 0);
-                    LCD_PrintString("Sgl Read Fls");
-//                    as7262.LED_on = True;
-//                    update_LED_reg_value( &as7262 );
-//                    AS7262_SingleRead();
-//                    CyDelay(100);
-//                    as7262.LED_on = False;
-//                    update_LED_reg_value( &as7262 );
                     // turn on LED
                     uint8 led_reg_hold = as7262.LED_control_reg_value;
                     uint led_reg_on = led_reg_hold;
@@ -200,26 +170,17 @@ void AS7262_Commands(uint8 buffer[]) {
                     
                     uint8 led_reg = I2C_AS7262_Read( AS726x_REG_LED );
                     
+                    if (led_reg != led_reg_on)  {  // LED is not flashing properly so just return
+                        break;
+                    }
                     // run the read
                     AS7262_SingleRead();
                     
                     I2C_AS7262_Write( AS726x_REG_LED, led_reg_hold );
-                    LCD_Position(0, 0);
-                    LCD_PrintString("end read ");
-//                    LCD_Position(0, 0);
-//                    sprintf(LCD_str, "L2:0x%02x|0x%02x ", led_reg, led_reg_on);
-//                    LCD_PrintString(LCD_str);
-                    
                 }
                 else if ( buffer[19] == 'N' ) { 
-                    LCD_Position(0, 0);
-                    LCD_PrintString("Sgl Read No Fls");
                     AS7262_SingleRead();
-                    LCD_Position(0, 0);
-                    LCD_PrintString("SingleRead5  ");
                 }
-                
-                
             }
             break;
         case SET_INTEGRATION_TIME: ; // the command to set the integration time
@@ -324,16 +285,17 @@ uint8 update_LED_reg_value(AS7262_settings* as7262_ptr) {
 
 void AS7262_SingleRead(void) {
     // send command to run a single shot read
-    LCD_ClearDisplay();
-    LCD_Position(0, 0);
-    LCD_PrintString("SingleRead  ");
     I2C_AS7262_Write( AS726x_REG_CONTROL, as7262.control_reg_value );
-    LCD_Position(0, 0);
-    LCD_PrintString("SingleRead2  ");
     uint pre_data = I2C_AS7262_Read( AS726x_REG_CONTROL );
-    LCD_Position(0, 0);
-    sprintf(LCD_str, "pre data: 0x%02x ", pre_data);
-    LCD_PrintString(LCD_str);
+    
+    if ( pre_data != as7262.control_reg_value ) {  // the setting were not set correctly so send back 0's to indicate error
+        for (uint8 i=0; i < 6; i++) {
+            all_calibrated_data.calibrated_data[i] = 0.0;
+        }
+        USB_Export_Data(all_calibrated_data.data_bytes, 24);
+        return;
+    }
+
     float integ_time;
     if ( as7262.measurement_mode == BANK_MODE_0 || as7262.measurement_mode == BANK_MODE_1) {
         integ_time = 2.8;  // milliseconds
@@ -352,19 +314,11 @@ void AS7262_SingleRead(void) {
             USB_Export_Data((uint8*)"FAILED", 6);
         }
     } while ( (data & 0x02) == 0x00 );
-    LCD_Position(1, 0); 
-    sprintf(LCD_str, "C2:0x%02x|0x%02x  ", data, as7262.control_reg_value);
-    LCD_PrintString(LCD_str);
-//    isr_as7262_int_StartEx( isr_handler_basic_read );
-//    isr_as7262_pin_StartEx( isr_handler_debug1 );
-    //LED_3_Write( 1 );
-    //CyDelay(1000);
+    
     AS7262_ReadAllData();
-    LCD_Position(0, 0);
-    LCD_PrintString("SingleRead3  ");
+   
     USB_Export_Data(all_calibrated_data.data_bytes, 24);
-    LCD_Position(0, 0);
-    LCD_PrintString("SingleRead4  ");
+
 }
 
 /******************************************************************************
@@ -389,10 +343,6 @@ void AS7262_ReadAllData(void) {
     for (uint8 i=0; i < 24; i++ ) {
         all_calibrated_data.data_bytes[i] = I2C_AS7262_Read(AS7262_DATA_START_ADDR + i);
     }
-//    LCD_Position(0, 0);
-//    sprintf(LCD_str, "C:0x%02x|0x%02x  ", all_calibrated_data.data_bytes[0], all_calibrated_data.data_bytes[1]);
-//    LCD_PrintString(LCD_str);
-    
 }
 
 /******************************************************************************
@@ -413,19 +363,11 @@ void AS7262_ReadAllData(void) {
 
 uint8 I2C_AS7262_Read(uint8 reg_addr) {
     uint8 status;
-//    LCD_Position(1, 0); 
-//    LCD_PrintString("read0   ");
     status = I2C_AS7262_ReadRegister(AS72XX_SLAVE_STATUS_REG);
-//    LCD_Position(1, 0); 
-//    LCD_PrintString("read0b   ");
+
     if ( ( status & AS72XX_SLAVE_RX_VALID ) != 0 ) {  // data is trying ready to read, but it was not read before
-        uint8 data = I2C_AS7262_ReadRegister(reg_addr);
+        I2C_AS7262_ReadRegister(reg_addr);
     }
-//    LCD_Position(1, 0); 
-//    LCD_PrintString("read1   ");
-//    
-//    I2C_AS7262_WriteRegister(AS72XX_SLAVE_WRITE_REG, ( reg_addr | 0x80 ) );
-    
     // Wait for the write flag to clear
     while(1) {
         status = I2C_AS7262_ReadRegister( AS72XX_SLAVE_STATUS_REG );
@@ -435,8 +377,7 @@ uint8 I2C_AS7262_Read(uint8 reg_addr) {
         CyDelay(1);
     }
     I2C_AS7262_WriteRegister( AS72XX_SLAVE_WRITE_REG, reg_addr );
-//    LCD_Position(1, 0); 
-//    LCD_PrintString("read2   ");
+
     // Wait for read flag to be set
     while(1) {
         status = I2C_AS7262_ReadRegister(AS72XX_SLAVE_STATUS_REG);
@@ -445,9 +386,6 @@ uint8 I2C_AS7262_Read(uint8 reg_addr) {
             break;
         }
         CyDelay(1);
-//        LCD_Position(0, 0); 
-//        sprintf(LCD_str, "Code9: %d", status);
-//        LCD_PrintString(LCD_str);
     }
 
     return I2C_AS7262_ReadRegister(AS72XX_SLAVE_READ_REG);
@@ -476,12 +414,8 @@ uint8 I2C_AS7262_Read(uint8 reg_addr) {
 
 uint8 I2C_AS7262_ReadRegister(uint8 reg_addr) {
     uint8 status;
-//    LCD_Position(0, 0); 
-//    LCD_PrintString("read00   ");
     status = sensor_read8(AS7262_ADDRESS, read_buffer, reg_addr, &as7262.comm_error);
-//    LCD_Position(0, 0); 
-//    LCD_PrintString("read01   ");
-    return read_buffer[0];
+    return status;
 }
 
 /******************************************************************************
@@ -545,7 +479,6 @@ uint8 I2C_AS7262_Write(uint8 reg_addr, uint8 value) {
 *******************************************************************************/
 
 uint8 I2C_AS7262_WriteRegister(uint8 reg_addr, uint8 value) {
-    uint8 status;
     write_buffer[0] = reg_addr;
     write_buffer[1] = value;
     return sensor_write8(AS7262_ADDRESS, write_buffer);

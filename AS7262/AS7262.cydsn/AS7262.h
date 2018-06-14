@@ -33,7 +33,7 @@ typedef struct {
     uint8 device_type;
     uint8 hw_version;
     uint16 fw_version;
-    uint8* comm_error;
+    uint8 comm_error;
     uint8 control_reg_value;
     uint8 LED_control_reg_value;
 } AS7262_settings;

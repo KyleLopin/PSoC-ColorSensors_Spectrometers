@@ -25,38 +25,26 @@
 #define False                               0
 
 /***************************************
-*      Structures
-***************************************/ 
-
-typedef struct {
-    uint8 measurement_mode;
-    uint8 gain;
-    uint8 interrupt_on;
-    uint8 integration_time;
-    uint8 LED_power_level;
-    uint8 LED_on;
-    uint8 indicator_power_level;
-    uint8 indicator_on;
-    uint8 device_type;
-    uint8 hw_version;
-    uint16 fw_version;
-    uint8* comm_error;
-    uint8 control_reg_value;
-    uint8 LED_control_reg_value;
-} AS7262_settings;
-
-/***************************************
 *      I2C AS7262 Constants
 ***************************************/ 
 
-#define AS726x_ADDRESS                      0x49
-
+#define AS726X_ADDRESS                      0x49
 
 /***************************************
 *      AS7262 register masks
 ***************************************/ 
 
-#define AS726x_WRITE_REG_MASK               0x80
+#define AS726X_WRITE_REG_MASK               0x80
+
+/***************************************
+*      AS72XX Virtual Registers
+***************************************/ 
+
+#define AS72XX_SLAVE_STATUS_REG             0x00
+#define AS72XX_SLAVE_WRITE_REG              0x01
+#define AS72XX_SLAVE_READ_REG               0x02
+#define AS72XX_SLAVE_TX_VALID               0x02
+#define AS72XX_SLAVE_RX_VALID               0x01
 
 /***************************************
 *      AS7262 Control Registers
@@ -139,6 +127,49 @@ typedef struct {
 #define AS726x_LED_ON_OFF                   'L'
 
 extern char USB_str[40];
+
+
+/***************************************
+*        Constants to select 
+*        the 2 different sensors
+***************************************/ 
+
+#define I2C_BUS0_ACTIVE                     0
+#define I2C_BUS1_ACTIVE                     1
+
+/***************************************
+*      Structures
+***************************************/ 
+    
+// Union to store the 6 floats that are the calibrated data
+union CalibratedData {
+    uint8 data_bytes[24];
+    float32 calibrated_data[6];
+};
+
+typedef enum {
+    NO_DEVICE = 0,
+    AS7262 = AS7262_HARDWARE_VERSION,
+    AS7263 = AS7263_HARDWARE_VERSION
+} as726x_type;
+
+typedef struct {
+    uint8 measurement_mode;
+    uint8 gain;
+    uint8 interrupt_on;
+    uint8 integration_time;
+    uint8 LED_power_level;
+    uint8 LED_on;
+    uint8 indicator_power_level;
+    uint8 indicator_on;
+    as726x_type device_type;
+    uint8 hw_version;
+    uint16 fw_version;
+    uint8 comm_error;
+    uint8 control_reg_value;
+    uint8 LED_control_reg_value;
+    uint8 I2C_channel;
+} AS726X_settings;
 
 
 /***************************************

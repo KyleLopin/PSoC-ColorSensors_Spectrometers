@@ -1,12 +1,12 @@
 *.cydsn/Export/*
-*.cydsn/CortexM3/*
+*/CortexM3/*
 *.cydsn/Generated_Source/*
-*.cydsn/codegentemp/*
-*.cydsn/*.cycdx
-*.cydsn/*.cyfit
-*.cydsn/*.rpt
-*.cydsn/*.svd
-*.cydsn/*.html
+*/codegentemp/*
+*.cycdx
+*.cyfit
+*.rpt
+*.svd
+*.html
 
 C12880/*
 */Export/*

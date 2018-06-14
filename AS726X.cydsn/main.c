@@ -11,11 +11,25 @@
 */
 #include "project.h"
 
+// project files
+#include "AS726X.h"
+#include "usb_functions.h"
+
+
+#define True                        1
+#define False                       0
+
+char LCD_str[40];
+uint8 Input_Flag = False;
+
 int main(void)
 {
     CyGlobalIntEnable; /* Enable global interrupts. */
 
-    /* Place your initialization/startup code here (e.g. MyInst_Start()) */
+    USB_Start();
+    I2C_Start();
+    
+    
 
     for(;;)
     {
