@@ -458,7 +458,7 @@ uint8 I2C_AS7262_Write(uint8 reg_addr, uint8 value) {
 }
 
 /******************************************************************************
-* Function Name: I2C_AS7262_ReadRegister
+* Function Name: I2C_AS7262_WriteRegister
 *******************************************************************************
 *
 * Summary:

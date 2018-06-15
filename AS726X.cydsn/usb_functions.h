@@ -38,7 +38,6 @@
 #define IDENTIFY                    'I'
 #define IDENTIFY_SPECTROMETER       'S'
 #define AS726X_COMMAND              'A'
-#define IDENTIFY                    'I'
 
 #define TEST_MESSAGE                "PSoC-Spectrometer" 
 #define LEN_TEST_MESSAGE            17

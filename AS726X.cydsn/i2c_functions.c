@@ -73,10 +73,12 @@ uint8 sensor_read_n(uint8 address, uint8* buffer, uint8 _register, uint8 num_byt
 
 static uint8 sensor_read(uint8 address, uint8* buffer, uint8 _register, uint8 num_bytes) {
     uint8 temp;
-//    LCD_Position(0, 0); 
-//    LCD_PrintString("read0020   ");
+    LCD_Position(0, 0); 
+    LCD_PrintString("read0020   ");
     // I2C_MasterSendStart(address, 0);
     temp = I2C_MasterWriteBuf(address, &_register, 1, I2C_MODE_NO_STOP);
+    LCD_Position(0, 0); 
+    LCD_PrintString("read002a   ");
 //    LCD_Position(0, 0); 
 //    sprintf(LCD_str, "temp stat:%d", temp);
 //    LCD_PrintString(LCD_str);
@@ -84,8 +86,8 @@ static uint8 sensor_read(uint8 address, uint8* buffer, uint8 _register, uint8 nu
         if (0x00 != (I2C_MasterStatus() & I2C_MSTAT_WR_CMPLT)) {
             break;
         }
-//        LCD_Position(0, 0); 
-//        sprintf(LCD_str, "MS status:%d", I2C_MasterStatus());
+        LCD_Position(0, 0); 
+        sprintf(LCD_str, "MS status:%d", I2C_MasterStatus());
         LCD_PrintString(LCD_str);
     }
     if (temp != I2C_MSTR_NO_ERROR ) {

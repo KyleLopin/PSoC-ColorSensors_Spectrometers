@@ -19,6 +19,7 @@
 #define _AS726X_H
 
 #include <project.h>
+#include "helper_functions.h"
 #include "i2c_functions.h"
     
 #define True                                1
@@ -125,7 +126,7 @@
 #define AS726x_SET_GAIN                     'G'
 #define AS726x_SET_LED_POWER                'P'
 #define AS726x_LED_ON_OFF                   'L'
-
+    
 extern char USB_str[40];
 
 
@@ -142,10 +143,10 @@ extern char USB_str[40];
 ***************************************/ 
     
 // Union to store the 6 floats that are the calibrated data
-union CalibratedData {
-    uint8 data_bytes[24];
-    float32 calibrated_data[6];
-};
+//union CalibratedData {
+//    uint8 data_bytes[24];
+//    float32 calibrated_data[6];
+//};
 
 typedef enum {
     NO_DEVICE = 0,
@@ -171,11 +172,21 @@ typedef struct {
     uint8 I2C_channel;
 } AS726X_settings;
 
+/***************************************
+*        Multi sensor states
+***************************************/ 
+
+#define NO_SENSORS                  0
+#define ONLY_AS7262                 1
+#define ONLY_AS7263                 2
+#define BOTH_AS726X                 3
 
 /***************************************
 *        Function Prototypes
 ***************************************/ 
 
+void AS726x_Commands(uint8 buffer[]);
+void AS726x_Identify(void);
 uint8 AS726x_Init(void);
 void AS726x_Start(void);
 
